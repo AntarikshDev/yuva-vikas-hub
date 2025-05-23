@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +25,8 @@ const SystemSettings = () => {
       toast({
         title: "Connection Successful",
         description: "WhatsApp API connection was tested successfully.",
-        variant: "success",
+        // Changed from "success" to "default" as "success" is not a valid variant
+        variant: "default", 
       });
     }, 2000);
   };
@@ -367,7 +367,7 @@ const SystemSettings = () => {
                     <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-2">
-                          <CheckCirc2 className="h-5 w-5 text-purple-500" />
+                          <CheckCircle2 className="h-5 w-5 text-purple-500" />
                           <span className="font-medium">Completion Notice</span>
                         </div>
                         <Badge variant="outline">Email</Badge>
