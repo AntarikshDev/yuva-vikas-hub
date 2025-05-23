@@ -12,19 +12,32 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   Upload, FilePlus, FileEdit, FileCheck, Mail, Eye, 
-  Download, Trash2, AlertCircle, HelpCircle, Info
+  Download, Trash2, AlertCircle, HelpCircle, Info, Search, Send
 } from 'lucide-react';
 import { 
   Dialog, DialogContent, DialogDescription, 
   DialogFooter, DialogHeader, DialogTitle 
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const DocumentGenerator = () => {
   // State for dialogs and active tabs
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('templates');
   const { toast } = useToast();
 
@@ -36,6 +49,26 @@ const DocumentGenerator = () => {
     { id: 4, name: 'Travel Letter', type: 'PDF', fields: 10, lastUpdated: '2023-08-30', autoEmail: true },
     { id: 5, name: 'Attendance Sheet', type: 'XLSX', fields: 5, lastUpdated: '2023-10-10', autoEmail: false },
   ]);
+
+  // Dummy users/recipients data
+  const recipients = [
+    { id: 1, name: 'Rahul Sharma', email: 'rahul.sharma@example.com', role: 'Candidate', batchId: 'B-2023-01' },
+    { id: 2, name: 'Priya Patel', email: 'priya.patel@example.com', role: 'Candidate', batchId: 'B-2023-01' },
+    { id: 3, name: 'Amit Kumar', email: 'amit.kumar@example.com', role: 'Candidate', batchId: 'B-2023-02' },
+    { id: 4, name: 'Deepika Singh', email: 'deepika.singh@example.com', role: 'Candidate', batchId: 'B-2023-02' },
+    { id: 5, name: 'Rajesh Gupta', email: 'rajesh.gupta@example.com', role: 'Center Manager', centerId: 'C-001' },
+    { id: 6, name: 'Anjali Verma', email: 'anjali.verma@example.com', role: 'Trainer', centerId: 'C-001' },
+  ];
+  
+  // State for selected recipient
+  const [selectedRecipient, setSelectedRecipient] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter recipients based on search query
+  const filteredRecipients = recipients.filter(recipient => 
+    recipient.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    recipient.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Dummy document field mappings
   const fields = [
@@ -69,10 +102,26 @@ const DocumentGenerator = () => {
 
   // Handle test generate
   const handleTestGenerate = () => {
+    setGenerateDialogOpen(true);
+  };
+
+  // Handle document generation with recipient
+  const handleGenerateDocument = () => {
+    if (!selectedRecipient) {
+      toast({
+        title: "Recipient Required",
+        description: "Please select a recipient for the document.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     toast({
       title: "Document Generated",
-      description: `Test document for ${activeTemplate.name} has been generated successfully.`,
+      description: `${activeTemplate.name} has been generated for ${selectedRecipient.name} and sent to ${selectedRecipient.email}.`,
     });
+    setGenerateDialogOpen(false);
+    setSelectedRecipient(null);
   };
 
   // Toggle edit mode
@@ -331,7 +380,7 @@ const DocumentGenerator = () => {
                           onClick={handleTestGenerate}
                         >
                           <FileCheck className="h-3.5 w-3.5" />
-                          Test Generate
+                          Generate Document
                         </Button>
                       </div>
                     </CardFooter>
@@ -464,6 +513,113 @@ const DocumentGenerator = () => {
           </DialogContent>
         </Dialog>
 
+        {/* Generate Document Dialog with Recipient Selection */}
+        <Dialog open={generateDialogOpen} onOpenChange={setGenerateDialogOpen}>
+          <DialogContent className="sm:max-w-[550px]">
+            <DialogHeader>
+              <DialogTitle>Generate {activeTemplate?.name}</DialogTitle>
+              <DialogDescription>
+                Select a recipient to generate and send this document.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="recipientSearch">Search Recipients</Label>
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="recipientSearch"
+                    placeholder="Search by name or email..."
+                    className="pl-8"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="border rounded-md">
+                <div className="p-2 bg-muted/50 border-b flex items-center justify-between text-sm font-medium">
+                  <div>Select Recipient</div>
+                  {selectedRecipient && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-xs"
+                      onClick={() => setSelectedRecipient(null)}
+                    >
+                      Clear Selection
+                    </Button>
+                  )}
+                </div>
+                <div className="max-h-60 overflow-y-auto">
+                  {filteredRecipients.length > 0 ? (
+                    filteredRecipients.map(recipient => (
+                      <div
+                        key={recipient.id}
+                        className={`p-3 border-b last:border-0 cursor-pointer hover:bg-muted/50 flex items-center justify-between ${
+                          selectedRecipient?.id === recipient.id ? 'bg-muted/50' : ''
+                        }`}
+                        onClick={() => setSelectedRecipient(recipient)}
+                      >
+                        <div>
+                          <div className="font-medium">{recipient.name}</div>
+                          <div className="text-sm text-muted-foreground">{recipient.email}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">
+                            {recipient.role} {recipient.batchId ? `• Batch: ${recipient.batchId}` : recipient.centerId ? `• Center: ${recipient.centerId}` : ''}
+                          </div>
+                        </div>
+                        {selectedRecipient?.id === recipient.id && (
+                          <Badge className="ml-2" variant="outline">Selected</Badge>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-4 text-center text-muted-foreground">
+                      No recipients found. Try adjusting your search.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="emailSubject">Email Subject</Label>
+                <Input 
+                  id="emailSubject" 
+                  defaultValue={`Your ${activeTemplate?.name} Document`}
+                  placeholder="Enter email subject" 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="emailMessage">Email Message (Optional)</Label>
+                <Textarea
+                  id="emailMessage"
+                  placeholder="Enter a message to be included in the email"
+                  className="resize-none"
+                  rows={3}
+                  defaultValue={`Please find attached your ${activeTemplate?.name} document.`}
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setGenerateDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                type="button" 
+                onClick={handleGenerateDocument}
+                disabled={!selectedRecipient}
+                className="gap-2"
+              >
+                <Send className="h-4 w-4" />
+                Generate & Send
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Preview Dialog */}
         <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
           <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-auto">
@@ -516,7 +672,7 @@ const DocumentGenerator = () => {
             
             <DialogFooter>
               <Button variant="outline" onClick={() => setPreviewDialogOpen(false)}>Close</Button>
-              <Button onClick={handleTestGenerate}>Test Generate</Button>
+              <Button onClick={handleTestGenerate}>Generate Document</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
