@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +30,21 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { DataTable } from '@/components/common/DataTable';
 
+// Define the Batch type to ensure consistency
+interface Batch {
+  id: string;
+  name: string;
+  center: string;
+  jobRole: string;
+  trainer: string;
+  startDate: string;
+  endDate: string;
+  strength: number;
+  maxStrength: number;
+  progress: number;
+  status: string;
+}
+
 const BatchManagement = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(2023, 10, 15),
@@ -42,7 +56,7 @@ const BatchManagement = () => {
   const [editBatchOpen, setEditBatchOpen] = useState(false);
   const [viewDetailsOpen, setViewDetailsOpen] = useState(false);
   const [addStudentsOpen, setAddStudentsOpen] = useState(false);
-  const [selectedBatch, setSelectedBatch] = useState<any>(null);
+  const [selectedBatch, setSelectedBatch] = useState<Batch | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: '',
@@ -52,8 +66,8 @@ const BatchManagement = () => {
 
   const { toast } = useToast();
 
-  // Dummy data for batches
-  const [batches, setBatches] = useState([
+  // Updated batches state with the proper type
+  const [batches, setBatches] = useState<Batch[]>([
     { 
       id: 'B001', 
       name: 'CSE Batch 01', 
@@ -143,9 +157,9 @@ const BatchManagement = () => {
   // Job roles for filter
   const jobRoles = [...new Set(batches.map(b => b.jobRole))];
 
-  // Handle batch creation submission
+  // Updated handle batch creation to ensure dates are formatted as strings
   const handleBatchCreation = (batchData) => {
-    const newBatch = {
+    const newBatch: Batch = {
       id: `B00${batches.length + 1}`,
       name: batchData.name,
       center: batchData.center,
@@ -456,10 +470,20 @@ const BatchManagement = () => {
                 initialData={selectedBatch}
                 isEditing={true}
                 onSubmit={(data) => {
-                  // Update batch in the batches list
+                  // Update batch in the batches list with proper date formatting
                   const updatedBatches = batches.map(batch => 
-                    batch.id === selectedBatch.id ? { ...batch, ...data } : batch
+                    batch.id === selectedBatch.id ? {
+                      ...batch,
+                      name: data.name,
+                      jobRole: data.jobRole,
+                      center: data.center,
+                      trainer: data.trainer,
+                      startDate: format(data.startDate, 'yyyy-MM-dd'),
+                      endDate: format(data.endDate, 'yyyy-MM-dd'),
+                      maxStrength: data.maxStrength
+                    } : batch
                   );
+                  
                   setBatches(updatedBatches);
                   setEditBatchOpen(false);
                   toast({
