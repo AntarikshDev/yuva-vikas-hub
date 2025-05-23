@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -54,15 +54,19 @@ const formSchema = z.object({
 interface CandidateFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialData?: Partial<z.infer<typeof formSchema>>;
+  isEditing?: boolean;
+  onSubmit: (values: z.infer<typeof formSchema>) => void;
 }
 
-export function CandidateForm({ open, onOpenChange }: CandidateFormProps) {
+export function CandidateForm({ open, onOpenChange, initialData, isEditing = false, onSubmit }: CandidateFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       fatherName: "",
+      dob: new Date("2000-01-01"),
       gender: "male",
       mobile: "",
       email: "",
@@ -77,6 +81,38 @@ export function CandidateForm({ open, onOpenChange }: CandidateFormProps) {
       referredBy: "",
     },
   });
+
+  // Reset the form with initial data when editing or when the form opens
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        // Reset form with provided data
+        form.reset({
+          ...form.getValues(), // Default values
+          ...initialData, // Override with initialData
+        });
+      } else {
+        // Reset form to default values
+        form.reset({
+          name: "",
+          fatherName: "",
+          dob: new Date("2000-01-01"),
+          gender: "male",
+          mobile: "",
+          email: "",
+          education: "",
+          address: "",
+          district: "",
+          state: "",
+          pincode: "",
+          aadhar: "",
+          jobPreference: "",
+          willingToRelocate: false,
+          referredBy: "",
+        });
+      }
+    }
+  }, [open, initialData, form]);
 
   // Dummy data
   const educationLevels = [
@@ -105,12 +141,8 @@ export function CandidateForm({ open, onOpenChange }: CandidateFormProps) {
     { value: "rsa", label: "Retail Sales Associate" },
   ];
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    toast({
-      title: "Candidate Added",
-      description: `${values.name} has been registered successfully`,
-    });
-    onOpenChange(false);
+  function handleSubmit(values: z.infer<typeof formSchema>) {
+    onSubmit(values);
     form.reset();
   }
 
@@ -118,13 +150,15 @@ export function CandidateForm({ open, onOpenChange }: CandidateFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Register New Candidate</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Candidate' : 'Register New Candidate'}</DialogTitle>
           <DialogDescription>
-            Add a new candidate to the system with all relevant details
+            {isEditing 
+              ? 'Update candidate information in the system'
+              : 'Add a new candidate to the system with all relevant details'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -255,7 +289,7 @@ export function CandidateForm({ open, onOpenChange }: CandidateFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Education Qualification</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select qualification" />
@@ -309,7 +343,7 @@ export function CandidateForm({ open, onOpenChange }: CandidateFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>State</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select state" />
@@ -363,7 +397,7 @@ export function CandidateForm({ open, onOpenChange }: CandidateFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Job Role Preference</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select preferred job role" />
@@ -421,7 +455,7 @@ export function CandidateForm({ open, onOpenChange }: CandidateFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Register Candidate</Button>
+              <Button type="submit">{isEditing ? 'Update' : 'Register'} Candidate</Button>
             </DialogFooter>
           </form>
         </Form>
