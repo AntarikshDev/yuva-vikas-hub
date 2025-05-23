@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Sidebar, 
@@ -14,10 +13,10 @@ import {
   SidebarFooter,
   SidebarTrigger
 } from '@/components/ui/sidebar';
-import { Bell, Settings } from 'lucide-react';
+import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 
 // Define proper types for navigation items
 type NavIcon = React.FC<{ className?: string }>;
@@ -39,14 +38,18 @@ interface MainLayoutProps {
   role: 'super_admin' | 'state_head' | 'center_manager' | 'mobilizer' | 
          'candidate' | 'ppc_team' | 'company_hr' | 'mobilization_manager' | 
          'trainer' | 'outreach_admin' | 'accounts_team' | 'audit';
+  title?: string; // Optional title override
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
+export const MainLayout: React.FC<MainLayoutProps> = ({ children, role, title }) => {
   const [notifications, setNotifications] = useState<number>(5); // Example notifications count
   const location = useLocation();
   
   // Get navigation items based on role
   const navItems = getNavigationByRole(role);
+  
+  // Determine page title from route if not provided
+  const pageTitle = title || getPageTitle(location.pathname);
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -61,15 +64,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
           </SidebarHeader>
           
           <SidebarContent>
-            {role === 'super_admin' && (
+            {(role === 'super_admin' || role === 'state_head') && (
               <div className="px-4 pb-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 overflow-hidden rounded-full bg-indigo-300 ring-2 ring-white/30 shadow-lg">
                     <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" className="h-full w-full object-cover" />
                   </div>
                   <div>
-                    <div className="font-medium text-white">Super Admin</div>
-                    <div className="text-sm text-indigo-200">Super Admin</div>
+                    <div className="font-medium text-white">{formatRoleDisplay(role)}</div>
+                    <div className="text-sm text-indigo-200">Maharashtra</div>
                   </div>
                 </div>
               </div>
@@ -89,7 +92,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
                             isActive={isActive}
                             className={`hover:bg-indigo-800/70 transition-all duration-200 ${isActive ? 'bg-indigo-800/90 font-medium shadow-md' : ''}`}
                           >
-                            <a href={item.path} className="flex items-center">
+                            <Link to={item.path} className="flex items-center">
                               {item.icon && <item.icon className="mr-2 h-5 w-5" />}
                               <span>{item.name}</span>
                               {item.phase && (
@@ -97,7 +100,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
                                   Phase {item.phase}
                                 </span>
                               )}
-                            </a>
+                            </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
@@ -115,10 +118,10 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
                   className="hover:bg-indigo-800/70 transition-all duration-200 w-full"
                   asChild
                 >
-                  <a href="/logout" className="flex items-center">
+                  <Link to="/" className="flex items-center">
                     <span className="mr-2">🚪</span>
                     <span>Logout</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -129,7 +132,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
           <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-6 shadow-sm">
             <div className="flex items-center">
               <SidebarTrigger />
-              <h1 className="ml-4 text-xl font-semibold">Dashboard</h1>
+              <h1 className="ml-4 text-xl font-semibold">{pageTitle}</h1>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -167,6 +170,29 @@ function formatRoleDisplay(role: string): string {
     .join(' ');
 }
 
+// Helper function to get page title from URL path
+function getPageTitle(path: string): string {
+  const segments = path.split('/');
+  const lastSegment = segments[segments.length - 1];
+  
+  // Map specific routes to titles
+  const titleMap: Record<string, string> = {
+    'dashboard': 'Dashboard',
+    'state-overview': 'State Overview',
+    'center-performance': 'Center Performance',
+    'trainer-summary': 'Trainer Summary',
+    'reports': 'Reports',
+    'dropout-insights': 'Dropout Insights',
+    'ppc-schedule': 'PPC Schedule Monitor',
+    'batch-tracker': 'Batch Tracker',
+    'sos-tracker': 'SOS Tracker',
+    'export-reports': 'Export Reports',
+    'attendance': 'Attendance Module',
+  };
+  
+  return titleMap[lastSegment] || 'Dashboard';
+}
+
 // Function to return navigation items based on role with proper typing
 function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
   // This function would return different navigation items based on user role
@@ -178,12 +204,12 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { 
             name: 'Dashboard', 
             path: '/admin/dashboard', 
-            icon: ({ className }) => <span className={className || ''}>🏠</span> 
+            icon: Home 
           },
           { 
             name: 'User & Role Management', 
             path: '/admin/users', 
-            icon: ({ className }) => <span className={className || ''}>👤</span> 
+            icon: Users 
           },
           { 
             name: 'Master Data Management', 
@@ -198,7 +224,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { 
             name: 'Batch Management', 
             path: '/admin/batches', 
-            icon: ({ className }) => <span className={className || ''}>📦</span> 
+            icon: Package 
           },
           { 
             name: 'Candidate Directory', 
@@ -208,7 +234,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { 
             name: 'Reports & Analytics', 
             path: '/admin/reports', 
-            icon: ({ className }) => <span className={className || ''}>📊</span> 
+            icon: BarChart 
           },
           { 
             name: 'Video Log Manager', 
@@ -223,7 +249,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { 
             name: 'AI Dropout Engine', 
             path: '/admin/ai-dropout', 
-            icon: ({ className }) => <span className={className || ''}>🧠</span>,
+            icon: Brain,
             phase: 3 
           },
           { 
@@ -235,17 +261,89 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { 
             name: 'SOS & Escalation Tracker', 
             path: '/admin/sos', 
-            icon: ({ className }) => <span className={className || ''}>🆘</span> 
+            icon: AlertCircle 
           },
           { 
             name: 'Data Export Hub', 
             path: '/admin/export', 
-            icon: ({ className }) => <span className={className || ''}>📤</span> 
+            icon: FileOutput 
           },
           { 
             name: 'System Settings', 
             path: '/admin/settings', 
-            icon: ({ className }) => <span className={className || ''}>⚙️</span> 
+            icon: Settings 
+          },
+        ]
+      }
+    ];
+  }
+  
+  if (role === 'state_head') {
+    return [
+      {
+        label: 'Main',
+        items: [
+          { 
+            name: 'Dashboard', 
+            path: '/state-head/dashboard', 
+            icon: Home 
+          },
+          { 
+            name: 'State Overview', 
+            path: '/state-head/state-overview', 
+            icon: Map 
+          },
+          { 
+            name: 'Center Performance', 
+            path: '/state-head/center-performance', 
+            icon: Building 
+          },
+          { 
+            name: 'Trainer Summary', 
+            path: '/state-head/trainer-summary', 
+            icon: Users 
+          },
+          { 
+            name: 'Reports', 
+            path: '/state-head/reports', 
+            icon: BarChart 
+          },
+          { 
+            name: 'Attendance Module', 
+            path: '/state-head/attendance', 
+            icon: ClipboardList 
+          },
+        ]
+      },
+      {
+        label: 'Monitoring',
+        items: [
+          { 
+            name: 'Dropout Insights', 
+            path: '/state-head/dropout-insights', 
+            icon: Brain,
+            phase: 3
+          },
+          { 
+            name: 'PPC Schedule Monitor', 
+            path: '/state-head/ppc-schedule', 
+            icon: Calendar,
+            phase: 2 
+          },
+          { 
+            name: 'Batch Tracker', 
+            path: '/state-head/batch-tracker', 
+            icon: Package 
+          },
+          { 
+            name: 'SOS Tracker', 
+            path: '/state-head/sos-tracker', 
+            icon: AlertCircle 
+          },
+          { 
+            name: 'Export Reports', 
+            path: '/state-head/export-reports', 
+            icon: FileSpreadsheet 
           },
         ]
       }
@@ -260,7 +358,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
         { 
           name: 'Dashboard', 
           path: '/dashboard', 
-          icon: ({ className }) => <span className={className || ''}>🏠</span> 
+          icon: Home 
         },
       ]
     }
