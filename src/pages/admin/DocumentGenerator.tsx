@@ -9,7 +9,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { FileUpload, FilePlus, FileEdit, FileCheck, Mail, Eye, Download, Trash2 } from 'lucide-react';
+import { Upload, FilePlus, FileEdit, FileCheck, Mail, Eye, Download, Trash2 } from 'lucide-react';
 
 const DocumentGenerator = () => {
   // Dummy data for document templates

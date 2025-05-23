@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -168,8 +167,9 @@ const BatchManagement = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={batch.status === 'active' ? "default" : batch.status === 'completed' ? "success" : "secondary"}>
-                        {batch.status === 'active' ? 'Active' : batch.status === 'completed' ? 'Completed' : 'Pending'}
+                      <Badge variant={batch.status === "active" ? "default" : 
+                        batch.status === "completed" ? "secondary" : "outline"}>
+                        {batch.status.charAt(0).toUpperCase() + batch.status.slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell>

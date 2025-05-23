@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, FileSpreadsheet, FileJson, FilePdf, Mail, Calendar, Clock, RefreshCw } from 'lucide-react';
+import { Download, FileSpreadsheet, FileIcon, File, Mail, Calendar, Clock, RefreshCw } from 'lucide-react';
 
 const DataExportHub = () => {
   const [selectedFormat, setSelectedFormat] = useState('excel');
@@ -34,7 +33,7 @@ const DataExportHub = () => {
       name: 'District-Wise Batch Summary',
       description: 'Batches grouped by district with completion statistics',
       lastGenerated: '2023-10-28',
-      icon: <FilePdf className="h-5 w-5 text-red-600" />
+      icon: <File className="h-5 w-5 text-red-600" />
     },
     {
       id: 'template4',
@@ -48,7 +47,7 @@ const DataExportHub = () => {
       name: 'Candidate Documents Package',
       description: 'ZIP archive of all documents for selected candidates',
       lastGenerated: '2023-10-20',
-      icon: <FileJson className="h-5 w-5 text-blue-600" />
+      icon: <FileIcon className="h-5 w-5 text-blue-600" />
     },
   ];
 

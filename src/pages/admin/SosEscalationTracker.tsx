@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -195,7 +194,7 @@ const SosEscalationTracker = () => {
                           <Badge variant={
                             sosCase.status === 'open' ? "outline" : 
                             sosCase.status === 'inprogress' ? "default" : 
-                            sosCase.status === 'escalated' ? "destructive" : "success"
+                            sosCase.status === 'escalated' ? "destructive" : "secondary"
                           }>
                             {sosCase.status === 'inprogress' ? 'In Progress' : 
                              sosCase.status.charAt(0).toUpperCase() + sosCase.status.slice(1)}
