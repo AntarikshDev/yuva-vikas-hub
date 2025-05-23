@@ -216,15 +216,15 @@ const DocumentGenerator = () => {
                             onClick={toggleEditMode}
                           >
                             {isEditMode ? (
-                              <>
+                              <React.Fragment>
                                 <FileCheck className="h-3.5 w-3.5" />
                                 Save
-                              </>
+                              </React.Fragment>
                             ) : (
-                              <>
+                              <React.Fragment>
                                 <FileEdit className="h-3.5 w-3.5" />
                                 Edit
-                              </>
+                              </React.Fragment>
                             )}
                           </Button>
                           <Button 
@@ -485,14 +485,14 @@ const DocumentGenerator = () => {
                 </div>
                 
                 <div className="text-center my-4">
-                  <h3 className="text-lg font-semibold"><<CandidateName>></h3>
-                  <p>(ID: <<CandidateID>>)</p>
+                  <h3 className="text-lg font-semibold">{'<<CandidateName>>'}</h3>
+                  <p>(ID: {'<<CandidateID>>'})</p>
                 </div>
                 
                 <p className="text-center">
-                  has successfully completed training for the role of <b><<JobRole>></b> 
-                  at <b><<CenterName>></b> from <b><<StartDate>></b> to <b><<EndDate>></b> 
-                  as part of the <b><<BatchCode>></b> training batch.
+                  has successfully completed training for the role of <b>{'<<JobRole>>'}</b> 
+                  at <b>{'<<CenterName>>'}</b> from <b>{'<<StartDate>>'}</b> to <b>{'<<EndDate>>'}</b> 
+                  as part of the <b>{'<<BatchCode>>'}</b> training batch.
                 </p>
                 
                 <div className="mt-12 flex justify-between">
@@ -511,7 +511,7 @@ const DocumentGenerator = () => {
             
             <p className="text-sm text-muted-foreground my-2">
               <AlertCircle className="h-3.5 w-3.5 inline mr-1" />
-              This is a sample preview. Values in &lt;&lt;brackets&gt;&gt; will be replaced with actual data during generation.
+              This is a sample preview. Values in {'<<brackets>>'} will be replaced with actual data during generation.
             </p>
             
             <DialogFooter>
@@ -544,7 +544,7 @@ const DocumentGenerator = () => {
                 <h4 className="font-medium">How to Use:</h4>
                 <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
                   <li><span className="font-medium">Upload Templates:</span> Start by uploading document templates (PDF, DOCX, XLSX) with placeholders.</li>
-                  <li><span className="font-medium">Define Placeholders:</span> Use placeholders like &lt;&lt;CandidateName&gt;&gt; in your documents where dynamic content should appear.</li>
+                  <li><span className="font-medium">Define Placeholders:</span> Use placeholders like {'<<CandidateName>>'} in your documents where dynamic content should appear.</li>
                   <li><span className="font-medium">Generate Documents:</span> Select a template, choose recipients, and generate personalized documents automatically.</li>
                   <li><span className="font-medium">Auto Email:</span> Enable automatic emailing to send documents directly to candidates or partners.</li>
                 </ul>
@@ -553,13 +553,13 @@ const DocumentGenerator = () => {
               <div className="space-y-2">
                 <h4 className="font-medium">Supported Placeholders:</h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>&lt;&lt;CandidateName&gt;&gt;</div>
-                  <div>&lt;&lt;CandidateID&gt;&gt;</div>
-                  <div>&lt;&lt;BatchCode&gt;&gt;</div>
-                  <div>&lt;&lt;CenterName&gt;&gt;</div>
-                  <div>&lt;&lt;JobRole&gt;&gt;</div>
-                  <div>&lt;&lt;StartDate&gt;&gt;</div>
-                  <div>&lt;&lt;EndDate&gt;&gt;</div>
+                  <div>{'<<CandidateName>>'}</div>
+                  <div>{'<<CandidateID>>'}</div>
+                  <div>{'<<BatchCode>>'}</div>
+                  <div>{'<<CenterName>>'}</div>
+                  <div>{'<<JobRole>>'}</div>
+                  <div>{'<<StartDate>>'}</div>
+                  <div>{'<<EndDate>>'}</div>
                   <div>and many more...</div>
                 </div>
               </div>
