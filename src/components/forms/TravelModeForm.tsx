@@ -38,9 +38,10 @@ const formSchema = z.object({
 interface TravelModeFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  itemId?: number;  // Added this prop
 }
 
-export function TravelModeForm({ open, onOpenChange }: TravelModeFormProps) {
+export function TravelModeForm({ open, onOpenChange, itemId }: TravelModeFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,10 +56,38 @@ export function TravelModeForm({ open, onOpenChange }: TravelModeFormProps) {
     },
   });
 
+  // We can use the itemId for editing existing travel modes if needed
+  React.useEffect(() => {
+    if (itemId) {
+      // In a real app, you would fetch the travel mode data by itemId
+      console.log(`Editing travel mode with ID: ${itemId}`);
+      // For now, we'll just use dummy data
+      form.reset({
+        code: `TM${itemId}`,
+        name: `Travel Mode ${itemId}`,
+        baseRate: 50 + itemId,
+        perKmRate: 5 + (itemId * 0.5),
+        maxDistance: itemId * 100,
+        isPublic: true,
+        status: true
+      });
+    } else {
+      form.reset({
+        code: "",
+        name: "",
+        baseRate: 0,
+        perKmRate: 0,
+        maxDistance: undefined,
+        isPublic: true,
+        status: true
+      });
+    }
+  }, [itemId, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     toast({
-      title: "Travel Mode Added",
-      description: `${values.name} has been added successfully`,
+      title: itemId ? "Travel Mode Updated" : "Travel Mode Added",
+      description: `${values.name} has been ${itemId ? 'updated' : 'added'} successfully`,
     });
     onOpenChange(false);
     form.reset();
@@ -68,9 +97,9 @@ export function TravelModeForm({ open, onOpenChange }: TravelModeFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Add New Travel Mode</DialogTitle>
+          <DialogTitle>{itemId ? "Edit" : "Add New"} Travel Mode</DialogTitle>
           <DialogDescription>
-            Create a new travel mode for travel scheduling and expense calculation
+            {itemId ? "Update existing" : "Create a new"} travel mode for travel scheduling and expense calculation
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -211,7 +240,7 @@ export function TravelModeForm({ open, onOpenChange }: TravelModeFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Save</Button>
+              <Button type="submit">{itemId ? 'Update' : 'Save'}</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -37,9 +37,10 @@ const formSchema = z.object({
 interface UserFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  userId?: number;  // Added this prop
 }
 
-export function UserForm({ open, onOpenChange }: UserFormProps) {
+export function UserForm({ open, onOpenChange, userId }: UserFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,10 +54,36 @@ export function UserForm({ open, onOpenChange }: UserFormProps) {
     },
   });
 
+  // We can use the userId for editing existing users if needed
+  React.useEffect(() => {
+    if (userId) {
+      // In a real app, you would fetch the user data by userId
+      console.log(`Editing user with ID: ${userId}`);
+      // For now, we'll just use dummy data
+      form.reset({
+        name: `User ${userId}`,
+        email: `user${userId}@example.com`,
+        mobile: "9876543210",
+        role: "center_manager",
+        center: "delhi_center",
+        password: "password123",
+      });
+    } else {
+      form.reset({
+        name: "",
+        email: "",
+        mobile: "",
+        role: "",
+        center: "",
+        password: "",
+      });
+    }
+  }, [userId, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     toast({
-      title: "User Added",
-      description: `${values.name} has been added as ${values.role}`,
+      title: userId ? "User Updated" : "User Added",
+      description: `${values.name} has been ${userId ? 'updated' : 'added'} as ${values.role}`,
     });
     onOpenChange(false);
     form.reset();
@@ -71,9 +98,9 @@ export function UserForm({ open, onOpenChange }: UserFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Add New User</DialogTitle>
+          <DialogTitle>{userId ? "Edit" : "Add New"} User</DialogTitle>
           <DialogDescription>
-            Create a new user account with role-based permissions
+            {userId ? "Update existing" : "Create a new"} user account with role-based permissions
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -176,9 +203,9 @@ export function UserForm({ open, onOpenChange }: UserFormProps) {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Initial Password</FormLabel>
+                  <FormLabel>{userId ? "Reset" : "Initial"} Password</FormLabel>
                   <FormControl>
-                    <Input {...field} type="password" placeholder="Set initial password" />
+                    <Input {...field} type="password" placeholder={userId ? "Reset password" : "Set initial password"} />
                   </FormControl>
                   <FormDescription>
                     User will be prompted to change password on first login
@@ -191,7 +218,7 @@ export function UserForm({ open, onOpenChange }: UserFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Create User</Button>
+              <Button type="submit">{userId ? 'Update User' : 'Create User'}</Button>
             </DialogFooter>
           </form>
         </Form>

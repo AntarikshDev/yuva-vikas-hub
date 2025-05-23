@@ -36,9 +36,10 @@ const formSchema = z.object({
 interface JobRoleFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  itemId?: number;  // Added this prop
 }
 
-export function JobRoleForm({ open, onOpenChange }: JobRoleFormProps) {
+export function JobRoleForm({ open, onOpenChange, itemId }: JobRoleFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,10 +52,34 @@ export function JobRoleForm({ open, onOpenChange }: JobRoleFormProps) {
     },
   });
 
+  // We can use the itemId for editing existing job roles if needed
+  React.useEffect(() => {
+    if (itemId) {
+      // In a real app, you would fetch the job role data by itemId
+      console.log(`Editing job role with ID: ${itemId}`);
+      // For now, we'll just use dummy data
+      form.reset({
+        code: `JR${itemId}`,
+        title: `Job Role ${itemId}`,
+        sector: "IT-ITES",
+        level: "NSQF 3",
+        status: true
+      });
+    } else {
+      form.reset({
+        code: "",
+        title: "",
+        sector: "",
+        level: "",
+        status: true
+      });
+    }
+  }, [itemId, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     toast({
-      title: "Job Role Added",
-      description: `${values.title} has been added successfully`,
+      title: itemId ? "Job Role Updated" : "Job Role Added",
+      description: `${values.title} has been ${itemId ? 'updated' : 'added'} successfully`,
     });
     onOpenChange(false);
     form.reset();
@@ -64,9 +89,9 @@ export function JobRoleForm({ open, onOpenChange }: JobRoleFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Add New Job Role</DialogTitle>
+          <DialogTitle>{itemId ? "Edit" : "Add New"} Job Role</DialogTitle>
           <DialogDescription>
-            Create a new job role for training programs
+            {itemId ? "Update existing" : "Create a new"} job role for training programs
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -168,7 +193,7 @@ export function JobRoleForm({ open, onOpenChange }: JobRoleFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Save</Button>
+              <Button type="submit">{itemId ? 'Update' : 'Save'}</Button>
             </DialogFooter>
           </form>
         </Form>

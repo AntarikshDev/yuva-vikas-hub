@@ -43,9 +43,10 @@ const districtSchema = z.object({
 interface LocationFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  itemId?: number;  // Added this prop
 }
 
-export function LocationForm({ open, onOpenChange }: LocationFormProps) {
+export function LocationForm({ open, onOpenChange, itemId }: LocationFormProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"state" | "district">("state");
   
@@ -108,10 +109,48 @@ export function LocationForm({ open, onOpenChange }: LocationFormProps) {
     { value: "WB", label: "West Bengal" },
   ];
 
+  // We can use the itemId for editing existing locations if needed
+  React.useEffect(() => {
+    if (itemId) {
+      // In a real app, you would fetch the location data by itemId
+      console.log(`Editing location with ID: ${itemId}`);
+      
+      if (itemId % 2 === 0) {
+        // Edit state
+        setActiveTab("state");
+        stateForm.reset({
+          code: `ST${itemId}`,
+          name: `State ${itemId}`,
+          isActive: true
+        });
+      } else {
+        // Edit district
+        setActiveTab("district");
+        districtForm.reset({
+          state: "DL",
+          name: `District ${itemId}`,
+          isActive: true
+        });
+      }
+    } else {
+      stateForm.reset({
+        code: "",
+        name: "",
+        isActive: true
+      });
+      
+      districtForm.reset({
+        state: "",
+        name: "",
+        isActive: true
+      });
+    }
+  }, [itemId, stateForm, districtForm]);
+
   function onSubmitState(values: z.infer<typeof stateSchema>) {
     toast({
-      title: "State Added",
-      description: `${values.name} has been added successfully`,
+      title: itemId ? "State Updated" : "State Added",
+      description: `${values.name} has been ${itemId ? 'updated' : 'added'} successfully`,
     });
     stateForm.reset();
     onOpenChange(false);
@@ -120,8 +159,8 @@ export function LocationForm({ open, onOpenChange }: LocationFormProps) {
   function onSubmitDistrict(values: z.infer<typeof districtSchema>) {
     const stateName = states.find(s => s.value === values.state)?.label || values.state;
     toast({
-      title: "District Added",
-      description: `${values.name} (${stateName}) has been added successfully`,
+      title: itemId ? "District Updated" : "District Added",
+      description: `${values.name} (${stateName}) has been ${itemId ? 'updated' : 'added'} successfully`,
     });
     districtForm.reset();
     onOpenChange(false);
@@ -131,16 +170,20 @@ export function LocationForm({ open, onOpenChange }: LocationFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Add Location</DialogTitle>
+          <DialogTitle>{itemId ? "Edit" : "Add"} Location</DialogTitle>
           <DialogDescription>
-            Add new states or districts to the system
+            {itemId ? "Update existing" : "Add new"} states or districts to the system
           </DialogDescription>
         </DialogHeader>
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "state" | "district")} className="w-full">
           <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger value="state">Add State</TabsTrigger>
-            <TabsTrigger value="district">Add District</TabsTrigger>
+            <TabsTrigger value="state">
+              {itemId && activeTab === "state" ? "Edit State" : "Add State"}
+            </TabsTrigger>
+            <TabsTrigger value="district">
+              {itemId && activeTab === "district" ? "Edit District" : "Add District"}
+            </TabsTrigger>
           </TabsList>
           
           {/* State Form */}
@@ -198,7 +241,7 @@ export function LocationForm({ open, onOpenChange }: LocationFormProps) {
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">Save State</Button>
+                  <Button type="submit">{itemId && activeTab === "state" ? 'Update State' : 'Save State'}</Button>
                 </DialogFooter>
               </form>
             </Form>
@@ -267,7 +310,7 @@ export function LocationForm({ open, onOpenChange }: LocationFormProps) {
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">Save District</Button>
+                  <Button type="submit">{itemId && activeTab === "district" ? 'Update District' : 'Save District'}</Button>
                 </DialogFooter>
               </form>
             </Form>

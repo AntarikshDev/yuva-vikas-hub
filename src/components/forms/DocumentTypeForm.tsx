@@ -39,9 +39,10 @@ const formSchema = z.object({
 interface DocumentTypeFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  itemId?: number;  // Added this prop
 }
 
-export function DocumentTypeForm({ open, onOpenChange }: DocumentTypeFormProps) {
+export function DocumentTypeForm({ open, onOpenChange, itemId }: DocumentTypeFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -73,10 +74,38 @@ export function DocumentTypeForm({ open, onOpenChange }: DocumentTypeFormProps) 
     { value: "doc", label: "DOC/DOCX" },
   ];
 
+  // We can use the itemId for editing existing document types if needed
+  React.useEffect(() => {
+    if (itemId) {
+      // In a real app, you would fetch the document type data by itemId
+      console.log(`Editing document type with ID: ${itemId}`);
+      // For now, we'll just use dummy data
+      form.reset({
+        code: `DOC${itemId}`,
+        name: `Document Type ${itemId}`,
+        category: itemId % 2 === 0 ? "identity" : "education",
+        required: itemId % 2 === 0,
+        maxSize: 5,
+        allowedFormats: ["pdf", "jpg"],
+        status: true
+      });
+    } else {
+      form.reset({
+        code: "",
+        name: "",
+        category: "",
+        required: false,
+        maxSize: 5,
+        allowedFormats: ["pdf"],
+        status: true
+      });
+    }
+  }, [itemId, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     toast({
-      title: "Document Type Added",
-      description: `${values.name} has been added successfully`,
+      title: itemId ? "Document Type Updated" : "Document Type Added",
+      description: `${values.name} has been ${itemId ? 'updated' : 'added'} successfully`,
     });
     onOpenChange(false);
     form.reset();
@@ -86,9 +115,9 @@ export function DocumentTypeForm({ open, onOpenChange }: DocumentTypeFormProps) 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Add Document Type</DialogTitle>
+          <DialogTitle>{itemId ? "Edit" : "Add"} Document Type</DialogTitle>
           <DialogDescription>
-            Create a new document type for candidate submissions
+            {itemId ? "Update existing" : "Create a new"} document type for candidate submissions
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -238,7 +267,7 @@ export function DocumentTypeForm({ open, onOpenChange }: DocumentTypeFormProps) 
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Save</Button>
+              <Button type="submit">{itemId ? 'Update' : 'Save'}</Button>
             </DialogFooter>
           </form>
         </Form>

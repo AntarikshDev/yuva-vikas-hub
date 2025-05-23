@@ -40,9 +40,10 @@ const formSchema = z.object({
 interface VideoFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  itemId?: number;  // Added this prop
 }
 
-export function VideoForm({ open, onOpenChange }: VideoFormProps) {
+export function VideoForm({ open, onOpenChange, itemId }: VideoFormProps) {
   const { toast } = useToast();
   const [uploadMethod, setUploadMethod] = useState<'file' | 'url'>('file');
   
@@ -57,11 +58,37 @@ export function VideoForm({ open, onOpenChange }: VideoFormProps) {
     },
   });
 
+  // We can use the itemId for editing existing videos if needed
+  React.useEffect(() => {
+    if (itemId) {
+      // In a real app, you would fetch the video data by itemId
+      console.log(`Editing video with ID: ${itemId}`);
+      setUploadMethod('url'); // Assume existing videos have URLs
+      // For now, we'll just use dummy data
+      form.reset({
+        title: `Video ${itemId}`,
+        jobRole: "customerServiceExecutive",
+        counsellingStage: "stage2",
+        description: `This is a description for video ${itemId}. It provides valuable information about the job role.`,
+        videoUrl: `https://example.com/video${itemId}.mp4`,
+        language: "English",
+      });
+    } else {
+      form.reset({
+        title: "",
+        jobRole: "",
+        counsellingStage: "",
+        description: "",
+        language: "English",
+      });
+    }
+  }, [itemId, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
     toast({
-      title: "Video Added",
-      description: `"${values.title}" has been added successfully`,
+      title: itemId ? "Video Updated" : "Video Added",
+      description: `"${values.title}" has been ${itemId ? 'updated' : 'added'} successfully`,
     });
     onOpenChange(false);
     form.reset();
@@ -71,9 +98,9 @@ export function VideoForm({ open, onOpenChange }: VideoFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add Counselling Video</DialogTitle>
+          <DialogTitle>{itemId ? "Edit" : "Add"} Counselling Video</DialogTitle>
           <DialogDescription>
-            Upload a new counselling video for candidates
+            {itemId ? "Update existing" : "Upload a new"} counselling video for candidates
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -264,7 +291,7 @@ export function VideoForm({ open, onOpenChange }: VideoFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Upload Video</Button>
+              <Button type="submit">{itemId ? 'Update Video' : 'Upload Video'}</Button>
             </DialogFooter>
           </form>
         </Form>

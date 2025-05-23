@@ -41,9 +41,10 @@ const formSchema = z.object({
 interface CompanyFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  itemId?: number;  // Added this prop
 }
 
-export function CompanyForm({ open, onOpenChange }: CompanyFormProps) {
+export function CompanyForm({ open, onOpenChange, itemId }: CompanyFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,10 +60,40 @@ export function CompanyForm({ open, onOpenChange }: CompanyFormProps) {
     },
   });
 
+  // We can use the itemId for editing existing companies if needed
+  React.useEffect(() => {
+    if (itemId) {
+      // In a real app, you would fetch the company data by itemId
+      console.log(`Editing company with ID: ${itemId}`);
+      // For now, we'll just use dummy data
+      form.reset({
+        name: `Company ${itemId}`,
+        sector: "IT-ITES",
+        location: "Delhi NCR",
+        contactPerson: "John Doe",
+        contactEmail: `contact${itemId}@example.com`,
+        contactPhone: "9876543210",
+        address: "123 Main Street, Delhi",
+        status: true
+      });
+    } else {
+      form.reset({
+        name: "",
+        sector: "",
+        location: "",
+        contactPerson: "",
+        contactEmail: "",
+        contactPhone: "",
+        address: "",
+        status: true
+      });
+    }
+  }, [itemId, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     toast({
-      title: "Company Added",
-      description: `${values.name} has been added successfully`,
+      title: itemId ? "Company Updated" : "Company Added",
+      description: `${values.name} has been ${itemId ? 'updated' : 'added'} successfully`,
     });
     onOpenChange(false);
     form.reset();
@@ -72,9 +103,9 @@ export function CompanyForm({ open, onOpenChange }: CompanyFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Add New Company</DialogTitle>
+          <DialogTitle>{itemId ? "Edit" : "Add New"} Company</DialogTitle>
           <DialogDescription>
-            Add a new company for placement opportunities
+            {itemId ? "Update existing company" : "Add a new company"} for placement opportunities
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -219,7 +250,7 @@ export function CompanyForm({ open, onOpenChange }: CompanyFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Save</Button>
+              <Button type="submit">{itemId ? 'Update' : 'Save'}</Button>
             </DialogFooter>
           </form>
         </Form>

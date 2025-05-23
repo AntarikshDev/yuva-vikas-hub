@@ -41,9 +41,10 @@ const formSchema = z.object({
 interface CenterFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  itemId?: number;  // Added this prop
 }
 
-export function CenterForm({ open, onOpenChange }: CenterFormProps) {
+export function CenterForm({ open, onOpenChange, itemId }: CenterFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,10 +60,40 @@ export function CenterForm({ open, onOpenChange }: CenterFormProps) {
     },
   });
 
+  // We can use the itemId for editing existing centers if needed
+  React.useEffect(() => {
+    if (itemId) {
+      // In a real app, you would fetch the center data by itemId
+      console.log(`Editing center with ID: ${itemId}`);
+      // For now, we'll just use dummy data
+      form.reset({
+        name: `Training Center ${itemId}`,
+        state: "Delhi",
+        city: "New Delhi",
+        address: "123 Main Street, Delhi",
+        capacity: 30 + itemId,
+        manager: `Manager ${itemId}`,
+        managerContact: "9876543210",
+        status: true
+      });
+    } else {
+      form.reset({
+        name: "",
+        state: "",
+        city: "",
+        address: "",
+        capacity: 30,
+        manager: "",
+        managerContact: "",
+        status: true
+      });
+    }
+  }, [itemId, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     toast({
-      title: "Center Added",
-      description: `${values.name} has been added successfully`,
+      title: itemId ? "Center Updated" : "Center Added",
+      description: `${values.name} has been ${itemId ? 'updated' : 'added'} successfully`,
     });
     onOpenChange(false);
     form.reset();
@@ -72,9 +103,9 @@ export function CenterForm({ open, onOpenChange }: CenterFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Add New Training Center</DialogTitle>
+          <DialogTitle>{itemId ? "Edit" : "Add New"} Training Center</DialogTitle>
           <DialogDescription>
-            Create a new training center location
+            {itemId ? "Update existing" : "Create a new"} training center location
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -219,7 +250,7 @@ export function CenterForm({ open, onOpenChange }: CenterFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Save</Button>
+              <Button type="submit">{itemId ? 'Update' : 'Save'}</Button>
             </DialogFooter>
           </form>
         </Form>
