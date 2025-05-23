@@ -8,7 +8,7 @@ interface FilterOption {
   id: string;
   label: string;
   options?: { value: string; label: string }[];
-  type: 'select' | 'date' | 'text';
+  type: 'select' | 'date' | 'text' | 'date-range';
 }
 
 interface FilterBarProps {
@@ -89,6 +89,24 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     className="h-10 rounded-md border border-neutral-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={activeFilters[filter.id] || ''}
                     onChange={(e) => handleFilterChange(filter.id, e.target.value)}
+                  />
+                </div>
+              )}
+              {filter.type === 'date-range' && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-neutral-500">{filter.label}:</span>
+                  <input
+                    type="date"
+                    className="h-10 rounded-md border border-neutral-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    value={activeFilters[`${filter.id}_start`] || ''}
+                    onChange={(e) => handleFilterChange(`${filter.id}_start`, e.target.value)}
+                  />
+                  <span className="text-xs">to</span>
+                  <input
+                    type="date"
+                    className="h-10 rounded-md border border-neutral-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    value={activeFilters[`${filter.id}_end`] || ''}
+                    onChange={(e) => handleFilterChange(`${filter.id}_end`, e.target.value)}
                   />
                 </div>
               )}

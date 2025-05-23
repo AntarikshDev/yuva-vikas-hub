@@ -15,7 +15,7 @@ import {
 type FilterOption = {
   id: string;
   label: string;
-  type: 'select' | 'date-range';
+  type: 'select' | 'date' | 'date-range' | 'text';
   options?: { value: string; label: string }[];
 };
 
