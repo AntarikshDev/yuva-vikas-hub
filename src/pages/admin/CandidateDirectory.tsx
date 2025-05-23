@@ -34,8 +34,8 @@ const CandidateDirectory = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
-    status: 'all',  // Changed from empty string to 'all'
-    course: 'all',  // Changed from empty string to 'all'
+    status: 'all',
+    course: 'all',
   });
 
   const { toast } = useToast();
@@ -121,7 +121,7 @@ const CandidateDirectory = () => {
 
   // Reset filters
   const resetFilters = () => {
-    setFilters({ status: 'all', course: 'all' });  // Changed from empty strings to 'all'
+    setFilters({ status: 'all', course: 'all' });
     setFilterOpen(false);
   };
 
@@ -176,7 +176,6 @@ const CandidateDirectory = () => {
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
-                            {/* Fix: Changed empty string to "all" with a label */}
                             <SelectItem value="all">All Statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="placed">Placed</SelectItem>
@@ -196,7 +195,6 @@ const CandidateDirectory = () => {
                             <SelectValue placeholder="Select course" />
                           </SelectTrigger>
                           <SelectContent>
-                            {/* Fix: Changed empty string to "all" with a label */}
                             <SelectItem value="all">All Courses</SelectItem>
                             {courses.map(course => (
                               <SelectItem key={course} value={course}>{course}</SelectItem>
