@@ -159,7 +159,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
   );
 };
 
-// Helper function to format role for display
+// Helper function to format role display
 function formatRoleDisplay(role: string): string {
   return role
     .split('_')
@@ -173,7 +173,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
   if (role === 'super_admin') {
     return [
       {
-        label: '',
+        label: 'Platform',
         items: [
           { 
             name: 'Dashboard', 
@@ -181,32 +181,69 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             icon: ({ className }) => <span className={className || ''}>🏠</span> 
           },
           { 
-            name: 'Profile', 
-            path: '/admin/profile', 
+            name: 'User & Role Management', 
+            path: '/admin/users', 
             icon: ({ className }) => <span className={className || ''}>👤</span> 
           },
           { 
-            name: 'Users', 
-            path: '/admin/users', 
-            icon: ({ className }) => <span className={className || ''}>👥</span> 
+            name: 'Master Data Management', 
+            path: '/admin/master-data', 
+            icon: ({ className }) => <span className={className || ''}>🗂️</span> 
           },
           { 
-            name: 'States', 
-            path: '/admin/states', 
-            icon: ({ className }) => <span className={className || ''}>🏛️</span> 
+            name: 'Document Generator', 
+            path: '/admin/documents', 
+            icon: ({ className }) => <span className={className || ''}>🧾</span> 
           },
           { 
-            name: 'Centers', 
-            path: '/admin/centers', 
-            icon: ({ className }) => <span className={className || ''}>🏢</span> 
+            name: 'Batch Management', 
+            path: '/admin/batches', 
+            icon: ({ className }) => <span className={className || ''}>📦</span> 
           },
           { 
-            name: 'Reports', 
+            name: 'Candidate Directory', 
+            path: '/admin/candidates', 
+            icon: ({ className }) => <span className={className || ''}>🔍</span> 
+          },
+          { 
+            name: 'Reports & Analytics', 
             path: '/admin/reports', 
             icon: ({ className }) => <span className={className || ''}>📊</span> 
           },
           { 
-            name: 'Settings', 
+            name: 'Video Log Manager', 
+            path: '/admin/videos', 
+            icon: ({ className }) => <span className={className || ''}>🎥</span> 
+          },
+        ]
+      },
+      {
+        label: 'Advanced Features',
+        items: [
+          { 
+            name: 'AI Dropout Engine', 
+            path: '/admin/ai-dropout', 
+            icon: ({ className }) => <span className={className || ''}>🧠</span>,
+            phase: 3 
+          },
+          { 
+            name: 'Quality Tracker', 
+            path: '/admin/quality', 
+            icon: ({ className }) => <span className={className || ''}>🧪</span>,
+            phase: 3 
+          },
+          { 
+            name: 'SOS & Escalation Tracker', 
+            path: '/admin/sos', 
+            icon: ({ className }) => <span className={className || ''}>🆘</span> 
+          },
+          { 
+            name: 'Data Export Hub', 
+            path: '/admin/export', 
+            icon: ({ className }) => <span className={className || ''}>📤</span> 
+          },
+          { 
+            name: 'System Settings', 
             path: '/admin/settings', 
             icon: ({ className }) => <span className={className || ''}>⚙️</span> 
           },

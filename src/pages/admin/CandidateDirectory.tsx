@@ -1,310 +1,317 @@
 
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
-import { FilterBar } from '@/components/common/FilterBar';
-import { DataTable } from '@/components/common/DataTable';
-import { StatusBadge } from '@/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { DateRange } from 'react-day-picker';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Filter, Download, Eye, FileText, UserCog, MoreHorizontal } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-interface Candidate {
-  id: string;
-  name: string;
-  center: string;
-  jobRole: string;
-  batch: string;
-  category: 'A' | 'B' | 'C';
-  status: 'active' | 'placed' | 'dropout' | 'pending';
-  mobilizer: string;
-  documents: number;
-}
+const CandidateDirectory = () => {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(2023, 9, 1),
+    to: new Date(2023, 11, 31)
+  });
 
-const CandidateDirectory: React.FC = () => {
-  const [isLoading] = useState(false);
-
-  // Mock data for candidates
-  const mockCandidates: Candidate[] = [
-    {
-      id: 'C001',
-      name: 'Rahul Sharma',
+  // Dummy data for candidates
+  const candidates = [
+    { 
+      id: 'C001', 
+      name: 'Rahul Sharma', 
+      mobile: '9876543210', 
+      district: 'Delhi', 
+      state: 'Delhi',
       center: 'Delhi Center',
-      jobRole: 'Healthcare',
-      batch: 'B001',
+      batch: 'CSE Batch 01',
+      jobRole: 'Customer Service Executive',
       category: 'A',
-      status: 'active',
-      mobilizer: 'Amit Kumar',
-      documents: 5,
+      status: 'training',
+      mobilizer: 'Amit Kumar'
     },
-    {
-      id: 'C002',
-      name: 'Priya Patel',
+    { 
+      id: 'C002', 
+      name: 'Priya Patel', 
+      mobile: '9876543211', 
+      district: 'Mumbai', 
+      state: 'Maharashtra',
       center: 'Mumbai Center',
-      jobRole: 'Retail',
-      batch: 'B005',
+      batch: 'FSE Batch 02',
+      jobRole: 'Field Sales Executive',
       category: 'B',
       status: 'placed',
-      mobilizer: 'Rakesh Verma',
-      documents: 4,
+      mobilizer: 'Sanjay Patel'
     },
-    {
-      id: 'C003',
-      name: 'Anil Singh',
-      center: 'Bengaluru Center',
-      jobRole: 'Hospitality',
-      batch: 'B008',
+    { 
+      id: 'C003', 
+      name: 'Amit Singh', 
+      mobile: '9876543212', 
+      district: 'Bangalore Urban', 
+      state: 'Karnataka',
+      center: 'Bangalore Center',
+      batch: 'GDA Batch 01',
+      jobRole: 'General Duty Assistant',
       category: 'A',
       status: 'placed',
-      mobilizer: 'Neha Gupta',
-      documents: 6,
+      mobilizer: 'Lakshmi N'
     },
-    {
-      id: 'C004',
-      name: 'Meera Shah',
-      center: 'Chennai Center',
-      jobRole: 'IT Support',
-      batch: 'B003',
+    { 
+      id: 'C004', 
+      name: 'Sneha Gupta', 
+      mobile: '9876543213', 
+      district: 'Pune', 
+      state: 'Maharashtra',
+      center: 'Pune Center',
+      batch: 'BPO Batch 01',
+      jobRole: 'BPO Voice',
       category: 'C',
       status: 'dropout',
-      mobilizer: 'Sunil Reddy',
-      documents: 2,
+      mobilizer: 'Rajesh Kumar'
     },
-    {
-      id: 'C005',
-      name: 'Vikram Desai',
-      center: 'Pune Center',
-      jobRole: 'Retail',
-      batch: 'B005',
+    { 
+      id: 'C005', 
+      name: 'Vikram Reddy', 
+      mobile: '9876543214', 
+      district: 'Chennai', 
+      state: 'Tamil Nadu',
+      center: 'Chennai Center',
+      batch: 'RSA Batch 03',
+      jobRole: 'Retail Sales Associate',
       category: 'B',
-      status: 'active',
-      mobilizer: 'Amit Kumar',
-      documents: 5,
+      status: 'training',
+      mobilizer: 'Ankit Gupta'
     },
-    {
-      id: 'C006',
-      name: 'Sneha Joshi',
-      center: 'Hyderabad Center',
-      jobRole: 'Healthcare',
-      batch: 'B010',
+    { 
+      id: 'C006', 
+      name: 'Kavita Nair', 
+      mobile: '9876543215', 
+      district: 'Trivandrum', 
+      state: 'Kerala',
+      center: 'Trivandrum Center',
+      batch: 'CSE Batch 02',
+      jobRole: 'Customer Service Executive',
       category: 'A',
+      status: 'placed',
+      mobilizer: 'Meena S'
+    },
+    { 
+      id: 'C007', 
+      name: 'Raj Malhotra', 
+      mobile: '9876543216', 
+      district: 'Hyderabad', 
+      state: 'Telangana',
+      center: 'Hyderabad Center',
+      batch: 'FSE Batch 01',
+      jobRole: 'Field Sales Executive',
+      category: 'B',
       status: 'pending',
-      mobilizer: 'Rakesh Verma',
-      documents: 3,
+      mobilizer: 'Venkat K'
     },
   ];
 
-  const filterOptions = [
-    {
-      id: 'state',
-      label: 'State',
-      type: 'select' as const,
-      options: [
-        { value: 'delhi', label: 'Delhi' },
-        { value: 'maharashtra', label: 'Maharashtra' },
-        { value: 'karnataka', label: 'Karnataka' },
-        { value: 'tamil-nadu', label: 'Tamil Nadu' },
-      ],
-    },
-    {
-      id: 'center',
-      label: 'Center',
-      type: 'select' as const,
-      options: [
-        { value: 'delhi', label: 'Delhi Center' },
-        { value: 'mumbai', label: 'Mumbai Center' },
-        { value: 'bengaluru', label: 'Bengaluru Center' },
-        { value: 'chennai', label: 'Chennai Center' },
-      ],
-    },
-    {
-      id: 'jobRole',
-      label: 'Job Role',
-      type: 'select' as const,
-      options: [
-        { value: 'healthcare', label: 'Healthcare' },
-        { value: 'retail', label: 'Retail' },
-        { value: 'hospitality', label: 'Hospitality' },
-        { value: 'it-support', label: 'IT Support' },
-      ],
-    },
-    {
-      id: 'batch',
-      label: 'Batch',
-      type: 'select' as const,
-      options: [
-        { value: 'B001', label: 'B001' },
-        { value: 'B003', label: 'B003' },
-        { value: 'B005', label: 'B005' },
-        { value: 'B008', label: 'B008' },
-        { value: 'B010', label: 'B010' },
-      ],
-    },
-    {
-      id: 'category',
-      label: 'Category',
-      type: 'select' as const,
-      options: [
-        { value: 'A', label: 'Category A' },
-        { value: 'B', label: 'Category B' },
-        { value: 'C', label: 'Category C' },
-      ],
-    },
-    {
-      id: 'status',
-      label: 'Status',
-      type: 'select' as const,
-      options: [
-        { value: 'active', label: 'Active' },
-        { value: 'placed', label: 'Placed' },
-        { value: 'dropout', label: 'Dropout' },
-        { value: 'pending', label: 'Pending' },
-      ],
-    },
-    {
-      id: 'mobilizer',
-      label: 'Mobilizer',
-      type: 'select' as const,
-      options: [
-        { value: 'amit-kumar', label: 'Amit Kumar' },
-        { value: 'rakesh-verma', label: 'Rakesh Verma' },
-        { value: 'neha-gupta', label: 'Neha Gupta' },
-        { value: 'sunil-reddy', label: 'Sunil Reddy' },
-      ],
-    },
-  ];
-
-  const handleSearch = (query: string) => {
-    console.log(`Searching for: ${query}`);
-    // In a real app, this would filter the data
-  };
-
-  const handleFilterChange = (filters: Record<string, any>) => {
-    console.log('Filters changed:', filters);
-    // In a real app, this would filter the data
-  };
-
-  const handleViewProfile = (candidate: Candidate) => {
-    console.log(`Viewing profile for: ${candidate.name}`);
-    // In a real app, this would navigate to the candidate profile
-  };
-
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case 'active': return 'info';
-      case 'placed': return 'success';
-      case 'dropout': return 'error';
-      default: return 'warning';
-    }
-  };
-
-  const getCategoryVariant = (category: string) => {
-    switch (category) {
-      case 'A': return 'success';
-      case 'B': return 'warning';
-      case 'C': return 'error';
-      default: return 'default';
-    }
-  };
-
-  const columns = [
-    {
-      id: 'id',
-      header: 'ID',
-      cell: (candidate: Candidate) => candidate.id,
-      className: 'w-16',
-    },
-    {
-      id: 'name',
-      header: 'Candidate Name',
-      cell: (candidate: Candidate) => (
-        <div className="font-medium">{candidate.name}</div>
-      ),
-    },
-    {
-      id: 'center',
-      header: 'Center',
-      cell: (candidate: Candidate) => candidate.center,
-    },
-    {
-      id: 'jobRole',
-      header: 'Job Role',
-      cell: (candidate: Candidate) => candidate.jobRole,
-    },
-    {
-      id: 'batch',
-      header: 'Batch',
-      cell: (candidate: Candidate) => candidate.batch,
-    },
-    {
-      id: 'category',
-      header: 'Category',
-      cell: (candidate: Candidate) => (
-        <StatusBadge
-          variant={getCategoryVariant(candidate.category)}
-          label={`Category ${candidate.category}`}
-          withDot
-        />
-      ),
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      cell: (candidate: Candidate) => (
-        <StatusBadge
-          variant={getStatusVariant(candidate.status)}
-          label={candidate.status.charAt(0).toUpperCase() + candidate.status.slice(1)}
-          withDot
-        />
-      ),
-    },
-    {
-      id: 'mobilizer',
-      header: 'Mobilizer',
-      cell: (candidate: Candidate) => candidate.mobilizer,
-    },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: (candidate: Candidate) => (
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleViewProfile(candidate)}
-          >
-            View Profile
-          </Button>
-          <Button variant="outline" size="sm">
-            Download Docs
-          </Button>
-        </div>
-      ),
-    },
-  ];
+  // Get unique states, centers, job roles, etc. for filters
+  const states = [...new Set(candidates.map(c => c.state))];
+  const jobRoles = [...new Set(candidates.map(c => c.jobRole))];
+  const centers = [...new Set(candidates.map(c => c.center))];
+  const categories = [...new Set(candidates.map(c => c.category))];
+  const statuses = [...new Set(candidates.map(c => c.status))];
 
   return (
     <MainLayout role="super_admin">
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Candidate Directory</h1>
-          <p className="text-muted-foreground">
-            View, search and manage all candidates in the system.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Candidate Directory</h1>
+            <p className="text-muted-foreground">
+              Comprehensive database of all registered candidates.
+            </p>
+          </div>
         </div>
 
-        <FilterBar
-          onSearch={handleSearch}
-          filters={filterOptions}
-          onFilterChange={handleFilterChange}
-          actions={
-            <Button>Advanced Search</Button>
-          }
-        />
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle>Filter Candidates</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                <Input className="pl-8" placeholder="Search by name, ID, mobile..." />
+              </div>
+              
+              <Select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select State" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All States</SelectItem>
+                  {states.map((state) => (
+                    <SelectItem key={state} value={state.toLowerCase()}>{state}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Center" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Centers</SelectItem>
+                  {centers.map((center) => (
+                    <SelectItem key={center} value={center.toLowerCase()}>{center}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Job Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Job Roles</SelectItem>
+                  {jobRoles.map((role) => (
+                    <SelectItem key={role} value={role.toLowerCase()}>{role}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  {statuses.map((status) => (
+                    <SelectItem key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 mt-4 items-end">
+              <div className="w-full sm:w-auto sm:flex-1">
+                <Label className="text-xs mb-1 block">Registration Date Range</Label>
+                <DateRangePicker
+                  dateRange={dateRange}
+                  onDateRangeChange={setDateRange}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="gap-2">
+                  <Filter className="h-4 w-4" />
+                  More Filters
+                </Button>
+                <Button className="gap-2">
+                  <Search className="h-4 w-4" />
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <DataTable
-          columns={columns}
-          data={mockCandidates}
-          isLoading={isLoading}
-          onRowClick={handleViewProfile}
-        />
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle>
+                Candidates
+                <Badge variant="outline" className="ml-2">
+                  {candidates.length} results
+                </Badge>
+              </CardTitle>
+              <Button variant="outline" className="gap-2">
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableCaption>List of all registered candidates</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Mobile</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Center</TableHead>
+                  <TableHead>Job Role</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {candidates.map((candidate) => (
+                  <TableRow key={candidate.id}>
+                    <TableCell className="font-mono">{candidate.id}</TableCell>
+                    <TableCell className="font-medium">{candidate.name}</TableCell>
+                    <TableCell>{candidate.mobile}</TableCell>
+                    <TableCell>{`${candidate.district}, ${candidate.state}`}</TableCell>
+                    <TableCell>{candidate.center}</TableCell>
+                    <TableCell className="max-w-[180px] truncate">{candidate.jobRole}</TableCell>
+                    <TableCell>
+                      <Badge variant={
+                        candidate.category === 'A' ? "default" : 
+                        candidate.category === 'B' ? "secondary" : "outline"
+                      }>
+                        Category {candidate.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={
+                        candidate.status === 'placed' ? "success" : 
+                        candidate.status === 'training' ? "default" : 
+                        candidate.status === 'dropout' ? "destructive" : "outline"
+                      }>
+                        {candidate.status.charAt(0).toUpperCase() + candidate.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                            <Eye className="h-4 w-4" />
+                            View Profile
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                            <FileText className="h-4 w-4" />
+                            Download Documents
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                            <UserCog className="h-4 w-4" />
+                            Change Category
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                            Reassign Batch
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </MainLayout>
   );
