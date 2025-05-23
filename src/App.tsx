@@ -31,47 +31,51 @@ import MobilizerNewCandidate from "./pages/mobilizer/NewCandidate";
 // Candidate App Routes
 import CandidateHome from "./pages/candidate/Home";
 
-const queryClient = new QueryClient();
+// Create a new QueryClient instance inside the component
+const App = () => {
+  // Create a new QueryClient instance inside the component to ensure React context works properly
+  const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          
-          {/* Admin Panel Routes */}
-          <Route path="/admin/dashboard" element={<SuperAdminDashboard />} />
-          <Route path="/admin/users" element={<UserManagement />} />
-          <Route path="/admin/master-data" element={<MasterDataManagement />} />
-          <Route path="/admin/documents" element={<DocumentGenerator />} />
-          <Route path="/admin/batches" element={<BatchManagement />} />
-          <Route path="/admin/candidates" element={<CandidateDirectory />} />
-          <Route path="/admin/reports" element={<ReportsAnalytics />} />
-          <Route path="/admin/videos" element={<VideoLogManager />} />
-          <Route path="/admin/ai-dropout" element={<AIDropoutEngine />} />
-          <Route path="/admin/quality" element={<QualityTracker />} />
-          <Route path="/admin/sos" element={<SosEscalationTracker />} />
-          <Route path="/admin/export" element={<DataExportHub />} />
-          <Route path="/admin/settings" element={<SystemSettings />} />
-          
-          {/* State Head Routes */}
-          <Route path="/state-head/dashboard" element={<StateHeadDashboard />} />
-          
-          {/* Mobilizer App Routes */}
-          <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />
-          
-          {/* Candidate App Routes */}
-          <Route path="/candidate" element={<CandidateHome />} />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            
+            {/* Admin Panel Routes */}
+            <Route path="/admin/dashboard" element={<SuperAdminDashboard />} />
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/master-data" element={<MasterDataManagement />} />
+            <Route path="/admin/documents" element={<DocumentGenerator />} />
+            <Route path="/admin/batches" element={<BatchManagement />} />
+            <Route path="/admin/candidates" element={<CandidateDirectory />} />
+            <Route path="/admin/reports" element={<ReportsAnalytics />} />
+            <Route path="/admin/videos" element={<VideoLogManager />} />
+            <Route path="/admin/ai-dropout" element={<AIDropoutEngine />} />
+            <Route path="/admin/quality" element={<QualityTracker />} />
+            <Route path="/admin/sos" element={<SosEscalationTracker />} />
+            <Route path="/admin/export" element={<DataExportHub />} />
+            <Route path="/admin/settings" element={<SystemSettings />} />
+            
+            {/* State Head Routes */}
+            <Route path="/state-head/dashboard" element={<StateHeadDashboard />} />
+            
+            {/* Mobilizer App Routes */}
+            <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />
+            
+            {/* Candidate App Routes */}
+            <Route path="/candidate" element={<CandidateHome />} />
+            
+            {/* Catch-all route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
