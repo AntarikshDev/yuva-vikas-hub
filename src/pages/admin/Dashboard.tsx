@@ -9,8 +9,11 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { ArrowUpRight, Book, Building, Calendar, ChevronRight, LineChart, Percent, Target, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { KpiAlertForm } from '@/components/forms/KpiAlertForm';
 
 const SuperAdminDashboard: React.FC = () => {
+  const [kpiAlertOpen, setKpiAlertOpen] = useState(false);
+  
   // This would come from API in a real application
   const dashboardData = {
     totalStudents: 12846,
@@ -130,7 +133,7 @@ const SuperAdminDashboard: React.FC = () => {
                   <Calendar className="h-4 w-4" />
                   Export Dashboard
                 </Button>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => setKpiAlertOpen(true)}>
                   <Target className="h-4 w-4" />
                   Set KPI Alerts
                 </Button>
@@ -298,6 +301,9 @@ const SuperAdminDashboard: React.FC = () => {
           </div>
         </section>
       </motion.div>
+
+      {/* KPI Alert Form Dialog */}
+      <KpiAlertForm open={kpiAlertOpen} onOpenChange={setKpiAlertOpen} />
     </MainLayout>
   );
 };
