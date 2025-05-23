@@ -79,7 +79,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
           </SidebarFooter>
         </Sidebar>
 
-        <SidebarInset className="flex flex-col">
+        <div className="flex flex-col flex-1">
           <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-6">
             <SidebarTrigger />
             
@@ -110,7 +110,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
           <main className="flex-1 overflow-auto p-6">
             {children}
           </main>
-        </SidebarInset>
+        </div>
         
         <Toaster />
       </div>
