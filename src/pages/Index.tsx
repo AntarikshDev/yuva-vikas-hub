@@ -1,13 +1,37 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React from 'react';
+import { MobileAppLayout } from '@/layouts/MobileAppLayout';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <MobileAppLayout role="mobilizer" title="Yuva Vikas Hub">
+      <div className="flex flex-col space-y-4">
+        <div className="rounded-lg bg-white p-4 shadow-sm">
+          <h2 className="mb-2 text-lg font-semibold">Welcome to Yuva Vikas Hub</h2>
+          <p className="text-gray-600">
+            Your platform for mobilizer and candidate management.
+          </p>
+        </div>
+        
+        <div className="rounded-lg bg-white p-4 shadow-sm">
+          <h3 className="mb-2 text-md font-medium">Quick Actions</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <button className="rounded bg-primary-50 p-3 text-center text-sm font-medium text-primary-700">
+              Register New Candidate
+            </button>
+            <button className="rounded bg-primary-50 p-3 text-center text-sm font-medium text-primary-700">
+              View Candidate List
+            </button>
+            <button className="rounded bg-primary-50 p-3 text-center text-sm font-medium text-primary-700">
+              Training Videos
+            </button>
+            <button className="rounded bg-primary-50 p-3 text-center text-sm font-medium text-primary-700">
+              Update Profile
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </MobileAppLayout>
   );
 };
 
