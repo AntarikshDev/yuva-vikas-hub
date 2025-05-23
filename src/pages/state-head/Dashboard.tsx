@@ -1,14 +1,18 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { ChartCard } from '@/components/dashboard/ChartCard';
-import { FilterBar } from '@/components/common/FilterBar';
+import { EnhancedFilterBar } from '@/components/common/EnhancedFilterBar';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { DateRange } from 'react-day-picker';
+import { Download, FileSpreadsheet, BarChart4 } from 'lucide-react';
 
 const StateHeadDashboard: React.FC = () => {
+  // Add state for date range
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  
   // Mock dashboard data
   const dashboardData = {
     totalCandidates: 4568,
@@ -43,9 +47,18 @@ const StateHeadDashboard: React.FC = () => {
     {
       id: 'dateRange',
       label: 'Date Range',
-      type: 'date' as const,
+      type: 'date-range' as const,
     },
   ];
+  
+  // Handle filter changes
+  const handleFilterChange = (filterId: string, value: any) => {
+    if (filterId === 'dateRange') {
+      setDateRange(value);
+    }
+    // Handle other filter changes as needed
+    console.log("Filter changed:", filterId, value);
+  };
   
   // Performance metrics for districts
   const districtPerformance = [
@@ -93,12 +106,19 @@ const StateHeadDashboard: React.FC = () => {
           </p>
         </div>
         
-        <FilterBar
+        <EnhancedFilterBar
           filters={filterOptions}
+          onFilterChange={handleFilterChange}
           actions={
             <>
-              <Button variant="outline">Export Dashboard</Button>
-              <Button>Detailed Report</Button>
+              <Button variant="outline" className="flex items-center gap-2">
+                <FileSpreadsheet className="h-4 w-4" />
+                Export CSV
+              </Button>
+              <Button className="flex items-center gap-2">
+                <BarChart4 className="h-4 w-4" />
+                Detailed Report
+              </Button>
             </>
           }
         />

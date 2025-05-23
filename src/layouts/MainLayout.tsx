@@ -51,11 +51,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen w-full bg-neutral-100">
-        <Sidebar className="border-r border-purple-800 bg-purple-700 text-white">
+        <Sidebar className="border-r border-indigo-800 bg-gradient-to-b from-indigo-900 to-violet-900 text-white">
           <SidebarHeader className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <span className="text-xl font-bold">LNJ Skills</span>
+                <span className="text-xl font-bold text-white">LNJ Skills</span>
               </div>
             </div>
           </SidebarHeader>
@@ -64,12 +64,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
             {role === 'super_admin' && (
               <div className="px-4 pb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 overflow-hidden rounded-full bg-purple-300">
+                  <div className="h-10 w-10 overflow-hidden rounded-full bg-indigo-300 ring-2 ring-white/30 shadow-lg">
                     <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" className="h-full w-full object-cover" />
                   </div>
                   <div>
-                    <div className="font-medium">Super Admin</div>
-                    <div className="text-sm text-purple-200">Super Admin</div>
+                    <div className="font-medium text-white">Super Admin</div>
+                    <div className="text-sm text-indigo-200">Super Admin</div>
                   </div>
                 </div>
               </div>
@@ -77,7 +77,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
 
             {navItems.map((group) => (
               <SidebarGroup key={group.label}>
-                <SidebarGroupLabel className="text-purple-200">{group.label}</SidebarGroupLabel>
+                <SidebarGroupLabel className="text-indigo-200">{group.label}</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {group.items.map((item) => {
@@ -87,13 +87,13 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
                           <SidebarMenuButton 
                             asChild 
                             isActive={isActive}
-                            className={`hover:bg-purple-600 ${isActive ? 'bg-purple-800 font-medium' : ''}`}
+                            className={`hover:bg-indigo-800/70 transition-all duration-200 ${isActive ? 'bg-indigo-800/90 font-medium shadow-md' : ''}`}
                           >
                             <a href={item.path} className="flex items-center">
                               {item.icon && <item.icon className="mr-2 h-5 w-5" />}
                               <span>{item.name}</span>
                               {item.phase && (
-                                <span className="ml-auto rounded bg-purple-900 px-1.5 py-0.5 text-xs text-white">
+                                <span className="ml-auto rounded bg-indigo-800/80 px-1.5 py-0.5 text-xs text-white shadow-inner">
                                   Phase {item.phase}
                                 </span>
                               )}
@@ -108,11 +108,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
             ))}
           </SidebarContent>
           
-          <SidebarFooter className="mt-auto border-t border-purple-800 p-4">
+          <SidebarFooter className="mt-auto border-t border-indigo-800/50 p-4">
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton 
-                  className="hover:bg-purple-600 w-full"
+                  className="hover:bg-indigo-800/70 transition-all duration-200 w-full"
                   asChild
                 >
                   <a href="/logout" className="flex items-center">
@@ -126,7 +126,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
         </Sidebar>
 
         <div className="flex flex-col flex-1">
-          <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-6">
+          <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-6 shadow-sm">
             <div className="flex items-center">
               <SidebarTrigger />
               <h1 className="ml-4 text-xl font-semibold">Dashboard</h1>
@@ -142,7 +142,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
                 )}
               </Button>
               
-              <div className="h-8 w-8 overflow-hidden rounded-full">
+              <div className="h-8 w-8 overflow-hidden rounded-full ring-2 ring-indigo-200 shadow-sm">
                 <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" className="h-full w-full object-cover" />
               </div>
             </div>
