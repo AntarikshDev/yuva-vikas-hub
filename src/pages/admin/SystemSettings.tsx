@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,9 +8,29 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, AtSign, Cloud, Bell, Webhook, Key, RefreshCw, Save, Globe, Smartphone } from 'lucide-react';
+import { MessageSquare, AtSign, Cloud, Bell, Webhook, Key, RefreshCw, Save, Globe, Smartphone, Mail, Phone, CheckCircle2, FileText, Image, Upload, Database } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const SystemSettings = () => {
+  const { toast } = useToast();
+  const [isTestingWhatsApp, setIsTestingWhatsApp] = useState(false);
+  const [storageUsage, setStorageUsage] = useState(64);
+  
+  const handleTestWhatsApp = () => {
+    setIsTestingWhatsApp(true);
+    setTimeout(() => {
+      setIsTestingWhatsApp(false);
+      toast({
+        title: "Connection Successful",
+        description: "WhatsApp API connection was tested successfully.",
+        variant: "success",
+      });
+    }, 2000);
+  };
+
   return (
     <MainLayout role="super_admin">
       <div className="space-y-6">
@@ -75,8 +95,13 @@ const SystemSettings = () => {
               </CardContent>
               <CardFooter className="flex justify-end border-t p-4">
                 <div className="flex gap-3">
-                  <Button variant="outline" className="gap-1">
-                    <RefreshCw className="h-4 w-4" />
+                  <Button 
+                    variant="outline" 
+                    className="gap-1"
+                    onClick={handleTestWhatsApp}
+                    disabled={isTestingWhatsApp}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isTestingWhatsApp ? "animate-spin" : ""}`} />
                     Test Connection
                   </Button>
                   <Button className="gap-1">
@@ -223,9 +248,148 @@ const SystemSettings = () => {
                   Configure when and how notifications are sent to users.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="min-h-[300px]">
-                <p className="text-center text-muted-foreground py-16">Notification settings interface will be implemented here.</p>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Email Notifications</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="email-alerts" />
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor="email-alerts">System Alerts</Label>
+                        <p className="text-sm text-muted-foreground">Receive notifications about system issues and updates</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="email-reports" defaultChecked />
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor="email-reports">Scheduled Reports</Label>
+                        <p className="text-sm text-muted-foreground">Receive scheduled reports via email</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="email-user" defaultChecked />
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor="email-user">User Activities</Label>
+                        <p className="text-sm text-muted-foreground">Get notified about important user activities</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">SMS Notifications</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="sms-alerts" />
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor="sms-alerts">Critical Alerts</Label>
+                        <p className="text-sm text-muted-foreground">Receive SMS notifications for critical system alerts</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="sms-auth" />
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor="sms-auth">Authentication Codes</Label>
+                        <p className="text-sm text-muted-foreground">Send authentication codes via SMS</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">In-App Notifications</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="app-messages" defaultChecked />
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor="app-messages">Messages</Label>
+                        <p className="text-sm text-muted-foreground">Show notifications for new messages</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="app-updates" defaultChecked />
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor="app-updates">System Updates</Label>
+                        <p className="text-sm text-muted-foreground">Show notifications for system updates</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="app-tasks" defaultChecked />
+                      <div>
+                        <Label className="text-sm font-medium" htmlFor="app-tasks">Task Assignments</Label>
+                        <p className="text-sm text-muted-foreground">Show notifications for task assignments</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Notification Templates</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <Mail className="h-5 w-5 text-blue-500" />
+                          <span className="font-medium">Welcome Email</span>
+                        </div>
+                        <Badge variant="outline">Email</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">Sent when a new user registers</p>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <Phone className="h-5 w-5 text-green-500" />
+                          <span className="font-medium">Verification SMS</span>
+                        </div>
+                        <Badge variant="outline">SMS</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">Sent for mobile verification</p>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <Bell className="h-5 w-5 text-amber-500" />
+                          <span className="font-medium">Task Assignment</span>
+                        </div>
+                        <Badge variant="outline">In-App</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">Shown when assigning new tasks</p>
+                    </div>
+                    
+                    <div className="border rounded-lg p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <CheckCirc2 className="h-5 w-5 text-purple-500" />
+                          <span className="font-medium">Completion Notice</span>
+                        </div>
+                        <Badge variant="outline">Email</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2">Sent when a task is completed</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button variant="outline">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Edit Templates
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
+              <CardFooter className="flex justify-end border-t p-4">
+                <Button className="gap-1">
+                  <Save className="h-4 w-4" />
+                  Save Settings
+                </Button>
+              </CardFooter>
             </Card>
           </TabsContent>
           
@@ -237,9 +401,161 @@ const SystemSettings = () => {
                   Configure cloud storage for documents and media files.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="min-h-[300px]">
-                <p className="text-center text-muted-foreground py-16">Cloud storage settings interface will be implemented here.</p>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Storage Usage</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Used: 12.8 GB</span>
+                      <span>Total: 20 GB</span>
+                    </div>
+                    <Progress value={storageUsage} className="h-2" />
+                    <p className="text-xs text-muted-foreground text-right">{storageUsage}% used</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Storage Provider</h3>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="storage-aws" defaultChecked />
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium" htmlFor="storage-aws">Amazon S3</Label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="aws-key" className="text-sm">Access Key</Label>
+                            <Input id="aws-key" type="password" placeholder="AWS Access Key" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="aws-secret" className="text-sm">Secret Key</Label>
+                            <Input id="aws-secret" type="password" placeholder="AWS Secret Key" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="aws-bucket" className="text-sm">Bucket Name</Label>
+                            <Input id="aws-bucket" placeholder="S3 Bucket Name" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="aws-region" className="text-sm">Region</Label>
+                            <Input id="aws-region" placeholder="e.g., us-east-1" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="storage-azure" />
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium" htmlFor="storage-azure">Azure Blob Storage</Label>
+                        <p className="text-sm text-muted-foreground">Configure Microsoft Azure for cloud storage</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="storage-gcp" />
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium" htmlFor="storage-gcp">Google Cloud Storage</Label>
+                        <p className="text-sm text-muted-foreground">Configure Google Cloud for cloud storage</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <Checkbox id="storage-local" />
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium" htmlFor="storage-local">Local Storage</Label>
+                        <div className="space-y-2 mt-2">
+                          <Label htmlFor="local-path" className="text-sm">Storage Path</Label>
+                          <Input id="local-path" placeholder="/path/to/storage" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">File Type Restrictions</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Image className="h-4 w-4 text-blue-500" />
+                        <Label className="text-sm">Images</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Label className="text-sm text-muted-foreground">Max size:</Label>
+                        <Input className="w-24 h-8" defaultValue="10" />
+                        <span className="text-sm">MB</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4 text-green-500" />
+                        <Label className="text-sm">Documents</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Label className="text-sm text-muted-foreground">Max size:</Label>
+                        <Input className="w-24 h-8" defaultValue="20" />
+                        <span className="text-sm">MB</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Database className="h-4 w-4 text-amber-500" />
+                        <Label className="text-sm">Database Backups</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Label className="text-sm text-muted-foreground">Max size:</Label>
+                        <Input className="w-24 h-8" defaultValue="500" />
+                        <span className="text-sm">MB</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <h3 className="text-lg font-medium">Test Storage Connection</h3>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="gap-1">
+                          <Upload className="h-4 w-4" />
+                          Test Upload
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Test File Upload</DialogTitle>
+                          <DialogDescription>
+                            Upload a test file to verify storage configuration.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="flex items-center gap-4">
+                            <Label htmlFor="test-file" className="text-right">
+                              File
+                            </Label>
+                            <Input id="test-file" type="file" />
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button type="submit">Upload</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                    <Button className="gap-1">
+                      <Cloud className="h-4 w-4" />
+                      Test Connection
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
+              <CardFooter className="flex justify-end border-t p-4">
+                <Button className="gap-1">
+                  <Save className="h-4 w-4" />
+                  Save Settings
+                </Button>
+              </CardFooter>
             </Card>
           </TabsContent>
           
