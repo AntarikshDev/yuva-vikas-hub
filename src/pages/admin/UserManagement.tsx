@@ -6,24 +6,118 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Filter, Plus, Edit, UserMinus, RotateCw, User, Users } from 'lucide-react';
+import { Filter, Plus, Edit, UserMinus, RotateCw, User, Users, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { UserForm } from '@/components/forms/UserForm';
 import { RoleMatrixForm } from '@/components/forms/RoleMatrixForm';
+import { UserFilterDialog, UserFilters } from '@/components/dialogs/UserFilterDialog';
+import { UserActionDialog } from '@/components/dialogs/UserActionDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const UserManagement = () => {
   // State for dialog forms
   const [userFormOpen, setUserFormOpen] = useState(false);
   const [roleMatrixOpen, setRoleMatrixOpen] = useState(false);
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [userActionDialog, setUserActionDialog] = useState<{
+    open: boolean;
+    type: 'deactivate' | 'reactivate' | 'delete';
+    userName: string;
+    userId: number;
+  }>({
+    open: false,
+    type: 'deactivate',
+    userName: '',
+    userId: 0,
+  });
+  const [editUserId, setEditUserId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [appliedFilters, setAppliedFilters] = useState<UserFilters>({
+    role: '',
+    center: '',
+    status: '',
+  });
+
+  const { toast } = useToast();
 
   // Dummy data for users
-  const users = [
+  const [users, setUsers] = useState([
     { id: 1, name: 'John Doe', email: 'john@example.com', mobile: '9876543210', role: 'State Head', center: 'Delhi Center', status: 'active' },
     { id: 2, name: 'Jane Smith', email: 'jane@example.com', mobile: '9876543211', role: 'Center Manager', center: 'Mumbai Center', status: 'active' },
     { id: 3, name: 'Alice Johnson', email: 'alice@example.com', mobile: '9876543212', role: 'Mobilizer', center: 'Pune Center', status: 'inactive' },
     { id: 4, name: 'Bob Wilson', email: 'bob@example.com', mobile: '9876543213', role: 'Trainer', center: 'Chennai Center', status: 'active' },
     { id: 5, name: 'Carol Williams', email: 'carol@example.com', mobile: '9876543214', role: 'PPC Team', center: 'Kolkata Center', status: 'active' },
-  ];
+  ]);
+
+  // Filter users based on search query and applied filters
+  const filteredUsers = users.filter(user => {
+    // Search filtering
+    if (searchQuery && !user.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+        !user.email.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !user.mobile.includes(searchQuery)) {
+      return false;
+    }
+
+    // Role filtering
+    if (appliedFilters.role && appliedFilters.role !== 'all' && 
+        user.role.toLowerCase() !== appliedFilters.role.toLowerCase()) {
+      return false;
+    }
+
+    // Center filtering
+    if (appliedFilters.center && appliedFilters.center !== 'all' && 
+        !user.center.toLowerCase().includes(appliedFilters.center.toLowerCase())) {
+      return false;
+    }
+
+    // Status filtering
+    if (appliedFilters.status && appliedFilters.status !== 'all' && 
+        user.status !== appliedFilters.status) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const handleEditUser = (userId: number) => {
+    setEditUserId(userId);
+    setUserFormOpen(true);
+    toast({
+      title: "Edit user",
+      description: `Opening edit form for user #${userId}`,
+    });
+  };
+
+  const handleUserAction = (type: 'deactivate' | 'reactivate' | 'delete', user: { id: number; name: string }) => {
+    setUserActionDialog({
+      open: true,
+      type,
+      userName: user.name,
+      userId: user.id,
+    });
+  };
+
+  const handleActionConfirm = () => {
+    const { type, userId } = userActionDialog;
+    
+    if (type === 'delete') {
+      setUsers(users.filter(user => user.id !== userId));
+    } else {
+      setUsers(users.map(user => {
+        if (user.id === userId) {
+          return {
+            ...user,
+            status: type === 'deactivate' ? 'inactive' : 'active'
+          };
+        }
+        return user;
+      }));
+    }
+  };
+
+  const handleApplyFilters = (filters: UserFilters) => {
+    setAppliedFilters(filters);
+  };
 
   return (
     <MainLayout role="super_admin">
@@ -35,7 +129,7 @@ const UserManagement = () => {
               Manage user accounts and role permissions across the platform.
             </p>
           </div>
-          <Button className="gap-2" onClick={() => setUserFormOpen(true)}>
+          <Button className="gap-2" onClick={() => {setEditUserId(null); setUserFormOpen(true)}}>
             <Plus className="h-4 w-4" />
             Add New User
           </Button>
@@ -59,8 +153,22 @@ const UserManagement = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle>User Directory</CardTitle>
                   <div className="flex items-center gap-2">
-                    <Input type="search" placeholder="Search users..." className="max-w-sm" />
-                    <Button variant="outline" size="sm" className="h-8 gap-1">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                      <Input 
+                        type="search" 
+                        placeholder="Search users..." 
+                        className="pl-8 max-w-sm" 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 gap-1"
+                      onClick={() => setFilterDialogOpen(true)}
+                    >
                       <Filter className="h-3.5 w-3.5" />
                       Filter
                     </Button>
@@ -82,33 +190,59 @@ const UserManagement = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.mobile}</TableCell>
-                        <TableCell>{user.role}</TableCell>
-                        <TableCell>{user.center}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.status === 'active' ? "default" : "secondary"}>
-                            {user.status === 'active' ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-1">
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <Edit className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <RotateCw className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button variant="outline" size="icon" className="h-8 w-8">
-                              <UserMinus className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
+                    {filteredUsers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                          No users match your search criteria
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      filteredUsers.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.name}</TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>{user.mobile}</TableCell>
+                          <TableCell>{user.role}</TableCell>
+                          <TableCell>{user.center}</TableCell>
+                          <TableCell>
+                            <Badge variant={user.status === 'active' ? "default" : "secondary"}>
+                              {user.status === 'active' ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-1">
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => handleEditUser(user.id)}
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => handleUserAction(
+                                  user.status === 'active' ? 'deactivate' : 'reactivate',
+                                  user
+                                )}
+                              >
+                                <RotateCw className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => handleUserAction('delete', user)}
+                              >
+                                <UserMinus className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -135,10 +269,26 @@ const UserManagement = () => {
       </div>
 
       {/* User Form Dialog */}
-      <UserForm open={userFormOpen} onOpenChange={setUserFormOpen} />
+      <UserForm open={userFormOpen} onOpenChange={setUserFormOpen} userId={editUserId} />
 
       {/* Role Matrix Dialog */}
       <RoleMatrixForm open={roleMatrixOpen} onOpenChange={setRoleMatrixOpen} />
+
+      {/* Filter Dialog */}
+      <UserFilterDialog 
+        open={filterDialogOpen} 
+        onOpenChange={setFilterDialogOpen} 
+        onApplyFilter={handleApplyFilters}
+      />
+
+      {/* User Action Dialog */}
+      <UserActionDialog
+        type={userActionDialog.type}
+        open={userActionDialog.open}
+        onOpenChange={(open) => setUserActionDialog({ ...userActionDialog, open })}
+        userName={userActionDialog.userName}
+        onConfirm={handleActionConfirm}
+      />
     </MainLayout>
   );
 };
