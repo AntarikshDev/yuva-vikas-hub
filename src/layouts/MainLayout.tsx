@@ -35,7 +35,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role }) => {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex h-screen w-full bg-neutral-100">
-        <Sidebar variant="sidebar" className="border-r border-neutral-200">
+        <Sidebar className="border-r border-neutral-200">
           <SidebarHeader className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
