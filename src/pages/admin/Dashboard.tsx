@@ -10,12 +10,35 @@ import { Button } from '@/components/ui/button';
 const SuperAdminDashboard: React.FC = () => {
   // This would come from API in a real application
   const dashboardData = {
-    totalCandidates: 12458,
-    activeBatches: 45,
-    placedCandidatesThisMonth: 876,
+    totalStudents: 12846,
+    activeCenters: 148,
+    placementRate: 78,
     retentionRate: 82,
-    mobilizeEngagement: 78,
-    sosAlerts: 5,
+    
+    // Program data
+    programData: [
+      { name: 'UPSDM Program', value: 4862, target: 5000 },
+      { name: 'DDUGKY Program', value: 3215, target: 4000 },
+      { name: 'BSDM Program', value: 2890, target: 3000 },
+      { name: 'PMKVY Program', value: 1879, target: 2500 },
+    ],
+    
+    // Recent activities
+    recentActivities: [
+      { 
+        title: 'New center approved in Bihar',
+        time: '2 hours ago',
+        actor: 'State Manager'
+      }
+    ],
+    
+    // Placement data
+    placementCompanies: [
+      { name: 'TCS', count: 120 },
+      { name: 'Wipro', count: 85 },
+      { name: 'Infosys', count: 65 },
+      { name: 'HCL', count: 52 },
+    ]
   };
   
   const filterOptions = [
@@ -52,7 +75,7 @@ const SuperAdminDashboard: React.FC = () => {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
-            Overview of Skill Development platform metrics and performance.
+            Overview of skills development platform metrics.
           </p>
         </div>
         
@@ -70,102 +93,113 @@ const SuperAdminDashboard: React.FC = () => {
           {/* Stats Cards Row */}
           <DashboardGrid>
             <StatCard
-              title="Total Candidates Registered"
-              value={dashboardData.totalCandidates.toLocaleString()}
+              title="Total Students Registered"
+              value={dashboardData.totalStudents.toLocaleString()}
               icon={<span className="text-lg">👥</span>}
               trend={{ value: 12, isPositive: true }}
               intent="primary"
+              footer="Across all states"
             />
             <StatCard
-              title="Active Batches"
-              value={dashboardData.activeBatches}
-              icon={<span className="text-lg">📚</span>}
-              trend={{ value: 5, isPositive: true }}
+              title="Active Centers"
+              value={dashboardData.activeCenters}
+              icon={<span className="text-lg">🏢</span>}
               intent="secondary"
+              footer="In 22 states"
             />
             <StatCard
-              title="Placed Candidates This Month"
-              value={dashboardData.placedCandidatesThisMonth}
+              title="Placement Rate"
+              value={`${dashboardData.placementRate}%`}
               icon={<span className="text-lg">🎯</span>}
-              trend={{ value: 8, isPositive: true }}
+              trend={{ value: 5, isPositive: true }}
               intent="success"
+              footer="Last 6 months"
             />
             <StatCard
               title="Retention Rate"
               value={`${dashboardData.retentionRate}%`}
               icon={<span className="text-lg">📈</span>}
-              trend={{ value: 3, isPositive: false }}
               intent="info"
-            />
-            <StatCard
-              title="Mobilizer Engagement"
-              value={`${dashboardData.mobilizeEngagement}%`}
-              icon={<span className="text-lg">📱</span>}
-              trend={{ value: 7, isPositive: true }}
-            />
-            <StatCard
-              title="SOS Alerts This Week"
-              value={dashboardData.sosAlerts}
-              icon={<span className="text-lg">🚨</span>}
-              intent="error"
+              footer="After 6 months"
             />
           </DashboardGrid>
 
-          {/* Charts Row */}
-          <DashboardGrid columns={{ sm: 1, md: 1, lg: 2 }}>
+          <h2 className="text-xl font-semibold mt-8 mb-4">Program Performance</h2>
+          
+          {/* Program Performance Cards */}
+          <DashboardGrid>
+            {dashboardData.programData.map((program) => (
+              <div key={program.name} className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="mb-2">
+                  <div className="text-sm text-gray-600">{program.name}</div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-2xl font-bold">{program.value}</div>
+                    <div className="text-sm text-gray-500">Target: {program.target}</div>
+                  </div>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-purple-600 h-2 rounded-full" 
+                    style={{ width: `${(program.value / program.target) * 100}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </DashboardGrid>
+
+          {/* Activity and Placement Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <ChartCard
-              title="Mobilization vs Placement Trend"
-              subtitle="Monthly comparison of mobilized vs placed candidates"
-              filters={
-                <Button variant="ghost" size="sm">
-                  Filter
-                </Button>
-              }
+              title="Recent Activities"
+              subtitle="Latest system activities across states"
               className="min-h-[300px]"
             >
-              <div className="flex h-64 items-center justify-center">
-                <div className="text-sm text-neutral-500">
-                  Area Chart: Monthly trend data visualization would appear here
-                </div>
+              <div className="mt-4">
+                {dashboardData.recentActivities.map((activity, index) => (
+                  <div key={index} className="flex items-start py-3 border-b border-gray-100">
+                    <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
+                      <span className="text-purple-700">⏱️</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium">{activity.title}</div>
+                      <div className="flex items-center text-sm text-gray-500 mt-1">
+                        <span>{activity.time}</span>
+                        <span className="mx-2">•</span>
+                        <span>{activity.actor}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </ChartCard>
             
             <ChartCard
-              title="Candidate Category Distribution"
-              subtitle="Breakdown by A/B/C categories"
+              title="Placement Overview"
+              subtitle="Last 30 days placement statistics"
               className="min-h-[300px]"
             >
-              <div className="flex h-64 items-center justify-center">
-                <div className="text-sm text-neutral-500">
-                  Pie Chart: Category distribution data would appear here
+              <div className="mt-4 space-y-3">
+                {dashboardData.placementCompanies.map((company) => (
+                  <div key={company.name} className="space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium">{company.name}</span>
+                      <span className="text-sm">{company.count} placements</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div 
+                        className="bg-purple-600 h-2 rounded-full" 
+                        style={{ width: `${(company.count / 120) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+                <div className="p-3 bg-green-50 mt-4 rounded-md">
+                  <div className="text-green-800 font-medium">Login successful</div>
+                  <div className="text-green-600 text-sm">Welcome back to LNJ Skills platform</div>
                 </div>
               </div>
             </ChartCard>
-          </DashboardGrid>
-
-          <DashboardGrid columns={{ sm: 1, md: 1, lg: 2 }}>
-            <ChartCard
-              title="Center-Wise Batch Status"
-              className="min-h-[300px]"
-            >
-              <div className="flex h-64 items-center justify-center">
-                <div className="text-sm text-neutral-500">
-                  Bar Graph: Center-wise batch status would appear here
-                </div>
-              </div>
-            </ChartCard>
-            
-            <ChartCard
-              title="District-Wise Dropout Intensity"
-              className="min-h-[300px]"
-            >
-              <div className="flex h-64 items-center justify-center">
-                <div className="text-sm text-neutral-500">
-                  Heatmap: District-wise dropout data would appear here
-                </div>
-              </div>
-            </ChartCard>
-          </DashboardGrid>
+          </div>
         </section>
       </div>
     </MainLayout>

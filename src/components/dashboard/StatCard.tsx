@@ -8,12 +8,12 @@ const statCardVariants = cva(
   {
     variants: {
       intent: {
-        primary: 'border-primary-100 bg-primary-50',
-        secondary: 'border-secondary-100 bg-secondary-50',
-        success: 'border-success-100 bg-success-50',
-        error: 'border-error-100 bg-error-50',
-        warning: 'border-warning-100 bg-warning-50',
-        info: 'border-info-100 bg-info-50',
+        primary: 'border-primary-100',
+        secondary: 'border-secondary-100',
+        success: 'border-success-100',
+        error: 'border-error-100',
+        warning: 'border-warning-100',
+        info: 'border-info-100',
         neutral: 'border-neutral-200',
       },
       size: {
@@ -53,17 +53,19 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <p className="text-sm font-medium text-neutral-600">{title}</p>
-            <h3 className="text-2xl font-semibold tracking-tight">{value}</h3>
+            <h3 className="text-2xl font-bold tracking-tight">{value}</h3>
             
             {trend && (
               <div className="flex items-center">
                 <span className={cn(
                   "text-xs font-medium",
-                  trend.isPositive ? "text-success-600" : "text-error-600"
+                  trend.isPositive ? "text-green-600" : "text-red-600"
                 )}>
                   {trend.isPositive ? '↑' : '↓'} {trend.value}%
                 </span>
-                <span className="ml-1 text-xs text-neutral-500">vs last period</span>
+                <span className="ml-1 text-xs text-neutral-500">
+                  {trend.isPositive ? 'increase' : 'decrease'} from last {intent === 'success' ? 'quarter' : 'month'}
+                </span>
               </div>
             )}
           </div>
@@ -85,7 +87,7 @@ export const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
         </div>
         
         {footer && (
-          <div className="mt-4 pt-3 border-t border-neutral-200 text-xs text-neutral-500">
+          <div className="mt-2 text-xs text-neutral-500">
             {footer}
           </div>
         )}

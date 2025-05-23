@@ -68,7 +68,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50">
       <div className="w-full max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome to Yuva Vikas Hub</h1>
+          <h1 className="text-3xl font-bold mb-2">Welcome to LNJ Skills Hub</h1>
           <p className="text-xl text-neutral-600">Select your role to continue</p>
         </div>
 
