@@ -2,7 +2,7 @@
 import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
 const statCardVariants = cva(
   'flex flex-col rounded-lg border p-4 bg-white shadow-sm transition-all duration-300 hover:shadow-md relative overflow-hidden',
@@ -31,7 +31,7 @@ const statCardVariants = cva(
 );
 
 export interface StatCardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends Omit<HTMLMotionProps<"div">, "title">, 
     VariantProps<typeof statCardVariants> {
   title: string;
   value: string | number;
