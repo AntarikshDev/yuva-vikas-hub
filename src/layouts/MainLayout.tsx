@@ -311,7 +311,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { 
             name: 'Attendance Module', 
             path: '/state-head/attendance', 
-            icon: ClipboardList 
+            icon: ({ className }) => <span className={className || ''}>📋</span> 
           },
         ]
       },
@@ -343,7 +343,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { 
             name: 'Export Reports', 
             path: '/state-head/export-reports', 
-            icon: FileSpreadsheet 
+            icon: FileOutput 
           },
         ]
       }

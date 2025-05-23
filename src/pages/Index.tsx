@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MobileAppLayout } from '@/layouts/MobileAppLayout';
 import { MainLayout } from '@/layouts/MainLayout';
