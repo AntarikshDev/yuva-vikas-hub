@@ -12,7 +12,6 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
   SidebarFooter,
-  SidebarInset,
   SidebarTrigger
 } from '@/components/ui/sidebar';
 import { Bell } from 'lucide-react';
