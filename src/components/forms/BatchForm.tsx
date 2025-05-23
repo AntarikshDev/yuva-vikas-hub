@@ -28,7 +28,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 
 const formSchema = z.object({
   name: z.string().min(2, "Batch name is required"),
@@ -47,14 +47,31 @@ const formSchema = z.object({
 interface BatchFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialData?: any;
+  isEditing?: boolean;
+  onSubmit?: (values: z.infer<typeof formSchema>) => void;
 }
 
-export function BatchForm({ open, onOpenChange }: BatchFormProps) {
+export function BatchForm({ 
+  open, 
+  onOpenChange, 
+  initialData, 
+  isEditing = false, 
+  onSubmit 
+}: BatchFormProps) {
   const { toast } = useToast();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData ? {
+      name: initialData.name,
+      jobRole: initialData.jobRole,
+      center: initialData.center,
+      trainer: initialData.trainer,
+      startDate: initialData.startDate ? new Date(initialData.startDate) : undefined,
+      endDate: initialData.endDate ? new Date(initialData.endDate) : undefined,
+      maxStrength: initialData.maxStrength,
+    } : {
       name: "",
       jobRole: "",
       center: "",
@@ -65,30 +82,31 @@ export function BatchForm({ open, onOpenChange }: BatchFormProps) {
 
   // Dummy data
   const jobRoles = [
-    { value: "cse", label: "Customer Service Executive" },
-    { value: "fse", label: "Field Sales Executive" },
-    { value: "gda", label: "General Duty Assistant" },
-    { value: "bpo", label: "BPO Voice" },
-    { value: "rsa", label: "Retail Sales Associate" },
+    { value: "Customer Service Executive", label: "Customer Service Executive" },
+    { value: "Field Sales Executive", label: "Field Sales Executive" },
+    { value: "General Duty Assistant", label: "General Duty Assistant" },
+    { value: "BPO Voice", label: "BPO Voice" },
+    { value: "Retail Sales Associate", label: "Retail Sales Associate" },
   ];
   
   const centers = [
-    { value: "delhi_center", label: "Delhi Center" },
-    { value: "mumbai_center", label: "Mumbai Center" },
-    { value: "bangalore_center", label: "Bangalore Center" },
-    { value: "chennai_center", label: "Chennai Center" },
-    { value: "kolkata_center", label: "Kolkata Center" },
+    { value: "Delhi Center", label: "Delhi Center" },
+    { value: "Mumbai Center", label: "Mumbai Center" },
+    { value: "Bangalore Center", label: "Bangalore Center" },
+    { value: "Chennai Center", label: "Chennai Center" },
+    { value: "Kolkata Center", label: "Kolkata Center" },
+    { value: "Pune Center", label: "Pune Center" },
   ];
   
   const trainers = [
-    { value: "rajiv_sharma", label: "Rajiv Sharma" },
-    { value: "priya_desai", label: "Priya Desai" },
-    { value: "suresh_kumar", label: "Suresh Kumar" },
-    { value: "lakshmi_n", label: "Lakshmi N" },
-    { value: "aman_gupta", label: "Aman Gupta" },
+    { value: "Rajiv Sharma", label: "Rajiv Sharma" },
+    { value: "Priya Desai", label: "Priya Desai" },
+    { value: "Suresh Kumar", label: "Suresh Kumar" },
+    { value: "Lakshmi N", label: "Lakshmi N" },
+    { value: "Aman Gupta", label: "Aman Gupta" },
   ];
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function handleSubmit(values: z.infer<typeof formSchema>) {
     // Validate that end date is after start date
     if (values.endDate < values.startDate) {
       form.setError("endDate", { 
@@ -98,11 +116,16 @@ export function BatchForm({ open, onOpenChange }: BatchFormProps) {
       return;
     }
     
-    toast({
-      title: "Batch Created",
-      description: `${values.name} has been created successfully`,
-    });
-    onOpenChange(false);
+    if (onSubmit) {
+      onSubmit(values);
+    } else {
+      toast({
+        title: isEditing ? "Batch Updated" : "Batch Created",
+        description: `${values.name} has been ${isEditing ? 'updated' : 'created'} successfully`,
+      });
+      onOpenChange(false);
+    }
+    
     form.reset();
   }
 
@@ -110,13 +133,15 @@ export function BatchForm({ open, onOpenChange }: BatchFormProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Create New Batch</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Batch" : "Create New Batch"}</DialogTitle>
           <DialogDescription>
-            Set up a new training batch with all required details
+            {isEditing 
+              ? "Update the batch details with the latest information." 
+              : "Set up a new training batch with all required details"}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -237,7 +262,7 @@ export function BatchForm({ open, onOpenChange }: BatchFormProps) {
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date()}
+                          disabled={(date) => date < new Date(Date.now() - 86400000)}
                           initialFocus
                           className="pointer-events-auto"
                         />
@@ -308,7 +333,7 @@ export function BatchForm({ open, onOpenChange }: BatchFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Create Batch</Button>
+              <Button type="submit">{isEditing ? "Update Batch" : "Create Batch"}</Button>
             </DialogFooter>
           </form>
         </Form>
