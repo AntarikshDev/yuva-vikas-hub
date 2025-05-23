@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, UserPlus, Flag, ArrowUpRight, Filter, Download, FileText, MoreHorizontal, Calendar } from 'lucide-react';
+import { Search, UserPlus, Flag, ArrowUpRight, MoreHorizontal, Calendar, Filter, Download, FileText } from 'lucide-react';
 import { DataTable, Column } from '@/components/common/DataTable';
 import { FilterBar } from '@/components/common/FilterBar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -143,7 +142,7 @@ const SosEscalationTracker = () => {
     {
       id: 'priority',
       label: 'Priority',
-      type: 'select',
+      type: 'select' as const,
       options: [
         { value: 'high', label: 'High' },
         { value: 'medium', label: 'Medium' },
@@ -153,7 +152,7 @@ const SosEscalationTracker = () => {
     {
       id: 'center',
       label: 'Center',
-      type: 'select',
+      type: 'select' as const,
       options: [
         { value: 'Delhi Center', label: 'Delhi Center' },
         { value: 'Mumbai Center', label: 'Mumbai Center' },
@@ -166,7 +165,7 @@ const SosEscalationTracker = () => {
     {
       id: 'dateRange',
       label: 'Date Range',
-      type: 'date-range'
+      type: 'date-range' as const
     }
   ];
 
