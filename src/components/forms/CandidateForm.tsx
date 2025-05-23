@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -397,13 +396,14 @@ export function CandidateForm({ open, onOpenChange, initialData, isEditing = fal
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Job Role Preference</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || "none"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select preferred job role" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="none">None Selected</SelectItem>
                         {jobRoles.map(role => (
                           <SelectItem key={role.value} value={role.value}>
                             {role.label}

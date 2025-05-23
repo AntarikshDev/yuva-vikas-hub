@@ -34,8 +34,8 @@ const CandidateDirectory = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState({
-    status: '',
-    course: '',
+    status: 'all',  // Changed from empty string to 'all'
+    course: 'all',  // Changed from empty string to 'all'
   });
 
   const { toast } = useToast();
@@ -112,16 +112,16 @@ const CandidateDirectory = () => {
       candidate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       candidate.mobile.includes(searchQuery);
     
-    // Apply filters
-    const matchesStatus = filters.status ? candidate.status === filters.status : true;
-    const matchesCourse = filters.course ? candidate.course === filters.course : true;
+    // Apply filters - update to use 'all' instead of empty string
+    const matchesStatus = filters.status === 'all' ? true : candidate.status === filters.status;
+    const matchesCourse = filters.course === 'all' ? true : candidate.course === filters.course;
     
     return matchesSearch && matchesStatus && matchesCourse;
   });
 
   // Reset filters
   const resetFilters = () => {
-    setFilters({ status: '', course: '' });
+    setFilters({ status: 'all', course: 'all' });  // Changed from empty strings to 'all'
     setFilterOpen(false);
   };
 
@@ -176,7 +176,8 @@ const CandidateDirectory = () => {
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Statuses</SelectItem>
+                            {/* Fix: Changed empty string to "all" with a label */}
+                            <SelectItem value="all">All Statuses</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
                             <SelectItem value="placed">Placed</SelectItem>
                             <SelectItem value="dropout">Dropout</SelectItem>
@@ -195,7 +196,8 @@ const CandidateDirectory = () => {
                             <SelectValue placeholder="Select course" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">All Courses</SelectItem>
+                            {/* Fix: Changed empty string to "all" with a label */}
+                            <SelectItem value="all">All Courses</SelectItem>
                             {courses.map(course => (
                               <SelectItem key={course} value={course}>{course}</SelectItem>
                             ))}
