@@ -4,6 +4,18 @@ import { MobileBottomNav } from '@/components/mobile/MobileBottomNav';
 import { Bell, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Define types for mobile navigation items
+type NavIcon = React.FC<{ className?: string }>;
+
+interface MobileNavItem {
+  label: string;
+  icon: React.ReactNode;
+  path: string;
+  isActive: boolean;
+  badge?: number;
+  phase?: 1 | 2 | 3;
+}
+
 interface MobileAppLayoutProps {
   children: React.ReactNode;
   role: 'mobilizer' | 'candidate';

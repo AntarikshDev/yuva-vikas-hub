@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Sidebar, 
@@ -16,6 +17,21 @@ import {
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
+
+// Define proper types for navigation items
+type NavIcon = React.FC<{ className?: string }>;
+
+interface NavItem {
+  name: string;
+  path: string;
+  icon?: NavIcon;
+  phase?: number;
+}
+
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+}
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -144,8 +160,8 @@ function getUserName(role: string): string {
   return nameMappings[role] || 'User';
 }
 
-// Mock function to return navigation items based on role
-function getNavigationByRole(role: string) {
+// Function to return navigation items based on role with proper typing
+function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
   // This function would return different navigation items based on user role
   // For now, let's return a basic structure for Super Admin
   if (role === 'super_admin') {
@@ -153,29 +169,83 @@ function getNavigationByRole(role: string) {
       {
         label: 'Main',
         items: [
-          { name: 'Dashboard', path: '/admin/dashboard', icon: () => <span>🏠</span> },
-          { name: 'User & Role Management', path: '/admin/users', icon: () => <span>👤</span> },
-          { name: 'Master Data Management', path: '/admin/master-data', icon: () => <span>🗂️</span> },
+          { 
+            name: 'Dashboard', 
+            path: '/admin/dashboard', 
+            icon: ({ className }) => <span className={className}>🏠</span> 
+          },
+          { 
+            name: 'User & Role Management', 
+            path: '/admin/users', 
+            icon: ({ className }) => <span className={className}>👤</span> 
+          },
+          { 
+            name: 'Master Data Management', 
+            path: '/admin/master-data', 
+            icon: ({ className }) => <span className={className}>🗂️</span> 
+          },
         ]
       },
       {
         label: 'Operations',
         items: [
-          { name: 'Document Generator', path: '/admin/documents', icon: () => <span>🧾</span> },
-          { name: 'Batch Management', path: '/admin/batches', icon: () => <span>📦</span> },
-          { name: 'Candidate Directory', path: '/admin/candidates', icon: () => <span>🔍</span> },
-          { name: 'Reports & Analytics', path: '/admin/reports', icon: () => <span>📊</span> },
-          { name: 'Video Log Manager', path: '/admin/video-logs', icon: () => <span>🎥</span> },
+          { 
+            name: 'Document Generator', 
+            path: '/admin/documents', 
+            icon: ({ className }) => <span className={className}>🧾</span> 
+          },
+          { 
+            name: 'Batch Management', 
+            path: '/admin/batches', 
+            icon: ({ className }) => <span className={className}>📦</span> 
+          },
+          { 
+            name: 'Candidate Directory', 
+            path: '/admin/candidates', 
+            icon: ({ className }) => <span className={className}>🔍</span> 
+          },
+          { 
+            name: 'Reports & Analytics', 
+            path: '/admin/reports', 
+            icon: ({ className }) => <span className={className}>📊</span> 
+          },
+          { 
+            name: 'Video Log Manager', 
+            path: '/admin/video-logs', 
+            icon: ({ className }) => <span className={className}>🎥</span> 
+          },
         ]
       },
       {
         label: 'Advanced',
         items: [
-          { name: 'AI Dropout Engine', path: '/admin/ai-dropout', icon: () => <span>🧠</span>, phase: 3 },
-          { name: 'Quality Tracker', path: '/admin/quality', icon: () => <span>🧪</span>, phase: 3 },
-          { name: 'SOS & Escalation Tracker', path: '/admin/sos', icon: () => <span>🆘</span> },
-          { name: 'Data Export Hub', path: '/admin/export', icon: () => <span>📤</span> },
-          { name: 'System Settings', path: '/admin/settings', icon: () => <span>⚙️</span> },
+          { 
+            name: 'AI Dropout Engine', 
+            path: '/admin/ai-dropout', 
+            icon: ({ className }) => <span className={className}>🧠</span>, 
+            phase: 3 
+          },
+          { 
+            name: 'Quality Tracker', 
+            path: '/admin/quality', 
+            icon: ({ className }) => <span className={className}>🧪</span>, 
+            phase: 3 
+          },
+          { 
+            name: 'SOS & Escalation Tracker', 
+            path: '/admin/sos', 
+            icon: ({ className }) => <span className={className}>🆘</span> 
+          },
+          { 
+            name: 'Data Export Hub', 
+            path: '/admin/export', 
+            icon: ({ className }) => <span className={className}>📤</span> 
+          },
+          { 
+            name: 'System Settings', 
+            path: '/admin/settings', 
+            icon: ({ className }) => <span className={className}>⚙️</span> 
+          },
         ]
       }
     ];
@@ -186,7 +256,11 @@ function getNavigationByRole(role: string) {
     {
       label: 'Main',
       items: [
-        { name: 'Dashboard', path: '/dashboard', icon: () => <span>🏠</span> },
+        { 
+          name: 'Dashboard', 
+          path: '/dashboard', 
+          icon: ({ className }) => <span className={className}>🏠</span> 
+        },
       ]
     }
   ];
