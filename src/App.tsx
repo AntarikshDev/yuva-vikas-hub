@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,6 +33,7 @@ import PPCScheduleMonitor from "./pages/state-head/PPCScheduleMonitor";
 import BatchTracker from "./pages/state-head/BatchTracker";
 import SOSTracker from "./pages/state-head/SOSTracker";
 import ExportReports from "./pages/state-head/ExportReports";
+import Attendance from "./pages/state-head/Attendance";
 
 // Mobilizer App Routes
 import MobilizerNewCandidate from "./pages/mobilizer/NewCandidate";
@@ -74,6 +76,7 @@ const App = () => {
             <Route path="/state-head/center-performance" element={<CenterPerformance />} />
             <Route path="/state-head/trainer-summary" element={<TrainerSummary />} />
             <Route path="/state-head/reports" element={<Reports />} />
+            <Route path="/state-head/attendance" element={<Attendance />} />
             <Route path="/state-head/dropout-insights" element={<DropoutInsights />} />
             <Route path="/state-head/ppc-schedule" element={<PPCScheduleMonitor />} />
             <Route path="/state-head/batch-tracker" element={<BatchTracker />} />
