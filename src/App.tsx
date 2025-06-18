@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +23,15 @@ import SystemSettings from "./pages/admin/SystemSettings";
 
 // State Head Routes
 import StateHeadDashboard from "./pages/state-head/Dashboard";
+import StateOverview from "./pages/state-head/StateOverview";
+import CenterPerformance from "./pages/state-head/CenterPerformance";
+import TrainerSummary from "./pages/state-head/TrainerSummary";
+import Reports from "./pages/state-head/Reports";
+import DropoutInsights from "./pages/state-head/DropoutInsights";
+import PPCScheduleMonitor from "./pages/state-head/PPCScheduleMonitor";
+import BatchTracker from "./pages/state-head/BatchTracker";
+import SOSTracker from "./pages/state-head/SOSTracker";
+import ExportReports from "./pages/state-head/ExportReports";
 
 // Mobilizer App Routes
 import MobilizerNewCandidate from "./pages/mobilizer/NewCandidate";
@@ -62,6 +70,15 @@ const App = () => {
             
             {/* State Head Routes */}
             <Route path="/state-head/dashboard" element={<StateHeadDashboard />} />
+            <Route path="/state-head/state-overview" element={<StateOverview />} />
+            <Route path="/state-head/center-performance" element={<CenterPerformance />} />
+            <Route path="/state-head/trainer-summary" element={<TrainerSummary />} />
+            <Route path="/state-head/reports" element={<Reports />} />
+            <Route path="/state-head/dropout-insights" element={<DropoutInsights />} />
+            <Route path="/state-head/ppc-schedule" element={<PPCScheduleMonitor />} />
+            <Route path="/state-head/batch-tracker" element={<BatchTracker />} />
+            <Route path="/state-head/sos-tracker" element={<SOSTracker />} />
+            <Route path="/state-head/export-reports" element={<ExportReports />} />
             
             {/* Mobilizer App Routes */}
             <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />
