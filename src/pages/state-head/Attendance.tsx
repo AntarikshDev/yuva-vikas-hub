@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { EnhancedFilterBar } from '@/components/common/EnhancedFilterBar';
@@ -7,9 +6,15 @@ import { DataTable } from '@/components/common/DataTable';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, Eye, Users, User } from 'lucide-react';
+import { CandidateAttendanceDialog } from '@/components/dialogs/CandidateAttendanceDialog';
+import { TrainerScheduleDialog } from '@/components/dialogs/TrainerScheduleDialog';
 
 const Attendance: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [candidateDialogOpen, setCandidateDialogOpen] = useState(false);
+  const [trainerDialogOpen, setTrainerDialogOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const [selectedTrainer, setSelectedTrainer] = useState<any>(null);
   
   const filterOptions = [
     {
@@ -184,7 +189,14 @@ const Attendance: React.FC = () => {
       id: 'actions',
       header: 'Actions',
       cell: (row: any) => (
-        <Button variant="outline" size="sm">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => {
+            setSelectedCandidate(row);
+            setCandidateDialogOpen(true);
+          }}
+        >
           <Eye className="h-4 w-4 mr-1" />
           View Details
         </Button>
@@ -262,7 +274,14 @@ const Attendance: React.FC = () => {
       id: 'actions',
       header: 'Actions',
       cell: (row: any) => (
-        <Button variant="outline" size="sm">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => {
+            setSelectedTrainer(row);
+            setTrainerDialogOpen(true);
+          }}
+        >
           <Eye className="h-4 w-4 mr-1" />
           View Schedule
         </Button>
@@ -340,6 +359,22 @@ const Attendance: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {selectedCandidate && (
+        <CandidateAttendanceDialog
+          open={candidateDialogOpen}
+          onOpenChange={setCandidateDialogOpen}
+          candidate={selectedCandidate}
+        />
+      )}
+      
+      {selectedTrainer && (
+        <TrainerScheduleDialog
+          open={trainerDialogOpen}
+          onOpenChange={setTrainerDialogOpen}
+          trainer={selectedTrainer}
+        />
+      )}
     </MainLayout>
   );
 };

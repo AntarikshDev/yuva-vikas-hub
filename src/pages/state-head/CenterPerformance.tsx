@@ -5,10 +5,15 @@ import { EnhancedFilterBar } from '@/components/common/EnhancedFilterBar';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/common/DataTable';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { CenterReportDialog } from '@/components/dialogs/CenterReportDialog';
+import { CenterContactDialog } from '@/components/dialogs/CenterContactDialog';
 import { Download, Eye, Phone, Mail } from 'lucide-react';
 
 const CenterPerformance: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [contactDialogOpen, setContactDialogOpen] = useState(false);
+  const [selectedCenter, setSelectedCenter] = useState<any>(null);
   
   const filterOptions = [
     {
@@ -157,11 +162,25 @@ const CenterPerformance: React.FC = () => {
       header: '',
       cell: (row: any) => (
         <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setSelectedCenter(row);
+              setReportDialogOpen(true);
+            }}
+          >
             <Eye className="h-4 w-4 mr-1" />
             Report
           </Button>
-          <Button variant="outline" size="sm">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setSelectedCenter(row);
+              setContactDialogOpen(true);
+            }}
+          >
             <Phone className="h-4 w-4 mr-1" />
             Contact
           </Button>
@@ -206,6 +225,22 @@ const CenterPerformance: React.FC = () => {
           />
         </div>
       </div>
+      
+      {selectedCenter && (
+        <>
+          <CenterReportDialog
+            open={reportDialogOpen}
+            onOpenChange={setReportDialogOpen}
+            centerName={selectedCenter.centerName}
+          />
+          
+          <CenterContactDialog
+            open={contactDialogOpen}
+            onOpenChange={setContactDialogOpen}
+            centerData={selectedCenter}
+          />
+        </>
+      )}
     </MainLayout>
   );
 };

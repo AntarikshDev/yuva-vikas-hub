@@ -5,10 +5,13 @@ import { EnhancedFilterBar } from '@/components/common/EnhancedFilterBar';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/common/DataTable';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { DrillDownDialog } from '@/components/dialogs/DrillDownDialog';
 import { Download, Eye, TrendingUp, TrendingDown } from 'lucide-react';
 
 const StateOverview: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [drillDownOpen, setDrillDownOpen] = useState(false);
+  const [selectedDistrict, setSelectedDistrict] = useState('');
   
   const filterOptions = [
     {
@@ -132,7 +135,14 @@ const StateOverview: React.FC = () => {
       id: 'actions',
       header: '',
       cell: (row: any) => (
-        <Button variant="outline" size="sm">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => {
+            setSelectedDistrict(row.district);
+            setDrillDownOpen(true);
+          }}
+        >
           <Eye className="h-4 w-4 mr-1" />
           Drill Down
         </Button>
@@ -176,6 +186,12 @@ const StateOverview: React.FC = () => {
           />
         </div>
       </div>
+      
+      <DrillDownDialog
+        open={drillDownOpen}
+        onOpenChange={setDrillDownOpen}
+        district={selectedDistrict}
+      />
     </MainLayout>
   );
 };
