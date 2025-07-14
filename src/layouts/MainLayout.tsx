@@ -14,6 +14,7 @@ import {
   SidebarTrigger
 } from '@/components/ui/sidebar';
 import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList } from 'lucide-react';
+import { NotificationCenter } from '@/components/common/NotificationCenter';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
 import { useLocation, Link } from 'react-router-dom';
@@ -136,14 +137,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role, title })
             </div>
             
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                {notifications > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs text-white">
-                    {notifications}
-                  </span>
-                )}
-              </Button>
+              <NotificationCenter />
               
               <div className="h-8 w-8 overflow-hidden rounded-full ring-2 ring-indigo-200 shadow-sm">
                 <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" className="h-full w-full object-cover" />

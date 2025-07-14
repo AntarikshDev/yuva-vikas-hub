@@ -1,182 +1,168 @@
 
 import React, { useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { StatusBadge } from './StatusBadge';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
-interface Notification {
+interface Alert {
   id: string;
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-  type: 'info' | 'warning' | 'error' | 'success';
-  actions?: {
-    label: string;
-    href?: string;
-    onClick?: () => void;
-  }[];
+  text: string;
+  unread: boolean;
+  priority: 'high' | 'medium' | 'low';
+  timestamp: string;
 }
 
 interface NotificationCenterProps {
-  notifications: Notification[];
-  onMarkAsRead?: (id: string) => void;
-  onMarkAllAsRead?: () => void;
-  onClearAll?: () => void;
+  className?: string;
 }
 
-export const NotificationCenter: React.FC<NotificationCenterProps> = ({
-  notifications,
-  onMarkAsRead,
-  onMarkAllAsRead,
-  onClearAll,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
+export const NotificationCenter: React.FC<NotificationCenterProps> = ({ className }) => {
+  const [alerts, setAlerts] = useState<Alert[]>([
+    {
+      id: '1',
+      text: 'Center A attendance below threshold (65%)',
+      unread: true,
+      priority: 'high',
+      timestamp: '5 min ago'
+    },
+    {
+      id: '2', 
+      text: 'Counselling overdue for 12 candidates',
+      unread: true,
+      priority: 'medium',
+      timestamp: '15 min ago'
+    },
+    {
+      id: '3',
+      text: 'Batch completion milestone reached - District B',
+      unread: false,
+      priority: 'low',
+      timestamp: '1 hour ago'
+    },
+    {
+      id: '4',
+      text: 'New trainer onboarding pending approval',
+      unread: true,
+      priority: 'medium',
+      timestamp: '2 hours ago'
+    },
+    {
+      id: '5',
+      text: 'Monthly placement target achieved - Mumbai',
+      unread: false,
+      priority: 'low',
+      timestamp: '3 hours ago'
+    },
+  ]);
+
+  const unreadCount = alerts.filter(alert => alert.unread).length;
   
-  const unreadCount = notifications.filter(n => !n.read).length;
-  
-  const getTypeVariant = (type: string) => {
-    switch (type) {
-      case 'error': return 'error';
-      case 'warning': return 'warning';
-      case 'success': return 'success';
-      default: return 'info';
-    }
+  const markAsRead = (id: string) => {
+    setAlerts(prev => prev.map(alert => 
+      alert.id === id ? { ...alert, unread: false } : alert
+    ));
   };
-  
-  const formatTimestamp = (date: Date) => {
-    const now = new Date();
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
-    if (diffInHours < 1) {
-      return `${Math.floor(diffInHours * 60)}m ago`;
-    } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)}h ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
+
+  const markAllAsRead = () => {
+    setAlerts(prev => prev.map(alert => ({ ...alert, unread: false })));
   };
-  
-  const handleActionClick = (
-    e: React.MouseEvent,
-    action: { onClick?: () => void; href?: string }
-  ) => {
-    if (!action.href) {
-      e.preventDefault();
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-500';
+      case 'medium': return 'bg-amber-500';
+      case 'low': return 'bg-green-500';
+      default: return 'bg-gray-500';
     }
-    if (action.onClick) {
-      action.onClick();
-    }
-    setIsOpen(false);
   };
   
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className={cn("relative", className)}>
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-error-500 text-xs text-white">
+            <Badge 
+              variant="destructive" 
+              className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+            >
               {unreadCount}
-            </span>
+            </Badge>
           )}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between border-b p-3">
-          <h3 className="font-semibold">Notifications</h3>
-          <div className="flex space-x-1 text-sm">
-            {unreadCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onMarkAllAsRead}
-                className="h-8 text-xs"
-              >
-                Mark all read
-              </Button>
-            )}
-            {notifications.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClearAll}
-                className="h-8 text-xs"
-              >
-                Clear all
-              </Button>
-            )}
-          </div>
-        </div>
-        
-        <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
-          {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8">
-              <Bell className="h-8 w-8 text-neutral-300" />
-              <p className="mt-2 text-sm text-neutral-600">No notifications</p>
-            </div>
-          ) : (
-            notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`border-b p-3 ${
-                  notification.read ? 'bg-white' : 'bg-neutral-50'
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <StatusBadge
-                    variant={getTypeVariant(notification.type)}
-                    withDot
-                    label={notification.title}
-                  />
-                  <span className="text-xs text-neutral-500">
-                    {formatTimestamp(notification.timestamp)}
-                  </span>
-                </div>
-                
-                <p className="mt-1 text-sm">{notification.message}</p>
-                
-                {notification.actions && notification.actions.length > 0 && (
-                  <div className="mt-2 flex space-x-2">
-                    {notification.actions.map((action, index) => (
-                      <Button
-                        key={index}
-                        size="sm"
-                        variant="outline"
-                        asChild={!!action.href}
-                        className="h-8 text-xs"
-                        onClick={(e) => handleActionClick(e, action)}
-                      >
-                        {action.href ? (
-                          <a href={action.href}>{action.label}</a>
-                        ) : (
-                          action.label
-                        )}
-                      </Button>
-                    ))}
-                    
-                    {!notification.read && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="ml-auto h-8 text-xs text-neutral-500"
-                        onClick={() => onMarkAsRead?.(notification.id)}
-                      >
-                        Mark as read
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
+      </DropdownMenuTrigger>
+      
+      <DropdownMenuContent className="w-80 max-h-96 overflow-y-auto" align="end">
+        <div className="flex items-center justify-between p-2">
+          <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+          {unreadCount > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={markAllAsRead}
+              className="text-xs"
+            >
+              <Check className="h-3 w-3 mr-1" />
+              Mark all read
+            </Button>
           )}
         </div>
-      </PopoverContent>
-    </Popover>
+        
+        <DropdownMenuSeparator />
+        
+        {alerts.length === 0 ? (
+          <div className="p-4 text-center text-sm text-muted-foreground">
+            No notifications
+          </div>
+        ) : (
+          alerts.map((alert) => (
+            <DropdownMenuItem
+              key={alert.id}
+              className={cn(
+                "flex flex-col items-start p-3 cursor-pointer",
+                alert.unread ? "bg-blue-50 border-l-4 border-l-blue-500" : "hover:bg-gray-50"
+              )}
+              onClick={() => markAsRead(alert.id)}
+            >
+              <div className="flex items-start justify-between w-full">
+                <div className="flex items-start space-x-2 flex-1">
+                  <div className={cn("w-2 h-2 rounded-full mt-2", getPriorityColor(alert.priority))} />
+                  <div className="flex-1">
+                    <p className={cn(
+                      "text-sm leading-tight",
+                      alert.unread ? "font-medium text-gray-900" : "text-gray-600"
+                    )}>
+                      {alert.text}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {alert.timestamp}
+                    </p>
+                  </div>
+                </div>
+                {alert.unread && (
+                  <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                )}
+              </div>
+            </DropdownMenuItem>
+          ))
+        )}
+        
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-center justify-center">
+          <Button variant="ghost" size="sm" className="text-xs">
+            View all notifications
+          </Button>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
