@@ -38,7 +38,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
   role: 'super_admin' | 'state_head' | 'center_manager' | 'mobilizer' | 
          'candidate' | 'ppc_team' | 'company_hr' | 'mobilization_manager' | 
-         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit';
+         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor';
   title?: string; // Optional title override
 }
 
@@ -338,6 +338,31 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             name: 'Export Reports', 
             path: '/state-head/export-reports', 
             icon: FileOutput 
+          },
+        ]
+      }
+    ];
+  }
+  
+  if (role === 'counsellor') {
+    return [
+      {
+        label: 'Counselling',
+        items: [
+          { 
+            name: 'Dashboard', 
+            path: '/counsellor/dashboard', 
+            icon: Home 
+          },
+          { 
+            name: 'Candidate Management', 
+            path: '/counsellor/candidates', 
+            icon: Users 
+          },
+          { 
+            name: 'Reports', 
+            path: '/counsellor/reports', 
+            icon: BarChart 
           },
         ]
       }

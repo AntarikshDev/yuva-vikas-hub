@@ -41,6 +41,11 @@ import MobilizerNewCandidate from "./pages/mobilizer/NewCandidate";
 // Candidate App Routes
 import CandidateHome from "./pages/candidate/Home";
 
+// Counsellor Routes
+import CounsellorDashboard from "./pages/counsellor/Dashboard";
+import CandidateManagement from "./pages/counsellor/CandidateManagement";
+import CounsellorReports from "./pages/counsellor/Reports";
+
 // Create a new QueryClient instance inside the component
 const App = () => {
   // Create a new QueryClient instance inside the component to ensure React context works properly
@@ -88,6 +93,11 @@ const App = () => {
             
             {/* Candidate App Routes */}
             <Route path="/candidate" element={<CandidateHome />} />
+            
+            {/* Counsellor Routes */}
+            <Route path="/counsellor/dashboard" element={<CounsellorDashboard />} />
+            <Route path="/counsellor/candidates" element={<CandidateManagement />} />
+            <Route path="/counsellor/reports" element={<CounsellorReports />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
