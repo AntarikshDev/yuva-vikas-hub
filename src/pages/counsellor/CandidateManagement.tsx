@@ -63,8 +63,8 @@ const mockCandidates = [
 
 export default function CandidateManagement() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStage, setSelectedStage] = useState("");
-  const [selectedBatch, setSelectedBatch] = useState("");
+  const [selectedStage, setSelectedStage] = useState("all");
+  const [selectedBatch, setSelectedBatch] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
   const [dialogType, setDialogType] = useState<string>("");
@@ -73,8 +73,8 @@ export default function CandidateManagement() {
   const filteredCandidates = mockCandidates.filter(candidate => {
     return (
       candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (selectedStage === "" || candidate.stage === selectedStage) &&
-      (selectedBatch === "" || candidate.batch === selectedBatch)
+      (selectedStage === "all" || candidate.stage === selectedStage) &&
+      (selectedBatch === "all" || candidate.batch === selectedBatch)
     );
   });
 
@@ -137,7 +137,7 @@ export default function CandidateManagement() {
                   <SelectValue placeholder="All Stages" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Stages</SelectItem>
+                  <SelectItem value="all">All Stages</SelectItem>
                   <SelectItem value="Stage 1">Stage 1</SelectItem>
                   <SelectItem value="Stage 2">Stage 2</SelectItem>
                   <SelectItem value="Stage 3">Stage 3</SelectItem>
@@ -148,7 +148,7 @@ export default function CandidateManagement() {
                   <SelectValue placeholder="All Batches" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Batches</SelectItem>
+                  <SelectItem value="all">All Batches</SelectItem>
                   <SelectItem value="Batch 2025-01">Batch 2025-01</SelectItem>
                   <SelectItem value="Batch 2025-02">Batch 2025-02</SelectItem>
                 </SelectContent>
