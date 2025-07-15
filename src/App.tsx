@@ -45,6 +45,11 @@ import CandidateHome from "./pages/candidate/Home";
 import CounsellorDashboard from "./pages/counsellor/Dashboard";
 import CandidateManagement from "./pages/counsellor/CandidateManagement";
 import CounsellorReports from "./pages/counsellor/Reports";
+import MandatorySheets from "./pages/counsellor/MandatorySheets";
+import VideoLogs from "./pages/counsellor/VideoLogs";
+import ParentConsentSummary from "./pages/counsellor/ParentConsentSummary";
+import PendingTasks from "./pages/counsellor/PendingTasks";
+import CounsellorProfile from "./pages/counsellor/Profile";
 
 // Create a new QueryClient instance inside the component
 const App = () => {
@@ -94,10 +99,15 @@ const App = () => {
             {/* Candidate App Routes */}
             <Route path="/candidate" element={<CandidateHome />} />
             
-            {/* Counsellor Routes */}
-            <Route path="/counsellor/dashboard" element={<CounsellorDashboard />} />
-            <Route path="/counsellor/candidates" element={<CandidateManagement />} />
-            <Route path="/counsellor/reports" element={<CounsellorReports />} />
+        {/* Counsellor Routes */}
+        <Route path="/counsellor/dashboard" element={<CounsellorDashboard />} />
+        <Route path="/counsellor/candidates" element={<CandidateManagement />} />
+        <Route path="/counsellor/reports" element={<CounsellorReports />} />
+        <Route path="/counsellor/mandatory-sheets" element={<MandatorySheets />} />
+        <Route path="/counsellor/video-logs" element={<VideoLogs />} />
+        <Route path="/counsellor/parent-consent" element={<ParentConsentSummary />} />
+        <Route path="/counsellor/pending-tasks" element={<PendingTasks />} />
+        <Route path="/counsellor/profile" element={<CounsellorProfile />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
