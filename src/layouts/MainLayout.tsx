@@ -13,7 +13,7 @@ import {
   SidebarFooter,
   SidebarTrigger
 } from '@/components/ui/sidebar';
-import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList } from 'lucide-react';
+import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck } from 'lucide-react';
 import { NotificationCenter } from '@/components/common/NotificationCenter';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
@@ -344,6 +344,26 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
     ];
   }
   
+  if (role === 'center_manager') {
+    return [
+      {
+        label: 'Main',
+        items: [
+          { name: 'Dashboard', path: '/center-manager/dashboard', icon: Home },
+          { name: 'Enrollment & Batch', path: '/center-manager/enrollment', icon: Users },
+          { name: 'Counselling Verification', path: '/center-manager/counselling', icon: FileCheck },
+          { name: 'Document Compliance', path: '/center-manager/documents', icon: ({ className }) => <span className={className || ''}>📋</span> },
+        ]
+      },
+      {
+        label: 'Documentation',
+        items: [
+          { name: 'Mandatory Sheets', path: '/center-manager/mandatory-sheets', icon: FileSpreadsheet },
+        ]
+      }
+    ];
+  }
+
   if (role === 'counsellor') {
     return [
       {

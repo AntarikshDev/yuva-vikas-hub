@@ -51,6 +51,13 @@ import ParentConsentSummary from "./pages/counsellor/ParentConsentSummary";
 import PendingTasks from "./pages/counsellor/PendingTasks";
 import CounsellorProfile from "./pages/counsellor/Profile";
 
+// Center Manager Routes
+import CenterManagerDashboard from "./pages/center-manager/Dashboard";
+import EnrollmentBatch from "./pages/center-manager/EnrollmentBatch";
+import CounsellingVerification from "./pages/center-manager/CounsellingVerification";
+import DocumentCompliance from "./pages/center-manager/DocumentCompliance";
+import CenterMandatorySheets from "./pages/center-manager/MandatorySheets";
+
 // Create a new QueryClient instance inside the component
 const App = () => {
   // Create a new QueryClient instance inside the component to ensure React context works properly
@@ -108,6 +115,13 @@ const App = () => {
         <Route path="/counsellor/parent-consent" element={<ParentConsentSummary />} />
         <Route path="/counsellor/pending-tasks" element={<PendingTasks />} />
         <Route path="/counsellor/profile" element={<CounsellorProfile />} />
+
+        {/* Center Manager Routes */}
+        <Route path="/center-manager/dashboard" element={<CenterManagerDashboard />} />
+        <Route path="/center-manager/enrollment" element={<EnrollmentBatch />} />
+        <Route path="/center-manager/counselling" element={<CounsellingVerification />} />
+        <Route path="/center-manager/documents" element={<DocumentCompliance />} />
+        <Route path="/center-manager/mandatory-sheets" element={<CenterMandatorySheets />} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
