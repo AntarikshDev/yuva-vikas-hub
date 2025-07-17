@@ -347,7 +347,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
   if (role === 'counsellor') {
     return [
       {
-        label: 'Counselling',
+        label: 'Main',
         items: [
           { 
             name: 'Dashboard', 
@@ -360,9 +360,44 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             icon: Users 
           },
           { 
-            name: 'Reports', 
+            name: 'Pending Tasks', 
+            path: '/counsellor/pending-tasks', 
+            icon: ClipboardList 
+          },
+        ]
+      },
+      {
+        label: 'Documentation',
+        items: [
+          { 
+            name: 'Mandatory Sheets', 
+            path: '/counsellor/mandatory-sheets', 
+            icon: FileSpreadsheet 
+          },
+          { 
+            name: 'Parent Consent', 
+            path: '/counsellor/parent-consent', 
+            icon: ({ className }) => <span className={className || ''}>📝</span>
+          },
+          { 
+            name: 'Video Logs', 
+            path: '/counsellor/video-logs', 
+            icon: ({ className }) => <span className={className || ''}>🎥</span>
+          },
+          { 
+            name: 'Reports & Analytics', 
             path: '/counsellor/reports', 
             icon: BarChart 
+          },
+        ]
+      },
+      {
+        label: 'Account',
+        items: [
+          { 
+            name: 'My Profile', 
+            path: '/counsellor/profile', 
+            icon: ({ className }) => <span className={className || ''}>👤</span>
           },
         ]
       }

@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { MainLayout } from "@/layouts/MainLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { Download, Play, FileSpreadsheet, FileText } from "lucide-react";
+import { Download, Eye, FileSpreadsheet, FileText, Calendar, BarChart2, TrendingUp, PieChart, Filter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 const reportCategories = [
   {
@@ -61,24 +63,27 @@ const mockReportData = [
 ];
 
 export default function CounsellorReports() {
-  const [selectedCentre, setSelectedCentre] = useState("");
-  const [selectedBatch, setSelectedBatch] = useState("");
+  const [selectedTab, setSelectedTab] = useState("mobilisation");
+  const [selectedCentre, setSelectedCentre] = useState("all");
+  const [selectedBatch, setSelectedBatch] = useState("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [runningReport, setRunningReport] = useState<string>("");
+  const [loadingReport, setLoadingReport] = useState<string | null>(null);
+  const [activeReport, setActiveReport] = useState<string | null>(null);
   const [reportData, setReportData] = useState<any[]>([]);
   const { toast } = useToast();
 
-  const handleRunReport = (reportName: string) => {
-    setRunningReport(reportName);
+  const handleViewReport = (reportName: string) => {
+    setLoadingReport(reportName);
     // Simulate API call
     setTimeout(() => {
       setReportData(mockReportData);
-      setRunningReport("");
+      setLoadingReport(null);
+      setActiveReport(reportName);
       toast({
-        title: "Report Generated",
-        description: `${reportName} has been generated successfully.`,
+        title: "Report Loaded",
+        description: `${reportName} has been loaded successfully.`,
       });
-    }, 2000);
+    }, 1500);
   };
 
   const handleExport = (format: string) => {
@@ -88,18 +93,45 @@ export default function CounsellorReports() {
     });
   };
 
+  // Find the currently selected category based on tab
+  const getCurrentCategory = () => {
+    switch(selectedTab) {
+      case "mobilisation": return reportCategories[0];
+      case "enrollment": return reportCategories[1];
+      case "attendance": return reportCategories[2];
+      case "placement": return reportCategories[3];
+      case "post-placement": return reportCategories[4];
+      default: return reportCategories[0];
+    }
+  };
+
   return (
     <MainLayout role="counsellor">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-3xl font-bold text-primary">Reports & Analytics</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-primary">Reports & Analytics</h1>
+            <p className="text-muted-foreground mt-1">View and analyze candidate performance and outcomes</p>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Calendar className="h-4 w-4 mr-2" />
+              Schedule Reports
+            </Button>
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              Saved Filters
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle>Report Filters</CardTitle>
+            <CardDescription>Narrow down your report data with these filters</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
@@ -108,6 +140,7 @@ export default function CounsellorReports() {
                   <SelectValue placeholder="Select Centre" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Centres</SelectItem>
                   <SelectItem value="centre-a">Centre A</SelectItem>
                   <SelectItem value="centre-b">Centre B</SelectItem>
                   <SelectItem value="centre-c">Centre C</SelectItem>
@@ -119,6 +152,7 @@ export default function CounsellorReports() {
                   <SelectValue placeholder="Select Batch" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">All Batches</SelectItem>
                   <SelectItem value="batch-1">Batch 2025-01</SelectItem>
                   <SelectItem value="batch-2">Batch 2025-02</SelectItem>
                   <SelectItem value="batch-3">Batch 2025-03</SelectItem>
@@ -130,48 +164,79 @@ export default function CounsellorReports() {
                 onDateRangeChange={setDateRange}
                 placeholder="Select date range"
               />
+
+              <Button variant="secondary" className="ml-auto">
+                Apply Filters
+              </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Report Categories */}
-        <div className="grid gap-6">
-          {reportCategories.map((category) => (
-            <Card key={category.title}>
-              <CardHeader>
-                <CardTitle>{category.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {category.reports.map((report) => (
-                    <div key={report.name} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{report.name}</h4>
-                        <p className="text-sm text-muted-foreground">{report.description}</p>
-                      </div>
-                      <Button
-                        onClick={() => handleRunReport(report.name)}
-                        disabled={runningReport === report.name}
-                        size="sm"
-                      >
-                        <Play className="h-4 w-4 mr-2" />
-                        {runningReport === report.name ? "Running..." : "Run"}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Report Categories as Tabs */}
+        <Tabs defaultValue="mobilisation" value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+          <TabsList className="grid grid-cols-5 mb-6">
+            <TabsTrigger value="mobilisation">Mobilisation</TabsTrigger>
+            <TabsTrigger value="enrollment">Enrollment</TabsTrigger>
+            <TabsTrigger value="attendance">Attendance</TabsTrigger>
+            <TabsTrigger value="placement">Placement</TabsTrigger>
+            <TabsTrigger value="post-placement">Post-Placement</TabsTrigger>
+          </TabsList>
 
-        {/* Report Preview */}
-        {reportData.length > 0 && (
-          <Card>
+          {/* Reports grid for the selected category */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {getCurrentCategory().reports.map((report) => (
+              <Card key={report.name} className={`border ${activeReport === report.name ? 'border-primary shadow-md' : ''}`}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{report.name}</CardTitle>
+                    {activeReport === report.name && <Badge variant="outline" className="bg-primary/10">Active</Badge>}
+                  </div>
+                  <CardDescription>{report.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="flex justify-between items-center mt-4">
+                    <div className="flex gap-1 items-center text-sm text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      <span>Updated daily</span>
+                    </div>
+                    <Button 
+                      onClick={() => handleViewReport(report.name)}
+                      disabled={loadingReport === report.name}
+                      size="sm"
+                      variant={activeReport === report.name ? "default" : "outline"}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      {loadingReport === report.name ? "Loading..." : "View Report"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </Tabs>
+
+        {/* Report Visualization */}
+        {activeReport && (
+          <Card className="mt-8">
             <CardHeader>
               <div className="flex justify-between items-center">
-                <CardTitle>Report Preview</CardTitle>
+                <div>
+                  <CardTitle className="flex items-center">
+                    {activeReport}
+                    <Badge className="ml-3" variant="outline">
+                      {selectedCentre === "all" ? "All Centres" : selectedCentre}
+                    </Badge>
+                    <Badge className="ml-2" variant="outline">
+                      {selectedBatch === "all" ? "All Batches" : selectedBatch}
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>Last updated: Today at 09:15 AM</CardDescription>
+                </div>
                 <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <BarChart2 className="h-4 w-4 mr-2" />
+                    Charts
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => handleExport("CSV")}>
                     <FileSpreadsheet className="h-4 w-4 mr-2" />
                     Export CSV
@@ -200,7 +265,11 @@ export default function CounsellorReports() {
                       <TableCell className="font-medium">{item.candidateName}</TableCell>
                       <TableCell>{item.batch}</TableCell>
                       <TableCell>{item.course}</TableCell>
-                      <TableCell>{item.placementStatus}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`${item.placementStatus === "Placed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}`}>
+                          {item.placementStatus}
+                        </Badge>
+                      </TableCell>
                       <TableCell>{item.salary !== "-" ? `₹${item.salary}` : item.salary}</TableCell>
                     </TableRow>
                   ))}
