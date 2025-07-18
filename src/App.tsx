@@ -61,6 +61,12 @@ import CenterMandatorySheets from "./pages/center-manager/MandatorySheets";
 // MIS Admin Routes
 import MISAdminDashboard from "./pages/mis-admin/Dashboard";
 import MISAdminUserManagement from "./pages/mis-admin/UserManagement";
+import MISAdminLookupConfiguration from "./pages/mis-admin/LookupConfiguration";
+import MISAdminDataManagement from "./pages/mis-admin/DataManagement";
+import MISAdminReportsLibrary from "./pages/mis-admin/ReportsLibrary";
+import MISAdminAlertsManagement from "./pages/mis-admin/AlertsManagement";
+import MISAdminAuditCompliance from "./pages/mis-admin/AuditCompliance";
+import MISAdminProfileSettings from "./pages/mis-admin/ProfileSettings";
 
 // Layout
 import { MainLayout } from "./layouts/MainLayout";
@@ -133,6 +139,17 @@ const App = () => {
         {/* MIS Admin Routes */}
         <Route path="/mis-admin/dashboard" element={<MainLayout role="mis_admin" title="Dashboard"><MISAdminDashboard /></MainLayout>} />
         <Route path="/mis-admin/users" element={<MainLayout role="mis_admin" title="User & Role Management"><MISAdminUserManagement /></MainLayout>} />
+        <Route path="/mis-admin/lookups" element={<MainLayout role="mis_admin" title="Lookup & Configuration"><MISAdminLookupConfiguration /></MainLayout>} />
+        <Route path="/mis-admin/data-sync" element={<MainLayout role="mis_admin" title="Data Management"><MISAdminDataManagement /></MainLayout>} />
+        <Route path="/mis-admin/data-correction" element={<MainLayout role="mis_admin" title="Data Management"><MISAdminDataManagement /></MainLayout>} />
+        <Route path="/mis-admin/backup" element={<MainLayout role="mis_admin" title="Data Management"><MISAdminDataManagement /></MainLayout>} />
+        <Route path="/mis-admin/reports" element={<MainLayout role="mis_admin" title="Reports Library"><MISAdminReportsLibrary /></MainLayout>} />
+        <Route path="/mis-admin/report-builder" element={<MainLayout role="mis_admin" title="Reports Library"><MISAdminReportsLibrary /></MainLayout>} />
+        <Route path="/mis-admin/schedule-reports" element={<MainLayout role="mis_admin" title="Reports Library"><MISAdminReportsLibrary /></MainLayout>} />
+        <Route path="/mis-admin/alerts" element={<MainLayout role="mis_admin" title="Notifications & Alerts"><MISAdminAlertsManagement /></MainLayout>} />
+        <Route path="/mis-admin/audit" element={<MainLayout role="mis_admin" title="Audit & Compliance"><MISAdminAuditCompliance /></MainLayout>} />
+        <Route path="/mis-admin/api-management" element={<MainLayout role="mis_admin" title="Notifications & Alerts"><MISAdminAlertsManagement /></MainLayout>} />
+        <Route path="/mis-admin/profile" element={<MainLayout role="mis_admin" title="Profile & Settings"><MISAdminProfileSettings /></MainLayout>} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
