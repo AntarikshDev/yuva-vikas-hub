@@ -58,6 +58,13 @@ import CounsellingVerification from "./pages/center-manager/CounsellingVerificat
 import DocumentCompliance from "./pages/center-manager/DocumentCompliance";
 import CenterMandatorySheets from "./pages/center-manager/MandatorySheets";
 
+// MIS Admin Routes
+import MISAdminDashboard from "./pages/mis-admin/Dashboard";
+import MISAdminUserManagement from "./pages/mis-admin/UserManagement";
+
+// Layout
+import { MainLayout } from "./layouts/MainLayout";
+
 // Create a new QueryClient instance inside the component
 const App = () => {
   // Create a new QueryClient instance inside the component to ensure React context works properly
@@ -117,11 +124,15 @@ const App = () => {
         <Route path="/counsellor/profile" element={<CounsellorProfile />} />
 
         {/* Center Manager Routes */}
-        <Route path="/center-manager/dashboard" element={<CenterManagerDashboard />} />
-        <Route path="/center-manager/enrollment" element={<EnrollmentBatch />} />
-        <Route path="/center-manager/counselling" element={<CounsellingVerification />} />
-        <Route path="/center-manager/documents" element={<DocumentCompliance />} />
-        <Route path="/center-manager/mandatory-sheets" element={<CenterMandatorySheets />} />
+        <Route path="/center-manager/dashboard" element={<MainLayout role="center_manager" title="Dashboard"><CenterManagerDashboard /></MainLayout>} />
+        <Route path="/center-manager/enrollment" element={<MainLayout role="center_manager" title="Enrollment & Batch"><EnrollmentBatch /></MainLayout>} />
+        <Route path="/center-manager/counselling" element={<MainLayout role="center_manager" title="Counselling Verification"><CounsellingVerification /></MainLayout>} />
+        <Route path="/center-manager/documents" element={<MainLayout role="center_manager" title="Document Compliance"><DocumentCompliance /></MainLayout>} />
+        <Route path="/center-manager/mandatory-sheets" element={<MainLayout role="center_manager" title="Mandatory Sheets"><CenterMandatorySheets /></MainLayout>} />
+
+        {/* MIS Admin Routes */}
+        <Route path="/mis-admin/dashboard" element={<MainLayout role="mis_admin" title="Dashboard"><MISAdminDashboard /></MainLayout>} />
+        <Route path="/mis-admin/users" element={<MainLayout role="mis_admin" title="User & Role Management"><MISAdminUserManagement /></MainLayout>} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />

@@ -13,7 +13,7 @@ import {
   SidebarFooter,
   SidebarTrigger
 } from '@/components/ui/sidebar';
-import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck } from 'lucide-react';
+import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp } from 'lucide-react';
 import { NotificationCenter } from '@/components/common/NotificationCenter';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
@@ -38,7 +38,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
   role: 'super_admin' | 'state_head' | 'center_manager' | 'mobilizer' | 
          'candidate' | 'ppc_team' | 'company_hr' | 'mobilization_manager' | 
-         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor';
+         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis_admin';
   title?: string; // Optional title override
 }
 
@@ -353,12 +353,67 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { name: 'Enrollment & Batch', path: '/center-manager/enrollment', icon: Users },
           { name: 'Counselling Verification', path: '/center-manager/counselling', icon: FileCheck },
           { name: 'Document Compliance', path: '/center-manager/documents', icon: ({ className }) => <span className={className || ''}>📋</span> },
+          { name: 'Mandatory Sheets', path: '/center-manager/mandatory-sheets', icon: FileSpreadsheet },
         ]
       },
       {
-        label: 'Documentation',
+        label: 'Training & Attendance',
         items: [
-          { name: 'Mandatory Sheets', path: '/center-manager/mandatory-sheets', icon: FileSpreadsheet },
+          { name: 'Video Logs & Orientation', path: '/center-manager/video-logs', icon: ({ className }) => <span className={className || ''}>🎥</span> },
+          { name: 'Attendance Module', path: '/center-manager/attendance', icon: ClipboardList },
+        ]
+      },
+      {
+        label: 'Placement & Travel',
+        items: [
+          { name: 'Placement Coordination', path: '/center-manager/placement', icon: Briefcase },
+          { name: 'Travel Letter Management', path: '/center-manager/travel-letters', icon: ({ className }) => <span className={className || ''}>✈️</span> },
+          { name: 'Post-Placement Tracking', path: '/center-manager/post-placement', icon: TrendingUp },
+        ]
+      },
+      {
+        label: 'Reports & Profile',
+        items: [
+          { name: 'Reports & Exports', path: '/center-manager/reports', icon: BarChart },
+          { name: 'Profile & Settings', path: '/center-manager/profile', icon: ({ className }) => <span className={className || ''}>👤</span> },
+        ]
+      }
+    ];
+  }
+
+  if (role === 'mis_admin') {
+    return [
+      {
+        label: 'Main',
+        items: [
+          { name: 'Dashboard', path: '/mis-admin/dashboard', icon: Home },
+          { name: 'User & Role Management', path: '/mis-admin/users', icon: Users },
+          { name: 'Lookup & Configuration', path: '/mis-admin/lookups', icon: Settings },
+        ]
+      },
+      {
+        label: 'Data Management',
+        items: [
+          { name: 'Data Sync Queue', path: '/mis-admin/data-sync', icon: ({ className }) => <span className={className || ''}>🔄</span> },
+          { name: 'Data Correction', path: '/mis-admin/data-correction', icon: ({ className }) => <span className={className || ''}>🔧</span> },
+          { name: 'Archive & Backup', path: '/mis-admin/backup', icon: ({ className }) => <span className={className || ''}>💾</span> },
+        ]
+      },
+      {
+        label: 'Reporting & MIS',
+        items: [
+          { name: 'Reports Library', path: '/mis-admin/reports', icon: BarChart },
+          { name: 'Custom Report Builder', path: '/mis-admin/report-builder', icon: ({ className }) => <span className={className || ''}>📊</span> },
+          { name: 'Report Scheduling', path: '/mis-admin/schedule-reports', icon: Calendar },
+        ]
+      },
+      {
+        label: 'System',
+        items: [
+          { name: 'Notifications & Alerts', path: '/mis-admin/alerts', icon: AlertCircle },
+          { name: 'Audit & Compliance', path: '/mis-admin/audit', icon: ({ className }) => <span className={className || ''}>🔍</span> },
+          { name: 'API & Integration', path: '/mis-admin/api-management', icon: ({ className }) => <span className={className || ''}>🔗</span> },
+          { name: 'Profile & Settings', path: '/mis-admin/profile', icon: ({ className }) => <span className={className || ''}>👤</span> },
         ]
       }
     ];
