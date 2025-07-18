@@ -4,15 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Users, FileCheck, Award, Briefcase, TrendingUp, AlertTriangle } from 'lucide-react';
-import { format } from 'date-fns';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { Users, FileCheck, Award, Briefcase, TrendingUp, AlertTriangle } from 'lucide-react';
+import { DateRange } from 'react-day-picker';
 
 const CenterManagerDashboard = () => {
   const [selectedCenter, setSelectedCenter] = useState('C-001');
   const [selectedBatch, setSelectedBatch] = useState('all');
-  const [dateRange, setDateRange] = useState<{from?: Date; to?: Date} | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   // Mock data
   const kpiData = {
@@ -78,25 +77,12 @@ const CenterManagerDashboard = () => {
               </SelectContent>
             </Select>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-48">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange?.from && dateRange?.to 
-                    ? `${format(dateRange.from, 'dd/MM')} - ${format(dateRange.to, 'dd/MM')}`
-                    : 'Select Date Range'
-                  }
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={setDateRange}
-                  className="rounded-md border p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
+            <DateRangePicker
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              className="w-48"
+              placeholder="Select Date Range"
+            />
           </div>
         </div>
 
