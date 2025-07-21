@@ -68,6 +68,22 @@ import MISAdminAlertsManagement from "./pages/mis-admin/AlertsManagement";
 import MISAdminAuditCompliance from "./pages/mis-admin/AuditCompliance";
 import MISAdminProfileSettings from "./pages/mis-admin/ProfileSettings";
 
+// Trainer Pages
+import TrainerDashboard from "./pages/trainer/Dashboard";
+import TrainerCurriculumPlanner from "./pages/trainer/CurriculumPlanner";
+import TrainerAttendanceManagement from "./pages/trainer/AttendanceManagement";
+import TrainerVideoLogs from "./pages/trainer/VideoLogs";
+import TrainerAssessmentEvaluation from "./pages/trainer/AssessmentEvaluation";
+import TrainerFeedbackManagement from "./pages/trainer/FeedbackManagement";
+import TrainerReports from "./pages/trainer/Reports";
+import TrainerProfile from "./pages/trainer/Profile";
+
+// Candidate Pages
+import CandidateProfile from "./pages/candidate/Profile";
+import CandidateProgress from "./pages/candidate/Progress";
+import CandidateAttendance from "./pages/candidate/Attendance";
+import CandidateDocuments from "./pages/candidate/Documents";
+
 // Layout
 import { MainLayout } from "./layouts/MainLayout";
 
@@ -117,7 +133,21 @@ const App = () => {
             <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />
             
             {/* Candidate App Routes */}
-            <Route path="/candidate" element={<CandidateHome />} />
+            <Route path="/candidate" element={<MainLayout role="candidate" title="Dashboard"><CandidateHome /></MainLayout>} />
+            <Route path="/candidate/profile" element={<MainLayout role="candidate" title="My Profile"><CandidateProfile /></MainLayout>} />
+            <Route path="/candidate/progress" element={<MainLayout role="candidate" title="Training Progress"><CandidateProgress /></MainLayout>} />
+            <Route path="/candidate/attendance" element={<MainLayout role="candidate" title="My Attendance"><CandidateAttendance /></MainLayout>} />
+            <Route path="/candidate/documents" element={<MainLayout role="candidate" title="My Documents"><CandidateDocuments /></MainLayout>} />
+            
+            {/* Trainer Routes */}
+            <Route path="/trainer" element={<MainLayout role="trainer" title="Dashboard"><TrainerDashboard /></MainLayout>} />
+            <Route path="/trainer/curriculum-planner" element={<MainLayout role="trainer" title="Curriculum Planner"><TrainerCurriculumPlanner /></MainLayout>} />
+            <Route path="/trainer/attendance-management" element={<MainLayout role="trainer" title="Attendance Management"><TrainerAttendanceManagement /></MainLayout>} />
+            <Route path="/trainer/video-logs" element={<MainLayout role="trainer" title="Video Logs"><TrainerVideoLogs /></MainLayout>} />
+            <Route path="/trainer/assessment-evaluation" element={<MainLayout role="trainer" title="Assessment Evaluation"><TrainerAssessmentEvaluation /></MainLayout>} />
+            <Route path="/trainer/feedback-management" element={<MainLayout role="trainer" title="Feedback Management"><TrainerFeedbackManagement /></MainLayout>} />
+            <Route path="/trainer/reports" element={<MainLayout role="trainer" title="Reports & Analytics"><TrainerReports /></MainLayout>} />
+            <Route path="/trainer/profile" element={<MainLayout role="trainer" title="Profile & Settings"><TrainerProfile /></MainLayout>} />
             
         {/* Counsellor Routes */}
         <Route path="/counsellor/dashboard" element={<CounsellorDashboard />} />

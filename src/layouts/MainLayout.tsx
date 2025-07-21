@@ -13,7 +13,7 @@ import {
   SidebarFooter,
   SidebarTrigger
 } from '@/components/ui/sidebar';
-import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp } from 'lucide-react';
+import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp, BookOpen, Video, MessageSquare, FileText } from 'lucide-react';
 import { NotificationCenter } from '@/components/common/NotificationCenter';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
@@ -472,6 +472,126 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { 
             name: 'My Profile', 
             path: '/counsellor/profile', 
+            icon: ({ className }) => <span className={className || ''}>👤</span>
+          },
+        ]
+      }
+    ];
+  }
+
+  if (role === 'candidate') {
+    return [
+      {
+        label: 'Main',
+        items: [
+          { 
+            name: 'Dashboard', 
+            path: '/candidate', 
+            icon: Home 
+          },
+          { 
+            name: 'My Profile', 
+            path: '/candidate/profile', 
+            icon: ({ className }) => <span className={className || ''}>👤</span>
+          },
+          { 
+            name: 'Training Progress', 
+            path: '/candidate/progress', 
+            icon: TrendingUp 
+          },
+          { 
+            name: 'Attendance', 
+            path: '/candidate/attendance', 
+            icon: Calendar 
+          },
+        ]
+      },
+      {
+        label: 'Documents & Forms',
+        items: [
+          { 
+            name: 'Documents', 
+            path: '/candidate/documents', 
+            icon: FileText 
+          },
+          { 
+            name: 'Forms & Applications', 
+            path: '/candidate/forms', 
+            icon: ClipboardList 
+          },
+        ]
+      },
+      {
+        label: 'Placement',
+        items: [
+          { 
+            name: 'Job Opportunities', 
+            path: '/candidate/jobs', 
+            icon: Briefcase 
+          },
+          { 
+            name: 'Placement Status', 
+            path: '/candidate/placement', 
+            icon: ({ className }) => <span className={className || ''}>🎯</span>
+          },
+        ]
+      }
+    ];
+  }
+
+  if (role === 'trainer') {
+    return [
+      {
+        label: 'Main',
+        items: [
+          { 
+            name: 'Dashboard', 
+            path: '/trainer', 
+            icon: Home 
+          },
+          { 
+            name: 'Curriculum Planner', 
+            path: '/trainer/curriculum-planner', 
+            icon: BookOpen 
+          },
+          { 
+            name: 'Attendance Management', 
+            path: '/trainer/attendance-management', 
+            icon: Users 
+          },
+          { 
+            name: 'Video Logs', 
+            path: '/trainer/video-logs', 
+            icon: Video 
+          },
+        ]
+      },
+      {
+        label: 'Assessment & Feedback',
+        items: [
+          { 
+            name: 'Assessment Evaluation', 
+            path: '/trainer/assessment-evaluation', 
+            icon: FileCheck 
+          },
+          { 
+            name: 'Feedback & Counselling', 
+            path: '/trainer/feedback-management', 
+            icon: MessageSquare 
+          },
+        ]
+      },
+      {
+        label: 'Reports & Profile',
+        items: [
+          { 
+            name: 'Reports & Analytics', 
+            path: '/trainer/reports', 
+            icon: BarChart 
+          },
+          { 
+            name: 'Profile & Settings', 
+            path: '/trainer/profile', 
             icon: ({ className }) => <span className={className || ''}>👤</span>
           },
         ]
