@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -44,8 +43,7 @@ const CenterManagerDashboard = () => {
   ];
 
   return (
-    <MainLayout role="center_manager" title="Centre Manager Dashboard">
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header & Filter Bar */}
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Centre Manager Dashboard</h1>
@@ -187,7 +185,6 @@ const CenterManagerDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </MainLayout>
   );
 };
 

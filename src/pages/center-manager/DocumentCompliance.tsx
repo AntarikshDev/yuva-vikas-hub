@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -127,8 +126,7 @@ const DocumentCompliance = () => {
   };
 
   return (
-    <MainLayout role="center_manager" title="Document Compliance">
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header & Filters */}
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Document Compliance Tracker</h1>
@@ -457,7 +455,6 @@ const DocumentCompliance = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </MainLayout>
   );
 };
 

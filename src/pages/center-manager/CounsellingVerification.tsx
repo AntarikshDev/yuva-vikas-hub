@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -114,8 +113,7 @@ const CounsellingVerification = () => {
   };
 
   return (
-    <MainLayout role="center_manager" title="Pre-Placement Counselling & Verification">
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header & Filters */}
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Counselling Completion Tracker</h1>
@@ -329,7 +327,6 @@ const CounsellingVerification = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </MainLayout>
   );
 };
 

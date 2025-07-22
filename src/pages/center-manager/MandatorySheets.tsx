@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,8 +104,7 @@ const MandatorySheets = () => {
   };
 
   return (
-    <MainLayout role="center_manager" title="Mandatory Sheets & Declarations">
-      <div className="space-y-6">
+    <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900">Mandatory Sheets & Declarations</h1>
 
         <Tabs defaultValue="pre-placement" className="w-full">
@@ -541,7 +539,6 @@ const MandatorySheets = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
   );
 };
 

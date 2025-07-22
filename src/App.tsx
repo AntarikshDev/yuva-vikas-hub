@@ -57,6 +57,13 @@ import EnrollmentBatch from "./pages/center-manager/EnrollmentBatch";
 import CounsellingVerification from "./pages/center-manager/CounsellingVerification";
 import DocumentCompliance from "./pages/center-manager/DocumentCompliance";
 import CenterMandatorySheets from "./pages/center-manager/MandatorySheets";
+import VideoLogsOrientation from "./pages/center-manager/VideoLogsOrientation";
+import AttendanceModule from "./pages/center-manager/AttendanceModule";
+import PlacementCoordination from "./pages/center-manager/PlacementCoordination";
+import TravelLetterManagement from "./pages/center-manager/TravelLetterManagement";
+import PostPlacementTracking from "./pages/center-manager/PostPlacementTracking";
+import CenterReportsExports from "./pages/center-manager/ReportsExports";
+import CenterProfileSettings from "./pages/center-manager/ProfileSettings";
 
 // MIS Admin Routes
 import MISAdminDashboard from "./pages/mis-admin/Dashboard";
@@ -200,6 +207,13 @@ const App = () => {
         <Route path="/center-manager/counselling" element={<MainLayout role="center_manager" title="Counselling Verification"><CounsellingVerification /></MainLayout>} />
         <Route path="/center-manager/documents" element={<MainLayout role="center_manager" title="Document Compliance"><DocumentCompliance /></MainLayout>} />
         <Route path="/center-manager/mandatory-sheets" element={<MainLayout role="center_manager" title="Mandatory Sheets"><CenterMandatorySheets /></MainLayout>} />
+        <Route path="/center-manager/video-logs" element={<MainLayout role="center_manager" title="Video Logs & Orientation"><VideoLogsOrientation /></MainLayout>} />
+        <Route path="/center-manager/attendance" element={<MainLayout role="center_manager" title="Attendance Module"><AttendanceModule /></MainLayout>} />
+        <Route path="/center-manager/placement" element={<MainLayout role="center_manager" title="Placement Coordination"><PlacementCoordination /></MainLayout>} />
+        <Route path="/center-manager/travel" element={<MainLayout role="center_manager" title="Travel Letter Management"><TravelLetterManagement /></MainLayout>} />
+        <Route path="/center-manager/post-placement" element={<MainLayout role="center_manager" title="Post-Placement Tracking"><PostPlacementTracking /></MainLayout>} />
+        <Route path="/center-manager/reports" element={<MainLayout role="center_manager" title="Reports & Exports"><CenterReportsExports /></MainLayout>} />
+        <Route path="/center-manager/profile" element={<MainLayout role="center_manager" title="Profile & Settings"><CenterProfileSettings /></MainLayout>} />
 
         {/* MIS Admin Routes */}
         <Route path="/mis-admin/dashboard" element={<MainLayout role="mis_admin" title="Dashboard"><MISAdminDashboard /></MainLayout>} />
