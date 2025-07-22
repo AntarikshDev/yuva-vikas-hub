@@ -8,17 +8,19 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, Building, Users, Calendar, Phone, Mail, MapPin, FileText } from 'lucide-react';
+import { Briefcase, Building, Users, Calendar, Phone, Mail, MapPin, FileText, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import LocalCompanyForm from '@/components/forms/LocalCompanyForm';
 
 const PlacementCoordination = () => {
   const [selectedBatch, setSelectedBatch] = useState('all');
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [isAddCompanyModalOpen, setIsAddCompanyModalOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
   const { toast } = useToast();
 
-  // Mock data for placement coordination
-  const placementData = [
+  // Mock data for local placement candidates (willing for local placement)
+  const localPlacementCandidates = [
     {
       id: 'C-001',
       name: 'Ravi Kumar',
@@ -28,7 +30,9 @@ const PlacementCoordination = () => {
       company: 'Tech Solutions Pvt Ltd',
       salary: '15000',
       joinDate: '2024-02-01',
-      location: 'Noida'
+      location: 'Local - Noida',
+      phone: '+91-9876543210',
+      willingForLocal: true
     },
     {
       id: 'C-002',
@@ -39,7 +43,9 @@ const PlacementCoordination = () => {
       company: 'Hardware Plus',
       salary: '18000',
       joinDate: '2024-02-05',
-      location: 'Gurgaon'
+      location: 'Local - Gurgaon',
+      phone: '+91-9876543211',
+      willingForLocal: true
     },
     {
       id: 'C-003',
@@ -50,35 +56,87 @@ const PlacementCoordination = () => {
       company: '',
       salary: '',
       joinDate: '',
-      location: ''
+      location: '',
+      phone: '+91-9876543212',
+      willingForLocal: true
+    },
+    {
+      id: 'C-004',
+      name: 'Sunita Devi',
+      batch: 'DDU-GKY-B6',
+      course: 'Retail Sales Associate',
+      status: 'ready',
+      company: '',
+      salary: '',
+      joinDate: '',
+      location: '',
+      phone: '+91-9876543213',
+      willingForLocal: true
+    },
+    {
+      id: 'C-005',
+      name: 'Rajesh Yadav',
+      batch: 'DDU-GKY-B7',
+      course: 'Computer Hardware',
+      status: 'ready',
+      company: '',
+      salary: '',
+      joinDate: '',
+      location: '',
+      phone: '+91-9876543214',
+      willingForLocal: true
     }
   ];
 
-  // Mock data for companies
-  const companies = [
+  // Mock data for local companies added by center manager
+  const localCompanies = [
     {
-      id: 'COMP-001',
+      id: 'LC-001',
       name: 'Tech Solutions Pvt Ltd',
       industry: 'IT Services',
-      location: 'Noida',
+      location: 'Noida (Local)',
       contact: 'Mr. Sharma',
       phone: '+91-9876543210',
       email: 'hr@techsolutions.com',
       openings: 25,
       skills: ['Data Entry', 'Computer Basics'],
-      salary: '15000-20000'
+      salary: '15000-20000',
+      jobRoles: 'Data Entry Operator, Computer Operator',
+      workingHours: '9 AM - 6 PM',
+      addedBy: 'Center Manager',
+      dateAdded: '2024-01-15'
     },
     {
-      id: 'COMP-002',
+      id: 'LC-002',
       name: 'Hardware Plus',
       industry: 'Computer Hardware',
-      location: 'Gurgaon',
+      location: 'Gurgaon (Local)',
       contact: 'Ms. Priya',
       phone: '+91-9876543211',
       email: 'careers@hardwareplus.com',
       openings: 15,
       skills: ['Hardware Repair', 'Troubleshooting'],
-      salary: '18000-25000'
+      salary: '18000-25000',
+      jobRoles: 'Hardware Technician, Support Executive',
+      workingHours: '10 AM - 7 PM',
+      addedBy: 'Center Manager',
+      dateAdded: '2024-01-20'
+    },
+    {
+      id: 'LC-003',
+      name: 'Local Retail Store',
+      industry: 'Retail',
+      location: 'Delhi (Local)',
+      contact: 'Mr. Gupta',
+      phone: '+91-9876543212',
+      email: 'hr@localretail.com',
+      openings: 10,
+      skills: ['Customer Service', 'Sales'],
+      salary: '12000-18000',
+      jobRoles: 'Sales Associate, Customer Service Executive',
+      workingHours: '10 AM - 8 PM',
+      addedBy: 'Center Manager',
+      dateAdded: '2024-01-25'
     }
   ];
 
@@ -112,14 +170,19 @@ const PlacementCoordination = () => {
   };
 
   const filteredData = selectedBatch === 'all' 
-    ? placementData 
-    : placementData.filter(candidate => candidate.batch === selectedBatch);
+    ? localPlacementCandidates 
+    : localPlacementCandidates.filter(candidate => candidate.batch === selectedBatch);
 
   return (
     <div className="space-y-6">
       {/* Header & Filters */}
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Placement Coordination</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Local Placement Coordination</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage candidates willing for local placement and add local companies in your state
+          </p>
+        </div>
         
         <div className="flex gap-3">
           <Select value={selectedBatch} onValueChange={setSelectedBatch}>
@@ -135,17 +198,17 @@ const PlacementCoordination = () => {
             </SelectContent>
           </Select>
           
-          <Button>
-            <Building className="h-4 w-4 mr-2" />
-            Add Company
+          <Button onClick={() => setIsAddCompanyModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Local Company
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="candidates" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="candidates">Candidate Status</TabsTrigger>
-          <TabsTrigger value="companies">Company Partners</TabsTrigger>
+          <TabsTrigger value="candidates">Local Candidates</TabsTrigger>
+          <TabsTrigger value="companies">Local Companies</TabsTrigger>
           <TabsTrigger value="pipeline">Placement Pipeline</TabsTrigger>
         </TabsList>
 
@@ -155,21 +218,24 @@ const PlacementCoordination = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Candidate Placement Status
+                Candidates Willing for Local Placement
               </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Candidates who have opted for local placement through the mobile app
+              </p>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Candidate Name</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Batch</TableHead>
                     <TableHead>Course</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Company</TableHead>
+                    <TableHead>Local Company</TableHead>
                     <TableHead>Salary</TableHead>
                     <TableHead>Join Date</TableHead>
-                    <TableHead>Location</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -177,13 +243,13 @@ const PlacementCoordination = () => {
                   {filteredData.map((candidate) => (
                     <TableRow key={candidate.id}>
                       <TableCell className="font-medium">{candidate.name}</TableCell>
+                      <TableCell>{candidate.phone}</TableCell>
                       <TableCell>{candidate.batch}</TableCell>
                       <TableCell>{candidate.course}</TableCell>
                       <TableCell>{getStatusBadge(candidate.status)}</TableCell>
                       <TableCell>{candidate.company || '-'}</TableCell>
                       <TableCell>{candidate.salary ? `₹${candidate.salary}` : '-'}</TableCell>
                       <TableCell>{candidate.joinDate || '-'}</TableCell>
-                      <TableCell>{candidate.location || '-'}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button 
@@ -197,7 +263,7 @@ const PlacementCoordination = () => {
                             Assign
                           </Button>
                           <Button variant="outline" size="sm">
-                            View
+                            Contact
                           </Button>
                         </div>
                       </TableCell>
@@ -215,16 +281,22 @@ const PlacementCoordination = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building className="h-5 w-5" />
-                Partner Companies
+                Local Companies in Your State
               </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Companies you have added for local placement opportunities
+              </p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {companies.map((company) => (
+                {localCompanies.map((company) => (
                   <Card key={company.id} className="border">
                     <CardHeader>
                       <CardTitle className="text-lg">{company.name}</CardTitle>
-                      <Badge variant="outline">{company.industry}</Badge>
+                      <div className="flex gap-2">
+                        <Badge variant="outline">{company.industry}</Badge>
+                        <Badge variant="secondary">Local</Badge>
+                      </div>
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="flex items-center gap-2 text-sm">
@@ -244,6 +316,12 @@ const PlacementCoordination = () => {
                         {company.openings} openings
                       </div>
                       <div className="text-sm">
+                        <strong>Job Roles:</strong> {company.jobRoles}
+                      </div>
+                      <div className="text-sm">
+                        <strong>Working Hours:</strong> {company.workingHours}
+                      </div>
+                      <div className="text-sm">
                         <strong>Salary:</strong> ₹{company.salary}
                       </div>
                       <div className="flex flex-wrap gap-1">
@@ -253,9 +331,17 @@ const PlacementCoordination = () => {
                           </Badge>
                         ))}
                       </div>
-                      <Button variant="outline" size="sm" className="w-full">
-                        Contact Company
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="flex-1">
+                          Contact
+                        </Button>
+                        <Button variant="outline" size="sm" className="flex-1">
+                          Edit
+                        </Button>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Added on {company.dateAdded}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -269,13 +355,13 @@ const PlacementCoordination = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Ready for Placement</CardTitle>
+                <CardTitle className="text-lg">Ready for Local Placement</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-yellow-600">
-                  {placementData.filter(c => c.status === 'ready').length}
+                  {localPlacementCandidates.filter(c => c.status === 'ready').length}
                 </div>
-                <p className="text-sm text-muted-foreground">Candidates</p>
+                <p className="text-sm text-muted-foreground">Local Candidates</p>
               </CardContent>
             </Card>
             
@@ -285,33 +371,33 @@ const PlacementCoordination = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-blue-600">
-                  {placementData.filter(c => c.status === 'interview_scheduled').length}
+                  {localPlacementCandidates.filter(c => c.status === 'interview_scheduled').length}
                 </div>
-                <p className="text-sm text-muted-foreground">Candidates</p>
+                <p className="text-sm text-muted-foreground">Local Candidates</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Placed</CardTitle>
+                <CardTitle className="text-lg">Locally Placed</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
-                  {placementData.filter(c => c.status === 'placed').length}
+                  {localPlacementCandidates.filter(c => c.status === 'placed').length}
                 </div>
-                <p className="text-sm text-muted-foreground">Candidates</p>
+                <p className="text-sm text-muted-foreground">Local Candidates</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Placement Rate</CardTitle>
+                <CardTitle className="text-lg">Local Companies</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-purple-600">
-                  {Math.round((placementData.filter(c => c.status === 'placed').length / placementData.length) * 100)}%
+                  {localCompanies.length}
                 </div>
-                <p className="text-sm text-muted-foreground">Success Rate</p>
+                <p className="text-sm text-muted-foreground">Added Companies</p>
               </CardContent>
             </Card>
           </div>
@@ -333,7 +419,7 @@ const PlacementCoordination = () => {
                   <SelectValue placeholder="Choose a company" />
                 </SelectTrigger>
                 <SelectContent>
-                  {companies.map((company) => (
+                  {localCompanies.map((company) => (
                     <SelectItem key={company.id} value={company.id}>
                       {company.name} - {company.location}
                     </SelectItem>
@@ -371,6 +457,12 @@ const PlacementCoordination = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Add Local Company Modal */}
+      <LocalCompanyForm 
+        open={isAddCompanyModalOpen} 
+        onOpenChange={setIsAddCompanyModalOpen} 
+      />
     </div>
   );
 };
