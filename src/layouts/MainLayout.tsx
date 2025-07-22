@@ -783,3 +783,5 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
     }
   ];
 }
+
+export default MainLayout;
