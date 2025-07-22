@@ -207,6 +207,15 @@ const App = () => {
         <Route path="/company-hr/feedback-management" element={<MainLayout role="company_hr" title="Feedback Management"><CompanyHRFeedbackManagement /></MainLayout>} />
         <Route path="/company-hr/reports" element={<MainLayout role="company_hr" title="Reports"><CompanyHRReports /></MainLayout>} />
         <Route path="/company-hr/profile" element={<MainLayout role="company_hr" title="Profile"><CompanyHRProfile /></MainLayout>} />
+
+        {/* PPC Admin Routes */}
+        <Route path="/ppc-admin/dashboard" element={<MainLayout role="ppc_admin" title="Dashboard"><PPCAdminDashboard /></MainLayout>} />
+        <Route path="/ppc-admin/pre-placement" element={<MainLayout role="ppc_admin" title="Pre-Placement Compliance"><PPCAdminPrePlacement /></MainLayout>} />
+        <Route path="/ppc-admin/post-placement" element={<MainLayout role="ppc_admin" title="Post-Placement Management"><PPCAdminPostPlacement /></MainLayout>} />
+        <Route path="/ppc-admin/poc-management" element={<MainLayout role="ppc_admin" title="POC Management"><PPCAdminPOCManagement /></MainLayout>} />
+        <Route path="/ppc-admin/sos-monitoring" element={<MainLayout role="ppc_admin" title="SOS Monitoring"><PPCAdminSOSMonitoring /></MainLayout>} />
+        <Route path="/ppc-admin/reports" element={<MainLayout role="ppc_admin" title="Reports & Analytics"><PPCAdminReports /></MainLayout>} />
+        <Route path="/ppc-admin/profile" element={<MainLayout role="ppc_admin" title="Profile"><PPCAdminProfile /></MainLayout>} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
