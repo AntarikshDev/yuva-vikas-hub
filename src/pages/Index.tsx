@@ -59,6 +59,11 @@ const Index = () => {
       label: "Company HR",
       path: "/company-hr/dashboard",
     },
+    {
+      value: "ppc-admin",
+      label: "PPC Admin",
+      path: "/ppc-admin/dashboard",
+    },
   ];
 
   const handleLogin = (e: React.FormEvent) => {

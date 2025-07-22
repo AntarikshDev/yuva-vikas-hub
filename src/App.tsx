@@ -81,6 +81,15 @@ import CompanyHRInterviewScheduler from "./pages/company-hr/InterviewScheduler";
 import CompanyHRFeedbackManagement from "./pages/company-hr/FeedbackManagement";
 import CompanyHRReports from "./pages/company-hr/Reports";
 import CompanyHRProfile from "./pages/company-hr/Profile";
+
+// PPC Admin imports
+import PPCAdminDashboard from "./pages/ppc-admin/Dashboard";
+import PPCAdminPrePlacement from "./pages/ppc-admin/PrePlacementCompliance";
+import PPCAdminPostPlacement from "./pages/ppc-admin/PostPlacementManagement";
+import PPCAdminPOCManagement from "./pages/ppc-admin/POCManagement";
+import PPCAdminSOSMonitoring from "./pages/ppc-admin/SOSMonitoring";
+import PPCAdminReports from "./pages/ppc-admin/Reports";
+import PPCAdminProfile from "./pages/ppc-admin/Profile";
 import TrainerAssessmentEvaluation from "./pages/trainer/AssessmentEvaluation";
 import TrainerFeedbackManagement from "./pages/trainer/FeedbackManagement";
 import TrainerReports from "./pages/trainer/Reports";
