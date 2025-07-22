@@ -90,6 +90,16 @@ import PPCAdminPOCManagement from "./pages/ppc-admin/POCManagement";
 import PPCAdminSOSMonitoring from "./pages/ppc-admin/SOSMonitoring";
 import PPCAdminReports from "./pages/ppc-admin/Reports";
 import PPCAdminProfile from "./pages/ppc-admin/Profile";
+
+// POC imports
+import POCDashboard from "./pages/poc/Dashboard";
+import POCVisitManagement from "./pages/poc/VisitManagement";
+import POCSOSManagement from "./pages/poc/SOSManagement";
+import POCTravelManagement from "./pages/poc/TravelManagement";
+import POCWelfareFacilitation from "./pages/poc/WelfareFacilitation";
+import POCReports from "./pages/poc/Reports";
+import POCProfile from "./pages/poc/Profile";
+
 import TrainerAssessmentEvaluation from "./pages/trainer/AssessmentEvaluation";
 import TrainerFeedbackManagement from "./pages/trainer/FeedbackManagement";
 import TrainerReports from "./pages/trainer/Reports";
@@ -213,7 +223,7 @@ const App = () => {
         <Route path="/ppc-admin/pre-placement" element={<MainLayout role="ppc_admin" title="Pre-Placement Compliance"><PPCAdminPrePlacement /></MainLayout>} />
         <Route path="/ppc-admin/post-placement" element={<MainLayout role="ppc_admin" title="Post-Placement Management"><PPCAdminPostPlacement /></MainLayout>} />
         <Route path="/ppc-admin/poc-management" element={<MainLayout role="ppc_admin" title="POC Management"><PPCAdminPOCManagement /></MainLayout>} />
-        <Route path="/ppc-admin/sos-monitoring" element={<MainLayout role="ppc_admin" title="SOS Monitoring"><SOSMonitoring /></MainLayout>} />
+        <Route path="/ppc-admin/sos-monitoring" element={<MainLayout role="ppc_admin" title="SOS Monitoring"><PPCAdminSOSMonitoring /></MainLayout>} />
         <Route path="/ppc-admin/reports" element={<MainLayout role="ppc_admin" title="Reports & Analytics"><PPCAdminReports /></MainLayout>} />
         <Route path="/ppc-admin/profile" element={<MainLayout role="ppc_admin" title="Profile"><PPCAdminProfile /></MainLayout>} />
 

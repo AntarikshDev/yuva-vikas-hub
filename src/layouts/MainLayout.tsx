@@ -13,7 +13,7 @@ import {
   SidebarFooter,
   SidebarTrigger
 } from '@/components/ui/sidebar';
-import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp, BookOpen, Video, MessageSquare, FileText } from 'lucide-react';
+import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp, BookOpen, Video, MessageSquare, FileText, MapPin } from 'lucide-react';
 import { NotificationCenter } from '@/components/common/NotificationCenter';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
@@ -659,40 +659,40 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
     ];
   }
 
-  if (role === 'ppc_admin') {
+  if (role === 'poc') {
     return [
       {
         label: 'Main',
         items: [
           { 
             name: 'Dashboard', 
-            path: '/ppc-admin/dashboard', 
+            path: '/poc/dashboard', 
             icon: Home 
           },
           { 
-            name: 'Pre-Placement Compliance', 
-            path: '/ppc-admin/pre-placement', 
-            icon: FileCheck 
+            name: 'Visit Management', 
+            path: '/poc/visits', 
+            icon: Calendar 
           },
           { 
-            name: 'Post-Placement Management', 
-            path: '/ppc-admin/post-placement', 
-            icon: Building 
+            name: 'SOS Management', 
+            path: '/poc/sos', 
+            icon: AlertCircle 
           },
         ]
       },
       {
-        label: 'Monitoring & Management',
+        label: 'Facilitation',
         items: [
           { 
-            name: 'POC Management', 
-            path: '/ppc-admin/poc-management', 
-            icon: Users 
+            name: 'Travel Management', 
+            path: '/poc/travel', 
+            icon: MapPin 
           },
           { 
-            name: 'SOS Monitoring', 
-            path: '/ppc-admin/sos-monitoring', 
-            icon: AlertCircle 
+            name: 'Welfare Facilitation', 
+            path: '/poc/welfare', 
+            icon: Home 
           },
         ]
       },
@@ -700,13 +700,13 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
         label: 'Reports & Profile',
         items: [
           { 
-            name: 'Reports & Analytics', 
-            path: '/ppc-admin/reports', 
+            name: 'Reports', 
+            path: '/poc/reports', 
             icon: BarChart 
           },
           { 
-            name: 'Profile & Settings', 
-            path: '/ppc-admin/profile', 
+            name: 'Profile', 
+            path: '/poc/profile', 
             icon: ({ className }) => <span className={className || ''}>👤</span>
           },
         ]
