@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertTriangle, Clock, CheckCircle, Eye, Search, Filter } from "lucide-react";
 
 const SOSMonitoring = () => {
+  console.log("SOS Monitoring component loaded");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sosTypeFilter, setSosTypeFilter] = useState("");

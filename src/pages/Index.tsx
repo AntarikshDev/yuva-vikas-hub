@@ -73,9 +73,12 @@ const Index = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Login attempt:", { selectedRole, username, password });
     if (selectedRole && username && password) {
       const role = userRoles.find(r => r.value === selectedRole);
+      console.log("Found role:", role);
       if (role) {
+        console.log("Navigating to:", role.path);
         navigate(role.path);
       }
     }

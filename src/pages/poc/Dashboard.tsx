@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Users, AlertTriangle, CheckCircle, Phone, Camera } from "lucide-react";
 
 const POCDashboard = () => {
+  console.log("POC Dashboard component loaded");
   const [stateFilter, setStateFilter] = useState("");
   const [batchFilter, setBatchFilter] = useState("");
   const [companyFilter, setCompanyFilter] = useState("");
