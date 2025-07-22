@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,8 +77,7 @@ const EnrollmentBatch = () => {
   };
 
   return (
-    <MainLayout role="center_manager" title="Enrollment & Batch Management">
-      <div className="space-y-6">
+    <div className="space-y-6">
         <Tabs defaultValue="calendar" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="calendar">Batch Calendar</TabsTrigger>
@@ -364,7 +362,6 @@ const EnrollmentBatch = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
   );
 };
 
