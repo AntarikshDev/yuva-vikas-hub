@@ -72,7 +72,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role, title })
                     <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile" className="h-full w-full object-cover" />
                   </div>
                   <div>
-                    <div className="font-medium text-white">{formatRoleDisplay(role)}</div>
+                    <div className="font-medium text-white">
+                      {window.location.pathname.startsWith('/admin-department') ? 'Administration Department' : formatRoleDisplay(role)}
+                    </div>
                     <div className="text-sm text-indigo-200">Maharashtra</div>
                   </div>
                 </div>
