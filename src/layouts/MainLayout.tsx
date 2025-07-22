@@ -189,6 +189,47 @@ function getPageTitle(path: string): string {
 
 // Function to return navigation items based on role with proper typing
 function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
+  // Check if this is an admin department page based on the current location
+  if (window.location.pathname.startsWith('/admin-department')) {
+    return [
+      {
+        label: 'Administration',
+        items: [
+          { 
+            name: 'Dashboard', 
+            path: '/admin-department/dashboard', 
+            icon: Home 
+          },
+          { 
+            name: 'Rent Management', 
+            path: '/admin-department/rent-management', 
+            icon: Building 
+          },
+          { 
+            name: 'Vendor Management', 
+            path: '/admin-department/vendor-management', 
+            icon: Users 
+          },
+          { 
+            name: 'Expense Management', 
+            path: '/admin-department/expense-management', 
+            icon: ({ className }) => <span className={className || ''}>💰</span>
+          },
+          { 
+            name: 'Ticket Booking', 
+            path: '/admin-department/ticket-booking', 
+            icon: ({ className }) => <span className={className || ''}>🎫</span>
+          },
+          { 
+            name: 'Reports', 
+            path: '/admin-department/reports', 
+            icon: BarChart 
+          },
+        ]
+      }
+    ];
+  }
+  
   // This function would return different navigation items based on user role
   if (role === 'super_admin') {
     return [

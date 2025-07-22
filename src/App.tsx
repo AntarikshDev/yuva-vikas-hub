@@ -246,12 +246,12 @@ const App = () => {
             
             {/* Catch-all route */}
             {/* Admin Department Routes */}
-            <Route path="/admin-department/dashboard" element={<AdminDeptDashboard />} />
-            <Route path="/admin-department/rent-management" element={<RentManagement />} />
-            <Route path="/admin-department/vendor-management" element={<VendorManagement />} />
-            <Route path="/admin-department/expense-management" element={<ExpenseManagement />} />
-            <Route path="/admin-department/ticket-booking" element={<TicketBooking />} />
-            <Route path="/admin-department/reports" element={<AdminDeptReports />} />
+            <Route path="/admin-department/dashboard" element={<MainLayout role="super_admin" title="Administration Dashboard"><AdminDeptDashboard /></MainLayout>} />
+            <Route path="/admin-department/rent-management" element={<MainLayout role="super_admin" title="Rent Management"><RentManagement /></MainLayout>} />
+            <Route path="/admin-department/vendor-management" element={<MainLayout role="super_admin" title="Vendor Management"><VendorManagement /></MainLayout>} />
+            <Route path="/admin-department/expense-management" element={<MainLayout role="super_admin" title="Expense Management"><ExpenseManagement /></MainLayout>} />
+            <Route path="/admin-department/ticket-booking" element={<MainLayout role="super_admin" title="Ticket Booking"><TicketBooking /></MainLayout>} />
+            <Route path="/admin-department/reports" element={<MainLayout role="super_admin" title="Reports"><AdminDeptReports /></MainLayout>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
