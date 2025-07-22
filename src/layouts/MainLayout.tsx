@@ -599,6 +599,61 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
     ];
   }
 
+  if (role === 'ppc_admin') {
+    return [
+      {
+        label: 'Main',
+        items: [
+          { 
+            name: 'Dashboard', 
+            path: '/ppc-admin/dashboard', 
+            icon: Home 
+          },
+          { 
+            name: 'Pre-Placement Compliance', 
+            path: '/ppc-admin/pre-placement', 
+            icon: FileCheck 
+          },
+          { 
+            name: 'Post-Placement Management', 
+            path: '/ppc-admin/post-placement', 
+            icon: Building 
+          },
+        ]
+      },
+      {
+        label: 'Monitoring & Management',
+        items: [
+          { 
+            name: 'POC Management', 
+            path: '/ppc-admin/poc-management', 
+            icon: Users 
+          },
+          { 
+            name: 'SOS Monitoring', 
+            path: '/ppc-admin/sos-monitoring', 
+            icon: AlertCircle 
+          },
+        ]
+      },
+      {
+        label: 'Reports & Profile',
+        items: [
+          { 
+            name: 'Reports & Analytics', 
+            path: '/ppc-admin/reports', 
+            icon: BarChart 
+          },
+          { 
+            name: 'Profile & Settings', 
+            path: '/ppc-admin/profile', 
+            icon: ({ className }) => <span className={className || ''}>👤</span>
+          },
+        ]
+      }
+    ];
+  }
+
   if (role === 'company_hr') {
     return [
       {
