@@ -54,6 +54,11 @@ const Index = () => {
       label: "MIS Admin",
       path: "/mis-admin/dashboard",
     },
+    {
+      value: "company-hr",
+      label: "Company HR",
+      path: "/company-hr/dashboard",
+    },
   ];
 
   const handleLogin = (e: React.FormEvent) => {

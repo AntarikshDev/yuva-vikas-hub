@@ -598,6 +598,66 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
       }
     ];
   }
+
+  if (role === 'company_hr') {
+    return [
+      {
+        label: 'Main',
+        items: [
+          { 
+            name: 'Dashboard', 
+            path: '/company-hr/dashboard', 
+            icon: Home 
+          },
+          { 
+            name: 'Batch Management', 
+            path: '/company-hr/batch-management', 
+            icon: Users 
+          },
+          { 
+            name: 'Candidate Management', 
+            path: '/company-hr/candidate-management', 
+            icon: ({ className }) => <span className={className || ''}>👥</span>
+          },
+        ]
+      },
+      {
+        label: 'Scheduling & Travel',
+        items: [
+          { 
+            name: 'Interview Scheduler', 
+            path: '/company-hr/interview-scheduler', 
+            icon: Calendar 
+          },
+          { 
+            name: 'Travel Management', 
+            path: '/company-hr/travel-management', 
+            icon: ({ className }) => <span className={className || ''}>✈️</span>
+          },
+        ]
+      },
+      {
+        label: 'Reports & Profile',
+        items: [
+          { 
+            name: 'Feedback Management', 
+            path: '/company-hr/feedback-management', 
+            icon: MessageSquare 
+          },
+          { 
+            name: 'Reports & Analytics', 
+            path: '/company-hr/reports', 
+            icon: BarChart 
+          },
+          { 
+            name: 'Profile & Settings', 
+            path: '/company-hr/profile', 
+            icon: ({ className }) => <span className={className || ''}>👤</span>
+          },
+        ]
+      }
+    ];
+  }
   
   // Return default navigation for other roles (would be customized for each)
   return [

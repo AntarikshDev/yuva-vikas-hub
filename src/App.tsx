@@ -73,6 +73,14 @@ import TrainerDashboard from "./pages/trainer/Dashboard";
 import TrainerCurriculumPlanner from "./pages/trainer/CurriculumPlanner";
 import TrainerAttendanceManagement from "./pages/trainer/AttendanceManagement";
 import TrainerVideoLogs from "./pages/trainer/VideoLogs";
+import CompanyHRDashboard from "./pages/company-hr/Dashboard";
+import CompanyHRBatchManagement from "./pages/company-hr/BatchManagement";
+import CompanyHRCandidateManagement from "./pages/company-hr/CandidateManagement";
+import CompanyHRTravelManagement from "./pages/company-hr/TravelManagement";
+import CompanyHRInterviewScheduler from "./pages/company-hr/InterviewScheduler";
+import CompanyHRFeedbackManagement from "./pages/company-hr/FeedbackManagement";
+import CompanyHRReports from "./pages/company-hr/Reports";
+import CompanyHRProfile from "./pages/company-hr/Profile";
 import TrainerAssessmentEvaluation from "./pages/trainer/AssessmentEvaluation";
 import TrainerFeedbackManagement from "./pages/trainer/FeedbackManagement";
 import TrainerReports from "./pages/trainer/Reports";
@@ -180,6 +188,16 @@ const App = () => {
         <Route path="/mis-admin/audit" element={<MainLayout role="mis_admin" title="Audit & Compliance"><MISAdminAuditCompliance /></MainLayout>} />
         <Route path="/mis-admin/api-management" element={<MainLayout role="mis_admin" title="Notifications & Alerts"><MISAdminAlertsManagement /></MainLayout>} />
         <Route path="/mis-admin/profile" element={<MainLayout role="mis_admin" title="Profile & Settings"><MISAdminProfileSettings /></MainLayout>} />
+
+        {/* Company HR Routes */}
+        <Route path="/company-hr/dashboard" element={<MainLayout role="company_hr" title="Dashboard"><CompanyHRDashboard /></MainLayout>} />
+        <Route path="/company-hr/batch-management" element={<MainLayout role="company_hr" title="Batch Management"><CompanyHRBatchManagement /></MainLayout>} />
+        <Route path="/company-hr/candidate-management" element={<MainLayout role="company_hr" title="Candidate Management"><CompanyHRCandidateManagement /></MainLayout>} />
+        <Route path="/company-hr/travel-management" element={<MainLayout role="company_hr" title="Travel Management"><CompanyHRTravelManagement /></MainLayout>} />
+        <Route path="/company-hr/interview-scheduler" element={<MainLayout role="company_hr" title="Interview Scheduler"><CompanyHRInterviewScheduler /></MainLayout>} />
+        <Route path="/company-hr/feedback-management" element={<MainLayout role="company_hr" title="Feedback Management"><CompanyHRFeedbackManagement /></MainLayout>} />
+        <Route path="/company-hr/reports" element={<MainLayout role="company_hr" title="Reports"><CompanyHRReports /></MainLayout>} />
+        <Route path="/company-hr/profile" element={<MainLayout role="company_hr" title="Profile"><CompanyHRProfile /></MainLayout>} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
