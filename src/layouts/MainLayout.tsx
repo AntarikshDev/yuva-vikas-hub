@@ -38,7 +38,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
   role: 'super_admin' | 'state_head' | 'center_manager' | 'mobilizer' | 
          'candidate' | 'ppc_team' | 'company_hr' | 'mobilization_manager' | 
-         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis_admin' | 'ppc_admin';
+         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis_admin' | 'ppc_admin' | 'poc';
   title?: string; // Optional title override
 }
 

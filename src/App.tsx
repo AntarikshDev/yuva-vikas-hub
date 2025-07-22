@@ -213,9 +213,18 @@ const App = () => {
         <Route path="/ppc-admin/pre-placement" element={<MainLayout role="ppc_admin" title="Pre-Placement Compliance"><PPCAdminPrePlacement /></MainLayout>} />
         <Route path="/ppc-admin/post-placement" element={<MainLayout role="ppc_admin" title="Post-Placement Management"><PPCAdminPostPlacement /></MainLayout>} />
         <Route path="/ppc-admin/poc-management" element={<MainLayout role="ppc_admin" title="POC Management"><PPCAdminPOCManagement /></MainLayout>} />
-        <Route path="/ppc-admin/sos-monitoring" element={<MainLayout role="ppc_admin" title="SOS Monitoring"><PPCAdminSOSMonitoring /></MainLayout>} />
+        <Route path="/ppc-admin/sos-monitoring" element={<MainLayout role="ppc_admin" title="SOS Monitoring"><SOSMonitoring /></MainLayout>} />
         <Route path="/ppc-admin/reports" element={<MainLayout role="ppc_admin" title="Reports & Analytics"><PPCAdminReports /></MainLayout>} />
         <Route path="/ppc-admin/profile" element={<MainLayout role="ppc_admin" title="Profile"><PPCAdminProfile /></MainLayout>} />
+
+        {/* POC Routes */}
+        <Route path="/poc/dashboard" element={<MainLayout role="poc" title="Dashboard"><POCDashboard /></MainLayout>} />
+        <Route path="/poc/visits" element={<MainLayout role="poc" title="Visit Management"><POCVisitManagement /></MainLayout>} />
+        <Route path="/poc/sos" element={<MainLayout role="poc" title="SOS Management"><POCSOSManagement /></MainLayout>} />
+        <Route path="/poc/travel" element={<MainLayout role="poc" title="Travel Management"><POCTravelManagement /></MainLayout>} />
+        <Route path="/poc/welfare" element={<MainLayout role="poc" title="Welfare Facilitation"><POCWelfareFacilitation /></MainLayout>} />
+        <Route path="/poc/reports" element={<MainLayout role="poc" title="Reports"><POCReports /></MainLayout>} />
+        <Route path="/poc/profile" element={<MainLayout role="poc" title="Profile"><POCProfile /></MainLayout>} />
             
             {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
