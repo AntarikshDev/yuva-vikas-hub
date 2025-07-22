@@ -100,6 +100,14 @@ import POCWelfareFacilitation from "./pages/poc/WelfareFacilitation";
 import POCReports from "./pages/poc/Reports";
 import POCProfile from "./pages/poc/Profile";
 
+// Administration Department imports
+import AdminDeptDashboard from "./pages/admin-department/Dashboard";
+import RentManagement from "./pages/admin-department/RentManagement";
+import VendorManagement from "./pages/admin-department/VendorManagement";
+import ExpenseManagement from "./pages/admin-department/ExpenseManagement";
+import TicketBooking from "./pages/admin-department/TicketBooking";
+import AdminDeptReports from "./pages/admin-department/Reports";
+
 import TrainerAssessmentEvaluation from "./pages/trainer/AssessmentEvaluation";
 import TrainerFeedbackManagement from "./pages/trainer/FeedbackManagement";
 import TrainerReports from "./pages/trainer/Reports";
