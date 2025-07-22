@@ -237,6 +237,14 @@ const App = () => {
         <Route path="/poc/profile" element={<MainLayout role="poc" title="Profile"><POCProfile /></MainLayout>} />
             
             {/* Catch-all route */}
+            {/* Admin Department Routes */}
+            <Route path="/admin-department/dashboard" element={<AdminDeptDashboard />} />
+            <Route path="/admin-department/rent-management" element={<RentManagement />} />
+            <Route path="/admin-department/vendor-management" element={<VendorManagement />} />
+            <Route path="/admin-department/expense-management" element={<ExpenseManagement />} />
+            <Route path="/admin-department/ticket-booking" element={<TicketBooking />} />
+            <Route path="/admin-department/reports" element={<AdminDeptReports />} />
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

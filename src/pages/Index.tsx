@@ -69,6 +69,11 @@ const Index = () => {
       label: "POC (Point of Contact)",
       path: "/poc/dashboard",
     },
+    {
+      value: "admin-department",
+      label: "Admin Department",
+      path: "/admin-department/dashboard",
+    },
   ];
 
   const handleLogin = (e: React.FormEvent) => {
