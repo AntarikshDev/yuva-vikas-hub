@@ -8,111 +8,130 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Calendar, Users, FileText, Download, Send, Clock } from 'lucide-react';
+import { MapPin, Calendar, Users, FileText, Download, Send, Clock, Building2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const TravelLetterManagement = () => {
   const [selectedBatch, setSelectedBatch] = useState('all');
-  const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
-  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [selectedBatchData, setSelectedBatchData] = useState<any>(null);
   const { toast } = useToast();
 
-  // Mock data for travel letters
-  const travelLetters = [
+  // Mock data for batch-wise travel letter requests
+  const batchData = [
     {
-      id: 'TL-001',
-      candidateName: 'Ravi Kumar',
-      batch: 'DDU-GKY-B5',
+      id: 'DDU-GKY-B5',
+      name: 'DDU-GKY Batch 5',
       company: 'Tech Solutions Pvt Ltd',
-      fromLocation: 'Delhi',
-      toLocation: 'Noida',
-      travelDate: '2024-01-25',
-      mode: 'Bus',
-      amount: '500',
-      status: 'approved',
-      requestDate: '2024-01-20'
+      totalCandidates: 25,
+      travelingCandidates: 18,
+      destination: 'Noida, UP',
+      travelDate: '2024-02-15',
+      status: 'letter_available', // requested, pending_approval, letter_available
+      requestedDate: '2024-01-20',
+      letterUploadedDate: '2024-02-10',
+      letterUrl: '/documents/travel-letter-batch5.pdf'
     },
     {
-      id: 'TL-002',
-      candidateName: 'Priya Sharma',
-      batch: 'DDU-GKY-B6',
-      company: 'Hardware Plus',
-      fromLocation: 'Delhi',
-      toLocation: 'Gurgaon',
-      travelDate: '2024-01-28',
-      mode: 'Metro',
-      amount: '200',
-      status: 'pending',
-      requestDate: '2024-01-22'
+      id: 'DDU-GKY-B6',
+      name: 'DDU-GKY Batch 6',
+      company: 'Hardware Plus India',
+      totalCandidates: 30,
+      travelingCandidates: 22,
+      destination: 'Gurgaon, HR',
+      travelDate: '2024-02-20',
+      status: 'pending_approval',
+      requestedDate: '2024-01-25',
+      letterUploadedDate: null,
+      letterUrl: null
     },
     {
-      id: 'TL-003',
-      candidateName: 'Amit Singh',
-      batch: 'DDU-GKY-B5',
+      id: 'DDU-GKY-B7',
+      name: 'DDU-GKY Batch 7',
       company: 'DataCorp Solutions',
-      fromLocation: 'Delhi',
-      toLocation: 'Faridabad',
-      travelDate: '2024-01-30',
-      mode: 'Bus',
-      amount: '300',
-      status: 'rejected',
-      requestDate: '2024-01-23'
+      totalCandidates: 20,
+      travelingCandidates: 15,
+      destination: 'Faridabad, HR',
+      travelDate: '2024-03-01',
+      status: 'not_requested',
+      requestedDate: null,
+      letterUploadedDate: null,
+      letterUrl: null
+    },
+    {
+      id: 'DDU-GKY-B8',
+      name: 'DDU-GKY Batch 8',
+      company: 'Future Tech Ltd',
+      totalCandidates: 28,
+      travelingCandidates: 20,
+      destination: 'Mumbai, MH',
+      travelDate: '2024-03-10',
+      status: 'requested',
+      requestedDate: '2024-02-01',
+      letterUploadedDate: null,
+      letterUrl: null
     }
   ];
 
   const batches = [
     { id: 'all', name: 'All Batches' },
-    { id: 'DDU-GKY-B5', name: 'DDU-GKY Batch 5' },
-    { id: 'DDU-GKY-B6', name: 'DDU-GKY Batch 6' },
-    { id: 'DDU-GKY-B7', name: 'DDU-GKY Batch 7' },
-  ];
-
-  const travelModes = [
-    { id: 'bus', name: 'Bus' },
-    { id: 'train', name: 'Train' },
-    { id: 'metro', name: 'Metro' },
-    { id: 'taxi', name: 'Taxi' },
+    ...batchData.map(batch => ({ id: batch.id, name: batch.name }))
   ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'approved':
-        return <Badge className="bg-green-100 text-green-800">Approved</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
-      case 'rejected':
-        return <Badge variant="destructive">Rejected</Badge>;
-      case 'issued':
-        return <Badge className="bg-blue-100 text-blue-800">Letter Issued</Badge>;
+      case 'letter_available':
+        return <Badge className="bg-green-100 text-green-800">Letter Available</Badge>;
+      case 'pending_approval':
+        return <Badge className="bg-yellow-100 text-yellow-800">Pending Approval</Badge>;
+      case 'requested':
+        return <Badge className="bg-blue-100 text-blue-800">Requested</Badge>;
+      case 'not_requested':
+        return <Badge variant="secondary">Not Requested</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
   };
 
-  const handleLetterAction = (action: 'approve' | 'reject' | 'issue') => {
-    toast({
-      title: `Travel Letter ${action}d`,
-      description: `Travel letter for ${selectedCandidate?.candidateName} has been ${action}d.`,
-    });
-    setIsLetterModalOpen(false);
+  const handleRequestTravelLetter = (batch: any) => {
+    setSelectedBatchData(batch);
+    setIsRequestModalOpen(true);
   };
 
-  const generateBulkLetters = () => {
+  const submitTravelLetterRequest = () => {
+    // Update batch status to requested and notify PPC Admin
     toast({
-      title: "Bulk Letters Generated",
-      description: "Travel letters have been generated for all approved requests.",
+      title: "Travel Letter Request Submitted",
+      description: `Request sent to PPC Admin for ${selectedBatchData?.name}. You will be notified when the letter is ready.`,
     });
+    setIsRequestModalOpen(false);
+    
+    // In real implementation, this would:
+    // 1. Send notification to PPC Admin
+    // 2. Update batch status in database
+    // 3. Create audit trail
+  };
+
+  const downloadTravelLetter = (batch: any) => {
+    toast({
+      title: "Downloading Travel Letter",
+      description: `Travel letter for ${batch.name} is being downloaded.`,
+    });
+    // In real implementation, this would download the actual file
   };
 
   const filteredData = selectedBatch === 'all' 
-    ? travelLetters 
-    : travelLetters.filter(letter => letter.batch === selectedBatch);
+    ? batchData 
+    : batchData.filter(batch => batch.id === selectedBatch);
 
   return (
     <div className="space-y-6">
       {/* Header & Filters */}
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Travel Letter Management</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Travel Letter Management</h1>
+          <p className="text-muted-foreground mt-1">Request and download batch-wise travel letters for company placements</p>
+        </div>
         
         <div className="flex gap-3">
           <Select value={selectedBatch} onValueChange={setSelectedBatch}>
@@ -127,16 +146,6 @@ const TravelLetterManagement = () => {
               ))}
             </SelectContent>
           </Select>
-          
-          <Button variant="outline" onClick={generateBulkLetters}>
-            <Download className="h-4 w-4 mr-2" />
-            Generate Bulk Letters
-          </Button>
-          
-          <Button>
-            <FileText className="h-4 w-4 mr-2" />
-            New Travel Request
-          </Button>
         </div>
       </div>
 
@@ -145,10 +154,24 @@ const TravelLetterManagement = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-yellow-600" />
+              <AlertCircle className="h-5 w-5 text-yellow-600" />
               <div>
                 <p className="text-2xl font-bold">
-                  {filteredData.filter(l => l.status === 'pending').length}
+                  {filteredData.filter(b => b.status === 'not_requested').length}
+                </p>
+                <p className="text-sm text-muted-foreground">Not Requested</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="text-2xl font-bold">
+                  {filteredData.filter(b => b.status === 'pending_approval').length}
                 </p>
                 <p className="text-sm text-muted-foreground">Pending Approval</p>
               </div>
@@ -162,9 +185,9 @@ const TravelLetterManagement = () => {
               <FileText className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-2xl font-bold">
-                  {filteredData.filter(l => l.status === 'approved').length}
+                  {filteredData.filter(b => b.status === 'letter_available').length}
                 </p>
-                <p className="text-sm text-muted-foreground">Approved</p>
+                <p className="text-sm text-muted-foreground">Letters Available</p>
               </div>
             </div>
           </CardContent>
@@ -173,91 +196,94 @@ const TravelLetterManagement = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Send className="h-5 w-5 text-blue-600" />
+              <Users className="h-5 w-5 text-purple-600" />
               <div>
                 <p className="text-2xl font-bold">
-                  {filteredData.filter(l => l.status === 'issued').length}
+                  {filteredData.reduce((sum, b) => sum + b.travelingCandidates, 0)}
                 </p>
-                <p className="text-sm text-muted-foreground">Letters Issued</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-2xl font-bold">
-                  ₹{filteredData.reduce((sum, l) => sum + parseInt(l.amount), 0)}
-                </p>
-                <p className="text-sm text-muted-foreground">Total Amount</p>
+                <p className="text-sm text-muted-foreground">Total Traveling</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Travel Letters Table */}
+      {/* Batch Travel Letters Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Travel Letter Requests
+            <Building2 className="h-5 w-5" />
+            Batch-wise Travel Letter Management
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Letter ID</TableHead>
-                <TableHead>Candidate Name</TableHead>
-                <TableHead>Batch</TableHead>
+                <TableHead>Batch Details</TableHead>
                 <TableHead>Company</TableHead>
-                <TableHead>From → To</TableHead>
+                <TableHead>Traveling Candidates</TableHead>
+                <TableHead>Destination</TableHead>
                 <TableHead>Travel Date</TableHead>
-                <TableHead>Mode</TableHead>
-                <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((letter) => (
-                <TableRow key={letter.id}>
-                  <TableCell className="font-medium">{letter.id}</TableCell>
-                  <TableCell>{letter.candidateName}</TableCell>
-                  <TableCell>{letter.batch}</TableCell>
-                  <TableCell>{letter.company}</TableCell>
+              {filteredData.map((batch) => (
+                <TableRow key={batch.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      {letter.fromLocation}
-                      <MapPin className="h-3 w-3" />
-                      {letter.toLocation}
+                    <div>
+                      <p className="font-medium">{batch.name}</p>
+                      <p className="text-sm text-muted-foreground">ID: {batch.id}</p>
                     </div>
                   </TableCell>
-                  <TableCell>{letter.travelDate}</TableCell>
+                  <TableCell>{batch.company}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{letter.mode}</Badge>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span className="font-medium">{batch.travelingCandidates}</span>
+                      <span className="text-muted-foreground">/ {batch.totalCandidates}</span>
+                    </div>
                   </TableCell>
-                  <TableCell>₹{letter.amount}</TableCell>
-                  <TableCell>{getStatusBadge(letter.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      {batch.destination}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      {batch.travelDate}
+                    </div>
+                  </TableCell>
+                  <TableCell>{getStatusBadge(batch.status)}</TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          setSelectedCandidate(letter);
-                          setIsLetterModalOpen(true);
-                        }}
-                      >
-                        Review
-                      </Button>
-                      {letter.status === 'approved' && (
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4" />
+                      {batch.status === 'not_requested' && (
+                        <Button 
+                          size="sm"
+                          onClick={() => handleRequestTravelLetter(batch)}
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          Request Letter
+                        </Button>
+                      )}
+                      {batch.status === 'letter_available' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => downloadTravelLetter(batch)}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      )}
+                      {(batch.status === 'requested' || batch.status === 'pending_approval') && (
+                        <Button variant="outline" size="sm" disabled>
+                          <Clock className="h-4 w-4 mr-2" />
+                          Waiting
                         </Button>
                       )}
                     </div>
@@ -269,31 +295,31 @@ const TravelLetterManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Travel Letter Review Modal */}
-      <Dialog open={isLetterModalOpen} onOpenChange={setIsLetterModalOpen}>
+      {/* Travel Letter Request Modal */}
+      <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Review Travel Letter - {selectedCandidate?.id}</DialogTitle>
+            <DialogTitle>Request Travel Letter - {selectedBatchData?.name}</DialogTitle>
           </DialogHeader>
           
-          {selectedCandidate && (
+          {selectedBatchData && (
             <div className="space-y-6">
-              {/* Candidate Details */}
+              {/* Batch Details */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Candidate Information</CardTitle>
+                  <CardTitle className="text-lg">Batch Information</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p><strong>Name:</strong> {selectedCandidate.candidateName}</p>
-                      <p><strong>Batch:</strong> {selectedCandidate.batch}</p>
-                      <p><strong>Company:</strong> {selectedCandidate.company}</p>
+                      <p><strong>Batch Name:</strong> {selectedBatchData.name}</p>
+                      <p><strong>Batch ID:</strong> {selectedBatchData.id}</p>
+                      <p><strong>Company:</strong> {selectedBatchData.company}</p>
                     </div>
                     <div>
-                      <p><strong>Request Date:</strong> {selectedCandidate.requestDate}</p>
-                      <p><strong>Travel Date:</strong> {selectedCandidate.travelDate}</p>
-                      <p><strong>Status:</strong> {getStatusBadge(selectedCandidate.status)}</p>
+                      <p><strong>Total Candidates:</strong> {selectedBatchData.totalCandidates}</p>
+                      <p><strong>Traveling Candidates:</strong> {selectedBatchData.travelingCandidates}</p>
+                      <p><strong>Destination:</strong> {selectedBatchData.destination}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -308,40 +334,21 @@ const TravelLetterManagement = () => {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">From Location</label>
-                        <Input defaultValue={selectedCandidate.fromLocation} />
+                        <label className="block text-sm font-medium mb-2">Travel Date</label>
+                        <Input type="date" defaultValue={selectedBatchData.travelDate} />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium mb-2">To Location</label>
-                        <Input defaultValue={selectedCandidate.toLocation} />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Travel Mode</label>
-                        <Select defaultValue={selectedCandidate.mode.toLowerCase()}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {travelModes.map((mode) => (
-                              <SelectItem key={mode.id} value={mode.id}>
-                                {mode.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Travel Amount</label>
-                        <Input defaultValue={selectedCandidate.amount} />
+                        <label className="block text-sm font-medium mb-2">Destination</label>
+                        <Input defaultValue={selectedBatchData.destination} />
                       </div>
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-2">Travel Date</label>
-                      <Input type="date" defaultValue={selectedCandidate.travelDate} />
+                      <label className="block text-sm font-medium mb-2">Special Requirements/Notes</label>
+                      <Textarea
+                        placeholder="Any special requirements for travel arrangement, accommodation details, or other notes..."
+                        rows={3}
+                      />
                     </div>
                   </div>
                 </CardContent>
@@ -349,39 +356,29 @@ const TravelLetterManagement = () => {
 
               <Separator />
 
-              {/* Review Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Centre Manager Review</h3>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Review Comments
-                  </label>
-                  <Textarea
-                    placeholder="Add your review comments..."
-                    rows={3}
-                  />
+              {/* Important Information */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-blue-900">Important Information</h4>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Once you submit this request, a notification will be sent to the PPC Admin team. 
+                      They will process your request and upload the official travel letter for your batch. 
+                      You will be notified when the letter is ready for download.
+                    </p>
+                  </div>
                 </div>
-                
-                <div className="flex justify-end gap-3">
-                  <Button variant="outline" onClick={() => setIsLetterModalOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => handleLetterAction('reject')}
-                  >
-                    Reject
-                  </Button>
-                  <Button onClick={() => handleLetterAction('approve')}>
-                    Approve
-                  </Button>
-                  {selectedCandidate.status === 'approved' && (
-                    <Button onClick={() => handleLetterAction('issue')}>
-                      Issue Letter
-                    </Button>
-                  )}
-                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setIsRequestModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={submitTravelLetterRequest}>
+                  <Send className="h-4 w-4 mr-2" />
+                  Submit Request
+                </Button>
               </div>
             </div>
           )}

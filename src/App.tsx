@@ -210,7 +210,7 @@ const App = () => {
         <Route path="/center-manager/video-logs" element={<MainLayout role="center_manager" title="Video Logs & Orientation"><VideoLogsOrientation /></MainLayout>} />
         <Route path="/center-manager/attendance" element={<MainLayout role="center_manager" title="Attendance Module"><AttendanceModule /></MainLayout>} />
         <Route path="/center-manager/placement" element={<MainLayout role="center_manager" title="Placement Coordination"><PlacementCoordination /></MainLayout>} />
-        <Route path="/center-manager/travel" element={<MainLayout role="center_manager" title="Travel Letter Management"><TravelLetterManagement /></MainLayout>} />
+        <Route path="/center-manager/travel-letters" element={<MainLayout role="center_manager" title="Travel Letter Management"><TravelLetterManagement /></MainLayout>} />
         <Route path="/center-manager/post-placement" element={<MainLayout role="center_manager" title="Post-Placement Tracking"><PostPlacementTracking /></MainLayout>} />
         <Route path="/center-manager/reports" element={<MainLayout role="center_manager" title="Reports & Exports"><CenterReportsExports /></MainLayout>} />
         <Route path="/center-manager/profile" element={<MainLayout role="center_manager" title="Profile & Settings"><CenterProfileSettings /></MainLayout>} />
