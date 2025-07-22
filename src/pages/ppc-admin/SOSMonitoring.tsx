@@ -194,7 +194,7 @@ const SOSMonitoring = () => {
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="Open">Open</SelectItem>
                 <SelectItem value="In Progress">In Progress</SelectItem>
                 <SelectItem value="Resolved">Resolved</SelectItem>
@@ -206,7 +206,7 @@ const SOSMonitoring = () => {
                 <SelectValue placeholder="Filter by SOS Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="Salary Delay">Salary Delay</SelectItem>
                 <SelectItem value="Hostel Issue">Hostel Issue</SelectItem>
                 <SelectItem value="Workplace Issue">Workplace Issue</SelectItem>

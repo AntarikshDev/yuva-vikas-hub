@@ -176,7 +176,7 @@ const VisitManagement = () => {
                 <SelectValue placeholder="Filter by State" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All States</SelectItem>
+                <SelectItem value="all">All States</SelectItem>
                 <SelectItem value="Karnataka">Karnataka</SelectItem>
                 <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
                 <SelectItem value="Delhi">Delhi</SelectItem>
@@ -188,7 +188,7 @@ const VisitManagement = () => {
                 <SelectValue placeholder="Filter by Batch" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Batches</SelectItem>
+                <SelectItem value="all">All Batches</SelectItem>
                 <SelectItem value="Batch X">Batch X</SelectItem>
                 <SelectItem value="Batch Y">Batch Y</SelectItem>
                 <SelectItem value="Batch Z">Batch Z</SelectItem>
@@ -200,7 +200,7 @@ const VisitManagement = () => {
                 <SelectValue placeholder="Filter by Hostel" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 <SelectItem value="Bangalore Hostel A">Bangalore Hostel A</SelectItem>
                 <SelectItem value="Delhi Hostel B">Delhi Hostel B</SelectItem>
                 <SelectItem value="Chennai Hostel C">Chennai Hostel C</SelectItem>

@@ -179,7 +179,7 @@ const SOSManagement = () => {
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="Open">Open</SelectItem>
                 <SelectItem value="In Progress">In Progress</SelectItem>
                 <SelectItem value="Resolved">Resolved</SelectItem>
@@ -191,7 +191,7 @@ const SOSManagement = () => {
                 <SelectValue placeholder="Filter by Location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Locations</SelectItem>
+                <SelectItem value="all">All Locations</SelectItem>
                 <SelectItem value="Bangalore">Bangalore</SelectItem>
                 <SelectItem value="Delhi">Delhi</SelectItem>
                 <SelectItem value="Chennai">Chennai</SelectItem>
@@ -204,7 +204,7 @@ const SOSManagement = () => {
                 <SelectValue placeholder="Filter by Batch" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Batches</SelectItem>
+                <SelectItem value="all">All Batches</SelectItem>
                 <SelectItem value="Batch X">Batch X</SelectItem>
                 <SelectItem value="Batch Y">Batch Y</SelectItem>
                 <SelectItem value="Batch Z">Batch Z</SelectItem>

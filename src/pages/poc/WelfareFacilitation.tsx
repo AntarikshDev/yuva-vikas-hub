@@ -139,7 +139,7 @@ const WelfareFacilitation = () => {
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
@@ -150,7 +150,7 @@ const WelfareFacilitation = () => {
                 <SelectValue placeholder="Filter by State" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All States</SelectItem>
+                <SelectItem value="all">All States</SelectItem>
                 <SelectItem value="Karnataka">Karnataka</SelectItem>
                 <SelectItem value="Delhi">Delhi</SelectItem>
                 <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
@@ -162,7 +162,7 @@ const WelfareFacilitation = () => {
                 <SelectValue placeholder="Filter by Batch" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Batches</SelectItem>
+                <SelectItem value="all">All Batches</SelectItem>
                 <SelectItem value="Batch X">Batch X</SelectItem>
                 <SelectItem value="Batch Y">Batch Y</SelectItem>
                 <SelectItem value="Batch Z">Batch Z</SelectItem>

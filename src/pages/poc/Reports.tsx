@@ -228,7 +228,7 @@ const Reports = () => {
                 <SelectValue placeholder="Filter by Report Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="visits">Visits Completed</SelectItem>
                 <SelectItem value="sos">SOS Actions</SelectItem>
                 <SelectItem value="travel">Travel Facilitation</SelectItem>
@@ -241,7 +241,7 @@ const Reports = () => {
                 <SelectValue placeholder="Filter by State" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All States</SelectItem>
+                <SelectItem value="all">All States</SelectItem>
                 <SelectItem value="Karnataka">Karnataka</SelectItem>
                 <SelectItem value="Delhi">Delhi</SelectItem>
                 <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
@@ -253,7 +253,7 @@ const Reports = () => {
                 <SelectValue placeholder="Filter by Batch" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Batches</SelectItem>
+                <SelectItem value="all">All Batches</SelectItem>
                 <SelectItem value="Batch X">Batch X</SelectItem>
                 <SelectItem value="Batch Y">Batch Y</SelectItem>
                 <SelectItem value="Batch Z">Batch Z</SelectItem>
@@ -265,7 +265,7 @@ const Reports = () => {
                 <SelectValue placeholder="Date Range" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Dates</SelectItem>
+                <SelectItem value="all">All Dates</SelectItem>
                 <SelectItem value="today">Today</SelectItem>
                 <SelectItem value="week">This Week</SelectItem>
                 <SelectItem value="month">This Month</SelectItem>

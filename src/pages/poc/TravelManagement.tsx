@@ -131,7 +131,7 @@ const TravelManagement = () => {
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="Planned">Planned</SelectItem>
                 <SelectItem value="Completed">Completed</SelectItem>
                 <SelectItem value="Pending">Pending</SelectItem>
@@ -143,7 +143,7 @@ const TravelManagement = () => {
                 <SelectValue placeholder="Filter by Destination" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Destinations</SelectItem>
+                <SelectItem value="all">All Destinations</SelectItem>
                 <SelectItem value="Bangalore">Bangalore</SelectItem>
                 <SelectItem value="Delhi">Delhi</SelectItem>
                 <SelectItem value="Chennai">Chennai</SelectItem>

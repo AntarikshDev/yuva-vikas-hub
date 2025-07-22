@@ -88,7 +88,7 @@ const POCDashboard = () => {
                 <SelectValue placeholder="Filter by State" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All States</SelectItem>
+                <SelectItem value="all">All States</SelectItem>
                 <SelectItem value="Karnataka">Karnataka</SelectItem>
                 <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
                 <SelectItem value="Maharashtra">Maharashtra</SelectItem>
@@ -101,7 +101,7 @@ const POCDashboard = () => {
                 <SelectValue placeholder="Filter by Batch" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Batches</SelectItem>
+                <SelectItem value="all">All Batches</SelectItem>
                 <SelectItem value="Batch X">Batch X</SelectItem>
                 <SelectItem value="Batch Y">Batch Y</SelectItem>
                 <SelectItem value="Batch Z">Batch Z</SelectItem>
@@ -113,7 +113,7 @@ const POCDashboard = () => {
                 <SelectValue placeholder="Filter by Company" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Companies</SelectItem>
+                <SelectItem value="all">All Companies</SelectItem>
                 <SelectItem value="TechCorp">TechCorp India</SelectItem>
                 <SelectItem value="RetailMax">RetailMax Ltd</SelectItem>
                 <SelectItem value="ServicePro">ServicePro Pvt</SelectItem>
