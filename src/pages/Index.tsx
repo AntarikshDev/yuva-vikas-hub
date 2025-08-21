@@ -15,8 +15,8 @@ const Index = () => {
 
   const userRoles = [
     {
-      value: "super-admin",
-      label: "Super Admin",
+      value: "admin",
+      label: "Admin",
       path: "/admin/dashboard",
     },
     {
@@ -50,9 +50,9 @@ const Index = () => {
       path: "/center-manager/dashboard",
     },
     {
-      value: "mis-admin",
-      label: "MIS Admin",
-      path: "/mis-admin/dashboard",
+      value: "mis",
+      label: "MIS",
+      path: "/mis/dashboard",
     },
     {
       value: "company-hr",

@@ -222,20 +222,20 @@ const App = () => {
         <Route path="/center-manager/reports" element={<MainLayout role="center_manager" title="Reports & Exports"><CenterReportsExports /></MainLayout>} />
         <Route path="/center-manager/profile" element={<MainLayout role="center_manager" title="Profile & Settings"><CenterProfileSettings /></MainLayout>} />
 
-        {/* Admin Routes (formerly MIS-Admin) */}
-        <Route path="/admin/dashboard" element={<MainLayout role="admin" title="Dashboard"><AdminDashboard /></MainLayout>} />
-        <Route path="/admin/users" element={<MainLayout role="admin" title="User & Role Management"><AdminUserManagement /></MainLayout>} />
-        <Route path="/admin/lookups" element={<MainLayout role="admin" title="Lookup & Configuration"><AdminLookupConfiguration /></MainLayout>} />
-        <Route path="/admin/data-sync" element={<MainLayout role="admin" title="Data Management"><AdminDataManagement /></MainLayout>} />
-        <Route path="/admin/data-correction" element={<MainLayout role="admin" title="Data Management"><AdminDataManagement /></MainLayout>} />
-        <Route path="/admin/backup" element={<MainLayout role="admin" title="Data Management"><AdminDataManagement /></MainLayout>} />
-        <Route path="/admin/reports" element={<MainLayout role="admin" title="Reports Library"><AdminReportsLibrary /></MainLayout>} />
-        <Route path="/admin/report-builder" element={<MainLayout role="admin" title="Reports Library"><AdminReportsLibrary /></MainLayout>} />
-        <Route path="/admin/schedule-reports" element={<MainLayout role="admin" title="Reports Library"><AdminReportsLibrary /></MainLayout>} />
-        <Route path="/admin/alerts" element={<MainLayout role="admin" title="Notifications & Alerts"><AdminAlertsManagement /></MainLayout>} />
-        <Route path="/admin/audit" element={<MainLayout role="admin" title="Audit & Compliance"><AdminAuditCompliance /></MainLayout>} />
-        <Route path="/admin/api-management" element={<MainLayout role="admin" title="Notifications & Alerts"><AdminAlertsManagement /></MainLayout>} />
-        <Route path="/admin/profile" element={<MainLayout role="admin" title="Profile & Settings"><AdminProfileSettings /></MainLayout>} />
+        {/* Admin Routes (new global admin) */}
+        <Route path="/admin/dashboard" element={<SuperAdminDashboard />} />
+        <Route path="/admin/users" element={<UserManagement />} />
+        <Route path="/admin/master-data" element={<MasterDataManagement />} />
+        <Route path="/admin/documents" element={<DocumentGenerator />} />
+        <Route path="/admin/batches" element={<BatchManagement />} />
+        <Route path="/admin/candidates" element={<CandidateDirectory />} />
+        <Route path="/admin/reports" element={<ReportsAnalytics />} />
+        <Route path="/admin/videos" element={<VideoLogManager />} />
+        <Route path="/admin/ai-dropout" element={<AIDropoutEngine />} />
+        <Route path="/admin/quality" element={<QualityTracker />} />
+        <Route path="/admin/sos" element={<SosEscalationTracker />} />
+        <Route path="/admin/export" element={<DataExportHub />} />
+        <Route path="/admin/settings" element={<SystemSettings />} />
 
         {/* MIS Routes (new center-specific MIS) */}
         <Route path="/mis/dashboard" element={<MainLayout role="mis" title="MIS Dashboard"><MISDashboard /></MainLayout>} />
