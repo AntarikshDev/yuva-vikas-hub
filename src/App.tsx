@@ -43,6 +43,7 @@ import CandidateHome from "./pages/candidate/Home";
 
 // Counsellor Routes
 import CounsellorDashboard from "./pages/counsellor/Dashboard";
+import CounsellorOFRManagement from "./pages/counsellor/OFRManagement";
 import CandidateManagement from "./pages/counsellor/CandidateManagement";
 import CounsellorReports from "./pages/counsellor/Reports";
 import MandatorySheets from "./pages/counsellor/MandatorySheets";
@@ -193,6 +194,7 @@ const App = () => {
             
         {/* Counsellor Routes */}
         <Route path="/counsellor/dashboard" element={<CounsellorDashboard />} />
+        <Route path="/counsellor/ofr-management" element={<CounsellorOFRManagement />} />
         <Route path="/counsellor/candidates" element={<CandidateManagement />} />
         <Route path="/counsellor/reports" element={<CounsellorReports />} />
         <Route path="/counsellor/mandatory-sheets" element={<MandatorySheets />} />

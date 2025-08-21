@@ -473,6 +473,11 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             icon: Home 
           },
           { 
+            name: 'OFR Management', 
+            path: '/counsellor/ofr-management', 
+            icon: FileText 
+          },
+          { 
             name: 'Candidate Management', 
             path: '/counsellor/candidates', 
             icon: Users 
