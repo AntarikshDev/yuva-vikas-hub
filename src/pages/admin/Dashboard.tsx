@@ -110,7 +110,7 @@ const SuperAdminDashboard: React.FC = () => {
   };
 
   return (
-    <MainLayout role="super_admin">
+    <MainLayout role="admin">
       <motion.div
         className="space-y-6"
         initial="hidden"

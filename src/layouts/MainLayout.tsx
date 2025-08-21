@@ -36,9 +36,9 @@ type NavGroup = {
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  role: 'super_admin' | 'state_head' | 'center_manager' | 'mobilizer' | 
+  role: 'admin' | 'state_head' | 'center_manager' | 'mobilizer' | 
          'candidate' | 'ppc_team' | 'company_hr' | 'mobilization_manager' | 
-         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis_admin' | 'ppc_admin' | 'poc';
+         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis' | 'ppc_admin' | 'poc';
   title?: string; // Optional title override
 }
 
@@ -65,7 +65,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role, title })
           </SidebarHeader>
           
           <SidebarContent>
-            {(role === 'super_admin' || role === 'state_head') && (
+            {(role === 'admin' || role === 'state_head') && (
               <div className="px-4 pb-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 overflow-hidden rounded-full bg-indigo-300 ring-2 ring-white/30 shadow-lg">
@@ -233,7 +233,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
   }
   
   // This function would return different navigation items based on user role
-  if (role === 'super_admin') {
+  if (role === 'admin') {
     return [
       {
         label: 'Platform',
@@ -424,39 +424,14 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
     ];
   }
 
-  if (role === 'mis_admin') {
+  if (role === 'mis') {
     return [
       {
         label: 'Main',
         items: [
-          { name: 'Dashboard', path: '/mis-admin/dashboard', icon: Home },
-          { name: 'User & Role Management', path: '/mis-admin/users', icon: Users },
-          { name: 'Lookup & Configuration', path: '/mis-admin/lookups', icon: Settings },
-        ]
-      },
-      {
-        label: 'Data Management',
-        items: [
-          { name: 'Data Sync Queue', path: '/mis-admin/data-sync', icon: ({ className }) => <span className={className || ''}>🔄</span> },
-          { name: 'Data Correction', path: '/mis-admin/data-correction', icon: ({ className }) => <span className={className || ''}>🔧</span> },
-          { name: 'Archive & Backup', path: '/mis-admin/backup', icon: ({ className }) => <span className={className || ''}>💾</span> },
-        ]
-      },
-      {
-        label: 'Reporting & MIS',
-        items: [
-          { name: 'Reports Library', path: '/mis-admin/reports', icon: BarChart },
-          { name: 'Custom Report Builder', path: '/mis-admin/report-builder', icon: ({ className }) => <span className={className || ''}>📊</span> },
-          { name: 'Report Scheduling', path: '/mis-admin/schedule-reports', icon: Calendar },
-        ]
-      },
-      {
-        label: 'System',
-        items: [
-          { name: 'Notifications & Alerts', path: '/mis-admin/alerts', icon: AlertCircle },
-          { name: 'Audit & Compliance', path: '/mis-admin/audit', icon: ({ className }) => <span className={className || ''}>🔍</span> },
-          { name: 'API & Integration', path: '/mis-admin/api-management', icon: ({ className }) => <span className={className || ''}>🔗</span> },
-          { name: 'Profile & Settings', path: '/mis-admin/profile', icon: ({ className }) => <span className={className || ''}>👤</span> },
+          { name: 'Dashboard', path: '/mis/dashboard', icon: Home },
+          { name: 'Daily Activity Management', path: '/mis/daily-activities', icon: Calendar },
+          { name: 'Ready for Migration', path: '/mis/ready-for-migration', icon: Users },
         ]
       }
     ];

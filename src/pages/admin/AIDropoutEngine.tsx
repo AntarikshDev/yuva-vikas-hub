@@ -77,7 +77,7 @@ const AIDropoutEngine = () => {
   const COLORS = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981'];
 
   return (
-    <MainLayout role="super_admin">
+    <MainLayout role="admin">
       <div className="space-y-6">
         <div>
           <div className="flex items-center space-x-2 mb-1">

@@ -66,15 +66,20 @@ import PostPlacementTracking from "./pages/center-manager/PostPlacementTracking"
 import CenterReportsExports from "./pages/center-manager/ReportsExports";
 import CenterProfileSettings from "./pages/center-manager/ProfileSettings";
 
-// MIS Admin Routes
-import MISAdminDashboard from "./pages/mis-admin/Dashboard";
-import MISAdminUserManagement from "./pages/mis-admin/UserManagement";
-import MISAdminLookupConfiguration from "./pages/mis-admin/LookupConfiguration";
-import MISAdminDataManagement from "./pages/mis-admin/DataManagement";
-import MISAdminReportsLibrary from "./pages/mis-admin/ReportsLibrary";
-import MISAdminAlertsManagement from "./pages/mis-admin/AlertsManagement";
-import MISAdminAuditCompliance from "./pages/mis-admin/AuditCompliance";
-import MISAdminProfileSettings from "./pages/mis-admin/ProfileSettings";
+// Admin Routes (formerly MIS-Admin)
+import AdminDashboard from "./pages/mis-admin/Dashboard";
+import AdminUserManagement from "./pages/mis-admin/UserManagement";
+import AdminLookupConfiguration from "./pages/mis-admin/LookupConfiguration";
+import AdminDataManagement from "./pages/mis-admin/DataManagement";
+import AdminReportsLibrary from "./pages/mis-admin/ReportsLibrary";
+import AdminAlertsManagement from "./pages/mis-admin/AlertsManagement";
+import AdminAuditCompliance from "./pages/mis-admin/AuditCompliance";
+import AdminProfileSettings from "./pages/mis-admin/ProfileSettings";
+
+// MIS Routes (new center-specific MIS)
+import MISDashboard from "./pages/mis/Dashboard";
+import DailyActivityManagement from "./pages/mis/DailyActivityManagement";
+import ReadyForMigration from "./pages/mis/ReadyForMigration";
 
 // Trainer Pages
 import TrainerDashboard from "./pages/trainer/Dashboard";
@@ -217,20 +222,25 @@ const App = () => {
         <Route path="/center-manager/reports" element={<MainLayout role="center_manager" title="Reports & Exports"><CenterReportsExports /></MainLayout>} />
         <Route path="/center-manager/profile" element={<MainLayout role="center_manager" title="Profile & Settings"><CenterProfileSettings /></MainLayout>} />
 
-        {/* MIS Admin Routes */}
-        <Route path="/mis-admin/dashboard" element={<MainLayout role="mis_admin" title="Dashboard"><MISAdminDashboard /></MainLayout>} />
-        <Route path="/mis-admin/users" element={<MainLayout role="mis_admin" title="User & Role Management"><MISAdminUserManagement /></MainLayout>} />
-        <Route path="/mis-admin/lookups" element={<MainLayout role="mis_admin" title="Lookup & Configuration"><MISAdminLookupConfiguration /></MainLayout>} />
-        <Route path="/mis-admin/data-sync" element={<MainLayout role="mis_admin" title="Data Management"><MISAdminDataManagement /></MainLayout>} />
-        <Route path="/mis-admin/data-correction" element={<MainLayout role="mis_admin" title="Data Management"><MISAdminDataManagement /></MainLayout>} />
-        <Route path="/mis-admin/backup" element={<MainLayout role="mis_admin" title="Data Management"><MISAdminDataManagement /></MainLayout>} />
-        <Route path="/mis-admin/reports" element={<MainLayout role="mis_admin" title="Reports Library"><MISAdminReportsLibrary /></MainLayout>} />
-        <Route path="/mis-admin/report-builder" element={<MainLayout role="mis_admin" title="Reports Library"><MISAdminReportsLibrary /></MainLayout>} />
-        <Route path="/mis-admin/schedule-reports" element={<MainLayout role="mis_admin" title="Reports Library"><MISAdminReportsLibrary /></MainLayout>} />
-        <Route path="/mis-admin/alerts" element={<MainLayout role="mis_admin" title="Notifications & Alerts"><MISAdminAlertsManagement /></MainLayout>} />
-        <Route path="/mis-admin/audit" element={<MainLayout role="mis_admin" title="Audit & Compliance"><MISAdminAuditCompliance /></MainLayout>} />
-        <Route path="/mis-admin/api-management" element={<MainLayout role="mis_admin" title="Notifications & Alerts"><MISAdminAlertsManagement /></MainLayout>} />
-        <Route path="/mis-admin/profile" element={<MainLayout role="mis_admin" title="Profile & Settings"><MISAdminProfileSettings /></MainLayout>} />
+        {/* Admin Routes (formerly MIS-Admin) */}
+        <Route path="/admin/dashboard" element={<MainLayout role="admin" title="Dashboard"><AdminDashboard /></MainLayout>} />
+        <Route path="/admin/users" element={<MainLayout role="admin" title="User & Role Management"><AdminUserManagement /></MainLayout>} />
+        <Route path="/admin/lookups" element={<MainLayout role="admin" title="Lookup & Configuration"><AdminLookupConfiguration /></MainLayout>} />
+        <Route path="/admin/data-sync" element={<MainLayout role="admin" title="Data Management"><AdminDataManagement /></MainLayout>} />
+        <Route path="/admin/data-correction" element={<MainLayout role="admin" title="Data Management"><AdminDataManagement /></MainLayout>} />
+        <Route path="/admin/backup" element={<MainLayout role="admin" title="Data Management"><AdminDataManagement /></MainLayout>} />
+        <Route path="/admin/reports" element={<MainLayout role="admin" title="Reports Library"><AdminReportsLibrary /></MainLayout>} />
+        <Route path="/admin/report-builder" element={<MainLayout role="admin" title="Reports Library"><AdminReportsLibrary /></MainLayout>} />
+        <Route path="/admin/schedule-reports" element={<MainLayout role="admin" title="Reports Library"><AdminReportsLibrary /></MainLayout>} />
+        <Route path="/admin/alerts" element={<MainLayout role="admin" title="Notifications & Alerts"><AdminAlertsManagement /></MainLayout>} />
+        <Route path="/admin/audit" element={<MainLayout role="admin" title="Audit & Compliance"><AdminAuditCompliance /></MainLayout>} />
+        <Route path="/admin/api-management" element={<MainLayout role="admin" title="Notifications & Alerts"><AdminAlertsManagement /></MainLayout>} />
+        <Route path="/admin/profile" element={<MainLayout role="admin" title="Profile & Settings"><AdminProfileSettings /></MainLayout>} />
+
+        {/* MIS Routes (new center-specific MIS) */}
+        <Route path="/mis/dashboard" element={<MainLayout role="mis" title="MIS Dashboard"><MISDashboard /></MainLayout>} />
+        <Route path="/mis/daily-activities" element={<MainLayout role="mis" title="Daily Activity Management"><DailyActivityManagement /></MainLayout>} />
+        <Route path="/mis/ready-for-migration" element={<MainLayout role="mis" title="Ready for Migration"><ReadyForMigration /></MainLayout>} />
 
         {/* Company HR Routes */}
         <Route path="/company-hr/dashboard" element={<MainLayout role="company_hr" title="Dashboard"><CompanyHRDashboard /></MainLayout>} />
@@ -262,12 +272,12 @@ const App = () => {
             
             {/* Catch-all route */}
             {/* Admin Department Routes */}
-            <Route path="/admin-department/dashboard" element={<MainLayout role="super_admin" title="Administration Dashboard"><AdminDeptDashboard /></MainLayout>} />
-            <Route path="/admin-department/rent-management" element={<MainLayout role="super_admin" title="Rent Management"><RentManagement /></MainLayout>} />
-            <Route path="/admin-department/vendor-management" element={<MainLayout role="super_admin" title="Vendor Management"><VendorManagement /></MainLayout>} />
-            <Route path="/admin-department/expense-management" element={<MainLayout role="super_admin" title="Expense Management"><ExpenseManagement /></MainLayout>} />
-            <Route path="/admin-department/ticket-booking" element={<MainLayout role="super_admin" title="Ticket Booking"><TicketBooking /></MainLayout>} />
-            <Route path="/admin-department/reports" element={<MainLayout role="super_admin" title="Reports"><AdminDeptReports /></MainLayout>} />
+            <Route path="/admin-department/dashboard" element={<MainLayout role="admin" title="Administration Dashboard"><AdminDeptDashboard /></MainLayout>} />
+            <Route path="/admin-department/rent-management" element={<MainLayout role="admin" title="Rent Management"><RentManagement /></MainLayout>} />
+            <Route path="/admin-department/vendor-management" element={<MainLayout role="admin" title="Vendor Management"><VendorManagement /></MainLayout>} />
+            <Route path="/admin-department/expense-management" element={<MainLayout role="admin" title="Expense Management"><ExpenseManagement /></MainLayout>} />
+            <Route path="/admin-department/ticket-booking" element={<MainLayout role="admin" title="Ticket Booking"><TicketBooking /></MainLayout>} />
+            <Route path="/admin-department/reports" element={<MainLayout role="admin" title="Reports"><AdminDeptReports /></MainLayout>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
