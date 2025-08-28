@@ -208,9 +208,19 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             icon: Building 
           },
           { 
+            name: 'Property Management', 
+            path: '/admin-department/property-management', 
+            icon: Building 
+          },
+          { 
             name: 'Vendor Management', 
             path: '/admin-department/vendor-management', 
             icon: Users 
+          },
+          { 
+            name: 'Food Vendor Management', 
+            path: '/admin-department/food-vendor-management', 
+            icon: ({ className }) => <span className={className || ''}>🍽️</span>
           },
           { 
             name: 'Expense Management', 
@@ -218,9 +228,24 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             icon: ({ className }) => <span className={className || ''}>💰</span>
           },
           { 
+            name: 'Petty Cash Management', 
+            path: '/admin-department/petty-cash-management', 
+            icon: ({ className }) => <span className={className || ''}>💳</span>
+          },
+          { 
+            name: 'Purchase Order Management', 
+            path: '/admin-department/purchase-order-management', 
+            icon: ({ className }) => <span className={className || ''}>📋</span>
+          },
+          { 
             name: 'Ticket Booking', 
             path: '/admin-department/ticket-booking', 
             icon: ({ className }) => <span className={className || ''}>🎫</span>
+          },
+          { 
+            name: 'Ticket Booking Approval', 
+            path: '/admin-department/ticket-booking-approval', 
+            icon: ({ className }) => <span className={className || ''}>✅</span>
           },
           { 
             name: 'Reports', 

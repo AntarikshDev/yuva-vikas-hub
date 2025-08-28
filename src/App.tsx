@@ -120,6 +120,11 @@ import VendorManagement from "./pages/admin-department/VendorManagement";
 import ExpenseManagement from "./pages/admin-department/ExpenseManagement";
 import TicketBooking from "./pages/admin-department/TicketBooking";
 import AdminDeptReports from "./pages/admin-department/Reports";
+import PropertyManagement from "./pages/admin-department/PropertyManagement";
+import FoodVendorManagement from "./pages/admin-department/FoodVendorManagement";
+import PettyCashManagement from "./pages/admin-department/PettyCashManagement";
+import PurchaseOrderManagement from "./pages/admin-department/PurchaseOrderManagement";
+import TicketBookingApproval from "./pages/admin-department/TicketBookingApproval";
 
 import TrainerAssessmentEvaluation from "./pages/trainer/AssessmentEvaluation";
 import TrainerFeedbackManagement from "./pages/trainer/FeedbackManagement";
@@ -273,10 +278,15 @@ const App = () => {
             {/* Catch-all route */}
             {/* Admin Department Routes */}
             <Route path="/admin-department/dashboard" element={<MainLayout role="admin" title="Administration Dashboard"><AdminDeptDashboard /></MainLayout>} />
+            <Route path="/admin-department/property-management" element={<MainLayout role="admin" title="Property Management"><PropertyManagement /></MainLayout>} />
             <Route path="/admin-department/rent-management" element={<MainLayout role="admin" title="Rent Management"><RentManagement /></MainLayout>} />
             <Route path="/admin-department/vendor-management" element={<MainLayout role="admin" title="Vendor Management"><VendorManagement /></MainLayout>} />
+            <Route path="/admin-department/food-vendor-management" element={<MainLayout role="admin" title="Food Vendor Management"><FoodVendorManagement /></MainLayout>} />
             <Route path="/admin-department/expense-management" element={<MainLayout role="admin" title="Expense Management"><ExpenseManagement /></MainLayout>} />
+            <Route path="/admin-department/petty-cash-management" element={<MainLayout role="admin" title="Petty Cash Management"><PettyCashManagement /></MainLayout>} />
+            <Route path="/admin-department/purchase-order-management" element={<MainLayout role="admin" title="Purchase Order Management"><PurchaseOrderManagement /></MainLayout>} />
             <Route path="/admin-department/ticket-booking" element={<MainLayout role="admin" title="Ticket Booking"><TicketBooking /></MainLayout>} />
+            <Route path="/admin-department/ticket-booking-approval" element={<MainLayout role="admin" title="Ticket Booking Approval"><TicketBookingApproval /></MainLayout>} />
             <Route path="/admin-department/reports" element={<MainLayout role="admin" title="Reports"><AdminDeptReports /></MainLayout>} />
 
             <Route path="*" element={<NotFound />} />
