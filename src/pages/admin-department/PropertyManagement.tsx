@@ -24,8 +24,8 @@ import {
 
 export default function PropertyManagement() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -100,8 +100,8 @@ export default function PropertyManagement() {
   const filteredPropertyData = propertyData.filter(property => {
     const matchesSearch = property.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          property.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = !typeFilter || property.propertyType === typeFilter;
-    const matchesStatus = !statusFilter || property.status === statusFilter;
+    const matchesType = typeFilter === "all" || property.propertyType === typeFilter;
+    const matchesStatus = statusFilter === "all" || property.status === statusFilter;
     return matchesSearch && matchesType && matchesStatus;
   });
 
@@ -203,7 +203,7 @@ export default function PropertyManagement() {
                 <SelectValue placeholder="Filter by Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="Training Centre">Training Centre</SelectItem>
                 <SelectItem value="Accommodation">Accommodation</SelectItem>
                 <SelectItem value="Office">Office</SelectItem>
@@ -214,7 +214,7 @@ export default function PropertyManagement() {
                 <SelectValue placeholder="Filter by Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="Active">Active</SelectItem>
                 <SelectItem value="Under Renovation">Under Renovation</SelectItem>
                 <SelectItem value="Vacant">Vacant</SelectItem>
