@@ -136,8 +136,8 @@ export default function FoodVendorManagement() {
   const filteredVendorData = foodVendorData.filter(vendor => {
     const matchesSearch = vendor.vendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vendor.contactPerson.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || vendor.category === categoryFilter;
-    const matchesStatus = !statusFilter || vendor.status === statusFilter;
+    const matchesCategory = !categoryFilter || categoryFilter === "all" || vendor.category === categoryFilter;
+    const matchesStatus = !statusFilter || statusFilter === "all" || vendor.status === statusFilter;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -256,7 +256,7 @@ export default function FoodVendorManagement() {
                   <SelectValue placeholder="Filter by Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   <SelectItem value="Catering">Catering</SelectItem>
                   <SelectItem value="Meal Service">Meal Service</SelectItem>
                   <SelectItem value="Restaurant">Restaurant</SelectItem>
@@ -268,7 +268,7 @@ export default function FoodVendorManagement() {
                   <SelectValue placeholder="Filter by Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="all">All Status</SelectItem>
                   <SelectItem value="Active">Active</SelectItem>
                   <SelectItem value="Pending Approval">Pending Approval</SelectItem>
                   <SelectItem value="Contract Expired">Contract Expired</SelectItem>
