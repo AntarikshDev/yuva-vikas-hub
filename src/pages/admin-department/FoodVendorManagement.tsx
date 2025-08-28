@@ -104,21 +104,21 @@ export default function FoodVendorManagement() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Active": return "bg-green-100 text-green-800";
-      case "Pending Approval": return "bg-yellow-100 text-yellow-800";
-      case "Suspended": return "bg-red-100 text-red-800";
-      case "Contract Expired": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Active": return "bg-success/10 text-success border-success/20";
+      case "Pending Approval": return "bg-warning/10 text-warning border-warning/20";
+      case "Suspended": return "bg-destructive/10 text-destructive border-destructive/20";
+      case "Contract Expired": return "bg-muted text-muted-foreground border-border";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "Catering": return "bg-blue-100 text-blue-800";
-      case "Meal Service": return "bg-green-100 text-green-800";
-      case "Restaurant": return "bg-purple-100 text-purple-800";
-      case "Snacks & Sweets": return "bg-orange-100 text-orange-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "Catering": return "bg-primary/10 text-primary border-primary/20";
+      case "Meal Service": return "bg-success/10 text-success border-success/20";
+      case "Restaurant": return "bg-secondary/10 text-secondary-foreground border-secondary/20";
+      case "Snacks & Sweets": return "bg-accent/10 text-accent-foreground border-accent/20";
+      default: return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -127,7 +127,7 @@ export default function FoodVendorManagement() {
       <Star
         key={index}
         className={`h-4 w-4 ${
-          index < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+          index < rating ? 'text-warning fill-current' : 'text-muted-foreground/40'
         }`}
       />
     ));
