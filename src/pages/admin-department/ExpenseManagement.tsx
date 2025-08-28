@@ -195,25 +195,26 @@ const ExpenseManagement = () => {
   };
 
   return (
-    <div className="p-3 md:p-6 space-y-4 md:space-y-6 max-w-full overflow-x-hidden">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="min-w-0">
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground truncate">Expense & Petty Cash Management</h1>
-          <p className="text-muted-foreground mt-1 text-sm md:text-base">Manage expenses, petty cash, and approval workflows</p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2">
-          <Button variant="outline" size="sm" className="w-full sm:w-auto">
-            <Download className="h-4 w-4 mr-2" />
-            Export Report
-          </Button>
-          <Dialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="w-full sm:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Expense
-              </Button>
-            </DialogTrigger>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-4 lg:p-6 space-y-6 max-w-7xl">
+        {/* Header */}
+        <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight">Expense & Petty Cash Management</h1>
+            <p className="text-muted-foreground">Manage expenses, petty cash, and approval workflows</p>
+          </div>
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+            <Button variant="outline" className="w-full sm:w-auto">
+              <Download className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+            <Dialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Expense
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add New Expense</DialogTitle>
@@ -321,301 +322,501 @@ const ExpenseManagement = () => {
         </div>
       </div>
 
-      {/* Petty Cash Overview - Mobile Optimized */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
-        <Card className="h-auto">
-          <CardContent className="p-3 md:p-4">
-            <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-3">
-              <Wallet className="h-6 w-6 md:h-8 md:w-8 text-green-600 self-start lg:self-center" />
-              <div className="min-w-0">
-                <p className="text-lg md:text-2xl font-bold text-green-600 truncate">{pettyCashData.currentBalance}</p>
-                <p className="text-xs md:text-sm text-muted-foreground">Current Balance</p>
+        {/* Stats Overview - Responsive Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Wallet className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-600">{pettyCashData.currentBalance}</p>
+                  <p className="text-sm text-muted-foreground">Current Balance</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="h-auto">
-          <CardContent className="p-3 md:p-4">
-            <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-3">
-              <DollarSign className="h-6 w-6 md:h-8 md:w-8 text-blue-600 self-start lg:self-center" />
-              <div className="min-w-0">
-                <p className="text-lg md:text-2xl font-bold text-blue-600 truncate">{pettyCashData.monthlyBudget}</p>
-                <p className="text-xs md:text-sm text-muted-foreground">Monthly Budget</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <DollarSign className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">{pettyCashData.monthlyBudget}</p>
+                  <p className="text-sm text-muted-foreground">Monthly Budget</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="h-auto">
-          <CardContent className="p-3 md:p-4">
-            <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-3">
-              <Receipt className="h-6 w-6 md:h-8 md:w-8 text-red-600 self-start lg:self-center" />
-              <div className="min-w-0">
-                <p className="text-lg md:text-2xl font-bold text-red-600 truncate">{pettyCashData.totalSpent}</p>
-                <p className="text-xs md:text-sm text-muted-foreground">Total Spent</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-red-100 rounded-lg">
+                  <Receipt className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-600">{pettyCashData.totalSpent}</p>
+                  <p className="text-sm text-muted-foreground">Total Spent</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="h-auto">
-          <CardContent className="p-3 md:p-4">
-            <div className="flex flex-col lg:flex-row lg:items-center space-y-2 lg:space-y-0 lg:space-x-3">
-              <Calendar className="h-6 w-6 md:h-8 md:w-8 text-yellow-600 self-start lg:self-center" />
-              <div className="min-w-0">
-                <p className="text-lg md:text-2xl font-bold text-yellow-600 truncate">{pettyCashData.pendingExpenses}</p>
-                <p className="text-xs md:text-sm text-muted-foreground">Pending Expenses</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Calendar className="h-6 w-6 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-yellow-600">{pettyCashData.pendingExpenses}</p>
+                  <p className="text-sm text-muted-foreground">Pending Expenses</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Budget Usage Progress */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg md:text-xl">Monthly Budget Usage</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Used: ₹55,000</span>
-              <span>Remaining: ₹45,000</span>
+        {/* Budget Usage Progress */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Budget Usage</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between text-sm font-medium">
+                <span>Used: ₹55,000</span>
+                <span>Remaining: ₹45,000</span>
+              </div>
+              <div className="w-full bg-secondary rounded-full h-4">
+                <div 
+                  className="bg-primary h-4 rounded-full transition-all duration-500 ease-in-out" 
+                  style={{ width: "55%" }}
+                ></div>
+              </div>
+              <p className="text-sm text-muted-foreground">55% of monthly budget used</p>
             </div>
-            <div className="w-full bg-muted rounded-full h-3">
-              <div className="bg-primary h-3 rounded-full transition-all duration-300" style={{ width: "55%" }}></div>
-            </div>
-            <p className="text-sm text-muted-foreground">55% of monthly budget used</p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Filters - Mobile Optimized */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="relative md:col-span-2 lg:col-span-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search expenses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+        {/* Filters */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search expenses..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:grid-cols-none lg:flex lg:space-x-4">
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-full lg:w-48">
+                    <SelectValue placeholder="Filter by Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="Travel">Travel</SelectItem>
+                    <SelectItem value="Supplies">Supplies</SelectItem>
+                    <SelectItem value="Miscellaneous">Miscellaneous</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full lg:w-48">
+                    <SelectValue placeholder="Filter by Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Approved">Approved</SelectItem>
+                    <SelectItem value="Rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline" className="w-full lg:w-auto">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Date Range
+                </Button>
+              </div>
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="Travel">Travel</SelectItem>
-                <SelectItem value="Supplies">Supplies</SelectItem>
-                <SelectItem value="Miscellaneous">Miscellaneous</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Pending">Pending</SelectItem>
-                <SelectItem value="Approved">Approved</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" className="w-full">
-              <Calendar className="h-4 w-4 mr-2" />
-              Date Range
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Expenses Table - Mobile Responsive */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg md:text-xl">Expense Requests</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="min-w-[100px]">Date</TableHead>
-                  <TableHead className="min-w-[120px]">Amount</TableHead>
-                  <TableHead className="min-w-[100px]">Category</TableHead>
-                  <TableHead className="min-w-[200px]">Description</TableHead>
-                  <TableHead className="min-w-[120px]">Requested By</TableHead>
-                  <TableHead className="min-w-[120px]">Payment</TableHead>
-                  <TableHead className="min-w-[100px]">Receipt</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
-                  <TableHead className="min-w-[150px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+        {/* Expenses List - Responsive */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Expense Requests</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {/* Mobile Card View - Hidden on larger screens */}
+            <div className="block lg:hidden">
+              <div className="space-y-4 p-4">
                 {filteredExpenseData.map((expense) => (
-                  <TableRow key={expense.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{expense.date}</TableCell>
-                    <TableCell className="font-semibold text-primary">{expense.amount}</TableCell>
-                    <TableCell>
-                      <Badge className={getCategoryColor(expense.category)} variant="secondary">
-                        {expense.category}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-[200px]">
-                      <div className="truncate" title={expense.description}>
-                        {expense.description}
-                      </div>
-                    </TableCell>
-                    <TableCell>{expense.requestedBy}</TableCell>
-                    <TableCell>{expense.paymentMethod}</TableCell>
-                    <TableCell>
-                      {expense.receiptUploaded ? (
-                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                          Uploaded
-                        </Badge>
-                      ) : (
-                        <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                          Missing
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(expense.status)} variant="secondary">
-                        {expense.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-1">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedExpense(expense)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Expense Details - #{expense.id}</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-6">
-                              {/* Expense Details */}
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <Label>Amount</Label>
-                                  <p className="font-semibold text-lg text-primary">{expense.amount}</p>
-                                </div>
-                                <div>
-                                  <Label>Category</Label>
-                                  <p className="font-medium">{expense.category}</p>
-                                </div>
-                                <div>
-                                  <Label>Requested By</Label>
-                                  <p className="font-medium">{expense.requestedBy}</p>
-                                </div>
-                                <div>
-                                  <Label>Payment Method</Label>
-                                  <p className="font-medium">{expense.paymentMethod}</p>
-                                </div>
-                                <div>
-                                  <Label>Expense Date</Label>
-                                  <p className="font-medium">{expense.date}</p>
-                                </div>
-                                <div>
-                                  <Label>Submitted Date</Label>
-                                  <p className="font-medium">{expense.submittedDate}</p>
-                                </div>
-                              </div>
-
-                              {/* Description */}
-                              <div>
-                                <Label>Description</Label>
-                                <p className="mt-1 p-3 bg-muted rounded-md">{expense.description}</p>
-                              </div>
-
-                              {/* Supporting Documents */}
-                              <div>
-                                <Label>Supporting Receipts</Label>
-                                {expense.receiptUploaded ? (
-                                  <div className="mt-2 p-4 border rounded-lg">
-                                    <div className="flex items-center space-x-2">
-                                      <Receipt className="h-5 w-5 text-green-600" />
-                                      <span className="text-sm">Receipt_001.pdf</span>
-                                      <Button variant="outline" size="sm">
-                                        View
-                                      </Button>
-                                    </div>
+                  <Card key={expense.id} className="border">
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-lg font-bold text-primary">{expense.amount}</p>
+                            <p className="text-sm text-muted-foreground">{expense.date}</p>
+                          </div>
+                          <Badge className={getStatusColor(expense.status)} variant="secondary">
+                            {expense.status}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Category:</span>
+                            <Badge className={getCategoryColor(expense.category)} variant="secondary">
+                              {expense.category}
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Requested by:</span>
+                            <span className="text-sm font-medium">{expense.requestedBy}</span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Payment:</span>
+                            <span className="text-sm">{expense.paymentMethod}</span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Receipt:</span>
+                            <Badge className={expense.receiptUploaded ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                              {expense.receiptUploaded ? "Uploaded" : "Missing"}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Description:</p>
+                          <p className="text-sm">{expense.description}</p>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => setSelectedExpense(expense)}
+                              >
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Expense Details - #{expense.id}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-6">
+                                {/* Expense Details */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Amount</Label>
+                                    <p className="font-semibold text-lg text-primary">{expense.amount}</p>
                                   </div>
-                                ) : (
-                                  <div className="mt-2 p-4 border-2 border-dashed border-destructive/30 rounded-lg text-center">
-                                    <p className="text-destructive">No receipt uploaded</p>
+                                  <div>
+                                    <Label>Category</Label>
+                                    <p className="font-medium">{expense.category}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Requested By</Label>
+                                    <p className="font-medium">{expense.requestedBy}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Payment Method</Label>
+                                    <p className="font-medium">{expense.paymentMethod}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Expense Date</Label>
+                                    <p className="font-medium">{expense.date}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Submitted Date</Label>
+                                    <p className="font-medium">{expense.submittedDate}</p>
+                                  </div>
+                                </div>
+
+                                {/* Description */}
+                                <div>
+                                  <Label>Description</Label>
+                                  <p className="mt-1 p-3 bg-muted rounded-md">{expense.description}</p>
+                                </div>
+
+                                {/* Supporting Documents */}
+                                <div>
+                                  <Label>Supporting Receipts</Label>
+                                  {expense.receiptUploaded ? (
+                                    <div className="mt-2 p-4 border rounded-lg">
+                                      <div className="flex items-center space-x-2">
+                                        <Receipt className="h-5 w-5 text-green-600" />
+                                        <span className="text-sm">Receipt_001.pdf</span>
+                                        <Button variant="outline" size="sm">
+                                          View
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="mt-2 p-4 border-2 border-dashed border-destructive/30 rounded-lg text-center">
+                                      <p className="text-destructive">No receipt uploaded</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Admin Remarks */}
+                                <div>
+                                  <Label>Admin Remarks</Label>
+                                  <Textarea 
+                                    placeholder="Add remarks for approval/rejection..."
+                                    className="mt-1"
+                                  />
+                                </div>
+
+                                {/* Action Buttons */}
+                                {expense.status === "Pending" && (
+                                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={() => handleRejectExpense(expense.id)}
+                                      className="w-full sm:w-auto"
+                                    >
+                                      <X className="h-4 w-4 mr-2" />
+                                      Reject
+                                    </Button>
+                                    <Button 
+                                      onClick={() => handleApproveExpense(expense.id)}
+                                      className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+                                    >
+                                      <Check className="h-4 w-4 mr-2" />
+                                      Approve
+                                    </Button>
                                   </div>
                                 )}
                               </div>
-
-                              {/* Admin Remarks */}
-                              <div>
-                                <Label>Admin Remarks</Label>
-                                <Textarea 
-                                  placeholder="Add remarks for approval/rejection..."
-                                  className="mt-1"
-                                />
-                              </div>
-
-                              {/* Action Buttons */}
-                              {expense.status === "Pending" && (
-                                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
-                                  <Button 
-                                    variant="outline" 
-                                    onClick={() => handleRejectExpense(expense.id)}
-                                    className="w-full sm:w-auto"
-                                  >
-                                    <X className="h-4 w-4 mr-2" />
-                                    Reject
-                                  </Button>
-                                  <Button 
-                                    onClick={() => handleApproveExpense(expense.id)}
-                                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
-                                  >
-                                    <Check className="h-4 w-4 mr-2" />
-                                    Approve
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                        
-                        {expense.status === "Pending" && (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={() => handleApproveExpense(expense.id)}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleRejectExpense(expense.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
+                            </DialogContent>
+                          </Dialog>
+                          
+                          {expense.status === "Pending" && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleApproveExpense(expense.id)}
+                                className="bg-green-600 hover:bg-green-700 flex-1"
+                              >
+                                <Check className="h-4 w-4 mr-2" />
+                                Approve
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRejectExpense(expense.id)}
+                                className="flex-1"
+                              >
+                                <X className="h-4 w-4 mr-2" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </CardContent>
+                  </Card>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
+              </div>
+            </div>
+
+            {/* Desktop Table View - Hidden on mobile */}
+            <div className="hidden lg:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Requested By</TableHead>
+                    <TableHead>Payment</TableHead>
+                    <TableHead>Receipt</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredExpenseData.map((expense) => (
+                    <TableRow key={expense.id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium">{expense.date}</TableCell>
+                      <TableCell className="font-semibold text-primary">{expense.amount}</TableCell>
+                      <TableCell>
+                        <Badge className={getCategoryColor(expense.category)} variant="secondary">
+                          {expense.category}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-[200px]">
+                        <div className="truncate" title={expense.description}>
+                          {expense.description}
+                        </div>
+                      </TableCell>
+                      <TableCell>{expense.requestedBy}</TableCell>
+                      <TableCell>{expense.paymentMethod}</TableCell>
+                      <TableCell>
+                        {expense.receiptUploaded ? (
+                          <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            Uploaded
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                            Missing
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(expense.status)} variant="secondary">
+                          {expense.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-1">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedExpense(expense)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Expense Details - #{expense.id}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-6">
+                                {/* Expense Details */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Amount</Label>
+                                    <p className="font-semibold text-lg text-primary">{expense.amount}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Category</Label>
+                                    <p className="font-medium">{expense.category}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Requested By</Label>
+                                    <p className="font-medium">{expense.requestedBy}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Payment Method</Label>
+                                    <p className="font-medium">{expense.paymentMethod}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Expense Date</Label>
+                                    <p className="font-medium">{expense.date}</p>
+                                  </div>
+                                  <div>
+                                    <Label>Submitted Date</Label>
+                                    <p className="font-medium">{expense.submittedDate}</p>
+                                  </div>
+                                </div>
+
+                                {/* Description */}
+                                <div>
+                                  <Label>Description</Label>
+                                  <p className="mt-1 p-3 bg-muted rounded-md">{expense.description}</p>
+                                </div>
+
+                                {/* Supporting Documents */}
+                                <div>
+                                  <Label>Supporting Receipts</Label>
+                                  {expense.receiptUploaded ? (
+                                    <div className="mt-2 p-4 border rounded-lg">
+                                      <div className="flex items-center space-x-2">
+                                        <Receipt className="h-5 w-5 text-green-600" />
+                                        <span className="text-sm">Receipt_001.pdf</span>
+                                        <Button variant="outline" size="sm">
+                                          View
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="mt-2 p-4 border-2 border-dashed border-destructive/30 rounded-lg text-center">
+                                      <p className="text-destructive">No receipt uploaded</p>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Admin Remarks */}
+                                <div>
+                                  <Label>Admin Remarks</Label>
+                                  <Textarea 
+                                    placeholder="Add remarks for approval/rejection..."
+                                    className="mt-1"
+                                  />
+                                </div>
+
+                                {/* Action Buttons */}
+                                {expense.status === "Pending" && (
+                                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={() => handleRejectExpense(expense.id)}
+                                      className="w-full sm:w-auto"
+                                    >
+                                      <X className="h-4 w-4 mr-2" />
+                                      Reject
+                                    </Button>
+                                    <Button 
+                                      onClick={() => handleApproveExpense(expense.id)}
+                                      className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+                                    >
+                                      <Check className="h-4 w-4 mr-2" />
+                                      Approve
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                          
+                          {expense.status === "Pending" && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleApproveExpense(expense.id)}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRejectExpense(expense.id)}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };
