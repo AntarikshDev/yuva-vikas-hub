@@ -277,17 +277,17 @@ const App = () => {
             
             {/* Catch-all route */}
             {/* Admin Department Routes */}
-            <Route path="/admin-department/dashboard" element={<MainLayout role="admin" title="Administration Dashboard"><AdminDeptDashboard /></MainLayout>} />
-            <Route path="/admin-department/property-management" element={<MainLayout role="admin" title="Property Management"><PropertyManagement /></MainLayout>} />
-            <Route path="/admin-department/rent-management" element={<MainLayout role="admin" title="Rent Management"><RentManagement /></MainLayout>} />
-            <Route path="/admin-department/vendor-management" element={<MainLayout role="admin" title="Vendor Management"><VendorManagement /></MainLayout>} />
-            <Route path="/admin-department/food-vendor-management" element={<MainLayout role="admin" title="Food Vendor Management"><FoodVendorManagement /></MainLayout>} />
-            <Route path="/admin-department/expense-management" element={<MainLayout role="admin" title="Expense Management"><ExpenseManagement /></MainLayout>} />
-            <Route path="/admin-department/petty-cash-management" element={<MainLayout role="admin" title="Petty Cash Management"><PettyCashManagement /></MainLayout>} />
-            <Route path="/admin-department/purchase-order-management" element={<MainLayout role="admin" title="Purchase Order Management"><PurchaseOrderManagement /></MainLayout>} />
-            <Route path="/admin-department/ticket-booking" element={<MainLayout role="admin" title="Ticket Booking"><TicketBooking /></MainLayout>} />
-            <Route path="/admin-department/ticket-booking-approval" element={<MainLayout role="admin" title="Ticket Booking Approval"><TicketBookingApproval /></MainLayout>} />
-            <Route path="/admin-department/reports" element={<MainLayout role="admin" title="Reports"><AdminDeptReports /></MainLayout>} />
+            <Route path="/admin-department/dashboard" element={<AdminDeptDashboard />} />
+            <Route path="/admin-department/property-management" element={<PropertyManagement />} />
+            <Route path="/admin-department/rent-management" element={<RentManagement />} />
+            <Route path="/admin-department/vendor-management" element={<VendorManagement />} />
+            <Route path="/admin-department/food-vendor-management" element={<FoodVendorManagement />} />
+            <Route path="/admin-department/expense-management" element={<ExpenseManagement />} />
+            <Route path="/admin-department/petty-cash-management" element={<PettyCashManagement />} />
+            <Route path="/admin-department/purchase-order-management" element={<PurchaseOrderManagement />} />
+            <Route path="/admin-department/ticket-booking" element={<TicketBooking />} />
+            <Route path="/admin-department/ticket-booking-approval" element={<TicketBookingApproval />} />
+            <Route path="/admin-department/reports" element={<AdminDeptReports />} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
