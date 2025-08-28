@@ -22,7 +22,7 @@ import {
 
 const RentManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedRent, setSelectedRent] = useState<any>(null);
 
   // Mock data for rent payments
@@ -89,7 +89,7 @@ const RentManagement = () => {
   const filteredRentData = rentData.filter(rent => {
     const matchesSearch = rent.centreName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          rent.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !statusFilter || rent.paymentStatus === statusFilter;
+    const matchesStatus = statusFilter === "all" || rent.paymentStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
 

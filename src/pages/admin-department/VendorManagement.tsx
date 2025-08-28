@@ -25,8 +25,8 @@ import {
 
 const VendorManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [serviceFilter, setServiceFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [serviceFilter, setServiceFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedVendor, setSelectedVendor] = useState<any>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -121,8 +121,8 @@ const VendorManagement = () => {
   const filteredVendorData = vendorData.filter(vendor => {
     const matchesSearch = vendor.vendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          vendor.contactPerson.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesService = !serviceFilter || vendor.serviceType === serviceFilter;
-    const matchesStatus = !statusFilter || vendor.paymentStatus === statusFilter;
+    const matchesService = serviceFilter === "all" || vendor.serviceType === serviceFilter;
+    const matchesStatus = statusFilter === "all" || vendor.paymentStatus === statusFilter;
     return matchesSearch && matchesService && matchesStatus;
   });
 

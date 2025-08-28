@@ -21,9 +21,9 @@ import {
 } from "lucide-react";
 
 const Reports = () => {
-  const [selectedReport, setSelectedReport] = useState("");
-  const [dateRange, setDateRange] = useState("");
-  const [centreFilter, setCentreFilter] = useState("");
+  const [selectedReport, setSelectedReport] = useState("all");
+  const [dateRange, setDateRange] = useState("this-month");
+  const [centreFilter, setCentreFilter] = useState("all");
   const [showScheduleForm, setShowScheduleForm] = useState(false);
 
   // Mock data for pre-configured reports

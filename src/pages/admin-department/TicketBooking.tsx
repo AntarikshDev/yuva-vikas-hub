@@ -26,8 +26,8 @@ import {
 
 const TicketBooking = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [stateFilter, setStateFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   // Mock data for ticket bookings
@@ -119,8 +119,8 @@ const TicketBooking = () => {
   const filteredBookings = ticketBookings.filter(booking => {
     const matchesSearch = booking.candidateName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          booking.candidateId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesState = !stateFilter || booking.state === stateFilter;
-    const matchesStatus = !statusFilter || booking.status === statusFilter;
+    const matchesState = stateFilter === "all" || booking.state === stateFilter;
+    const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
     return matchesSearch && matchesState && matchesStatus;
   });
 

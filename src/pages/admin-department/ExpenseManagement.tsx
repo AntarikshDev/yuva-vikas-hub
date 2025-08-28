@@ -24,8 +24,8 @@ import {
 
 const ExpenseManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedExpense, setSelectedExpense] = useState<any>(null);
 
   // Mock data for expenses
@@ -109,8 +109,8 @@ const ExpenseManagement = () => {
   const filteredExpenseData = expenseData.filter(expense => {
     const matchesSearch = expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          expense.requestedBy.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || expense.category === categoryFilter;
-    const matchesStatus = !statusFilter || expense.status === statusFilter;
+    const matchesCategory = categoryFilter === "all" || expense.category === categoryFilter;
+    const matchesStatus = statusFilter === "all" || expense.status === statusFilter;
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
