@@ -25,7 +25,7 @@ import {
   Building
 } from "lucide-react";
 
-const PurchaseOrderManagement = () => {
+export default function PurchaseOrderManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedPO, setSelectedPO] = useState<any>(null);
@@ -89,25 +89,6 @@ const PurchaseOrderManagement = () => {
       adminApproval: "Approved",
       adminApprovalDate: "2025-07-19",
       createdDate: "2025-07-15"
-    },
-    {
-      id: 4,
-      poNumber: "PO-2025-004",
-      vendor: "Swift Transport Services",
-      requestedBy: "Center Manager - Chennai",
-      requestDate: "2025-07-22",
-      expectedDelivery: "2025-07-28",
-      totalAmount: "₹45,000",
-      status: "Rejected",
-      priority: "Low",
-      items: [
-        { item: "Transportation Service", quantity: 1, unitPrice: "₹45,000", amount: "₹45,000" }
-      ],
-      stateHeadApproval: "Rejected",
-      stateHeadApprovalDate: "2025-07-23",
-      rejectionReason: "Budget constraints for this quarter",
-      adminApproval: "Not Required",
-      createdDate: "2025-07-22"
     }
   ];
 
@@ -148,21 +129,21 @@ const PurchaseOrderManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 lg:p-6 space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Purchase Order Management</h1>
+          <h1 className="text-3xl font-bold">Purchase Order Management</h1>
           <p className="text-muted-foreground mt-1">2-Step approval process: State Head → Admin</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-2">
-          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export POs
           </Button>
           <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
             <DialogTrigger asChild>
-              <Button size="sm" className="w-full sm:w-auto">
+              <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Purchase Order
               </Button>
@@ -210,90 +191,19 @@ const PurchaseOrderManagement = () => {
                   </div>
                 </div>
 
-                {/* Items Section */}
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <Label className="text-base font-semibold">Purchase Items</Label>
-                    <Button variant="outline" size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Item
-                    </Button>
-                  </div>
-                  
-                  <div className="border rounded-lg overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Item Description</TableHead>
-                          <TableHead>Quantity</TableHead>
-                          <TableHead>Unit Price</TableHead>
-                          <TableHead>Total</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>
-                            <Input placeholder="Enter item description" />
-                          </TableCell>
-                          <TableCell>
-                            <Input type="number" placeholder="Qty" />
-                          </TableCell>
-                          <TableCell>
-                            <Input placeholder="Unit price" />
-                          </TableCell>
-                          <TableCell>
-                            <Input placeholder="Total" disabled />
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="outline" size="sm">
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-
                 <div>
                   <Label>Special Instructions</Label>
                   <Textarea placeholder="Any special delivery or handling instructions..." />
                 </div>
 
-                <div className="bg-secondary/50 p-4 rounded-lg">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>Subtotal:</span>
-                        <span className="font-medium">₹0.00</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Tax (18%):</span>
-                        <span className="font-medium">₹0.00</span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>Shipping:</span>
-                        <span className="font-medium">₹0.00</span>
-                      </div>
-                      <div className="flex justify-between border-t pt-2">
-                        <span className="font-semibold">Total Amount:</span>
-                        <span className="font-semibold text-lg">₹0.00</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-end gap-3">
-                  <Button variant="outline" onClick={() => setShowCreateForm(false)} className="w-full sm:w-auto">
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setShowCreateForm(false)}>
                     Cancel
                   </Button>
-                  <Button variant="outline" className="w-full sm:w-auto">
+                  <Button variant="outline">
                     Save as Draft
                   </Button>
-                  <Button className="w-full sm:w-auto">
+                  <Button>
                     Submit for Approval
                   </Button>
                 </div>
@@ -303,44 +213,6 @@ const PurchaseOrderManagement = () => {
         </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search PO number, vendor..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
-                <SelectItem value="Draft">Draft</SelectItem>
-                <SelectItem value="State Head Approved">State Head Approved</SelectItem>
-                <SelectItem value="Admin Approved">Admin Approved</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
-                <SelectItem value="Completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" className="w-full">
-              <Calendar className="h-4 w-4 mr-2" />
-              Date Range
-            </Button>
-            <Button variant="outline" className="w-full">
-              <FileText className="h-4 w-4 mr-2" />
-              Generate Report
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -348,7 +220,7 @@ const PurchaseOrderManagement = () => {
             <div className="flex items-center space-x-3">
               <ShoppingCart className="h-8 w-8 text-primary" />
               <div>
-                <p className="text-2xl font-bold text-foreground">24</p>
+                <p className="text-2xl font-bold">24</p>
                 <p className="text-sm text-muted-foreground">Total Purchase Orders</p>
               </div>
             </div>
@@ -394,7 +266,7 @@ const PurchaseOrderManagement = () => {
         <CardHeader>
           <CardTitle>Purchase Orders</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
@@ -441,6 +313,7 @@ const PurchaseOrderManagement = () => {
                     <Badge 
                       className={
                         po.adminApproval === "Approved" ? "bg-green-100 text-green-800" :
+                        po.adminApproval === "Rejected" ? "bg-red-100 text-red-800" :
                         po.adminApproval === "Not Required" ? "bg-gray-100 text-gray-800" :
                         "bg-yellow-100 text-yellow-800"
                       }
@@ -455,163 +328,25 @@ const PurchaseOrderManagement = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedPO(po)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>Purchase Order Details - {po.poNumber}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-6">
-                            {/* PO Header */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>PO Number</Label>
-                                <p className="font-medium">{po.poNumber}</p>
-                              </div>
-                              <div>
-                                <Label>Vendor</Label>
-                                <p className="font-medium">{po.vendor}</p>
-                              </div>
-                              <div>
-                                <Label>Requested By</Label>
-                                <p className="font-medium">{po.requestedBy}</p>
-                              </div>
-                              <div>
-                                <Label>Request Date</Label>
-                                <p className="font-medium">{po.requestDate}</p>
-                              </div>
-                              <div>
-                                <Label>Expected Delivery</Label>
-                                <p className="font-medium">{po.expectedDelivery}</p>
-                              </div>
-                              <div>
-                                <Label>Priority</Label>
-                                <Badge className={getPriorityColor(po.priority)}>
-                                  {po.priority}
-                                </Badge>
-                              </div>
-                            </div>
-
-                            {/* Items Table */}
-                            <div>
-                              <Label className="text-base font-semibold">Purchase Items</Label>
-                              <div className="mt-2 border rounded-lg overflow-hidden">
-                                <Table>
-                                  <TableHeader>
-                                    <TableRow>
-                                      <TableHead>Item</TableHead>
-                                      <TableHead>Quantity</TableHead>
-                                      <TableHead>Unit Price</TableHead>
-                                      <TableHead>Amount</TableHead>
-                                    </TableRow>
-                                  </TableHeader>
-                                  <TableBody>
-                                    {po.items.map((item, index) => (
-                                      <TableRow key={index}>
-                                        <TableCell>{item.item}</TableCell>
-                                        <TableCell>{item.quantity}</TableCell>
-                                        <TableCell>{item.unitPrice}</TableCell>
-                                        <TableCell className="font-medium">{item.amount}</TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
-                              </div>
-                              <div className="mt-4 flex justify-end">
-                                <div className="text-right">
-                                  <p className="text-lg font-semibold">Total Amount: {po.totalAmount}</p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Approval Timeline */}
-                            <div>
-                              <Label className="text-base font-semibold">Approval Timeline</Label>
-                              <div className="mt-4 space-y-4">
-                                <div className="flex items-center space-x-4 p-3 border rounded-lg">
-                                  <Building className="h-5 w-5 text-blue-600" />
-                                  <div className="flex-1">
-                                    <p className="font-medium">State Head Approval</p>
-                                    <p className="text-sm text-muted-foreground">
-                                      Status: {po.stateHeadApproval}
-                                      {po.stateHeadApprovalDate && ` - ${po.stateHeadApprovalDate}`}
-                                    </p>
-                                  </div>
-                                  {po.stateHeadApproval === "Pending" && (
-                                    <div className="flex space-x-2">
-                                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                                        <Check className="h-4 w-4" />
-                                      </Button>
-                                      <Button variant="outline" size="sm">
-                                        <X className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="flex items-center space-x-4 p-3 border rounded-lg">
-                                  <User className="h-5 w-5 text-green-600" />
-                                  <div className="flex-1">
-                                    <p className="font-medium">Admin Approval</p>
-                                    <p className="text-sm text-muted-foreground">
-                                      Status: {po.adminApproval}
-                                      {po.adminApprovalDate && ` - ${po.adminApprovalDate}`}
-                                    </p>
-                                  </div>
-                                  {po.adminApproval === "Pending" && po.stateHeadApproval === "Approved" && (
-                                    <div className="flex space-x-2">
-                                      <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                                        <Check className="h-4 w-4" />
-                                      </Button>
-                                      <Button variant="outline" size="sm">
-                                        <X className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-
-                            {po.rejectionReason && (
-                              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                                <Label className="text-red-800 font-semibold">Rejection Reason</Label>
-                                <p className="mt-1 text-red-700">{po.rejectionReason}</p>
-                              </div>
-                            )}
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      
                       <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </Button>
-                      
-                      {/* Approval buttons based on status */}
-                      {po.stateHeadApproval === "Pending" && (
+                      {po.status === "State Head Approved" && (
                         <>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-green-600"
+                            onClick={() => handleAdminApproval(po.id, 'approve')}
+                          >
                             <Check className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="sm">
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                      
-                      {po.adminApproval === "Pending" && po.stateHeadApproval === "Approved" && (
-                        <>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600"
+                            onClick={() => handleAdminApproval(po.id, 'reject')}
+                          >
                             <X className="h-4 w-4" />
                           </Button>
                         </>
@@ -626,6 +361,4 @@ const PurchaseOrderManagement = () => {
       </Card>
     </div>
   );
-};
-
-export default PurchaseOrderManagement;
+}

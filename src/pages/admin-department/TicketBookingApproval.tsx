@@ -25,7 +25,7 @@ import {
   CreditCard
 } from "lucide-react";
 
-const TicketBookingApproval = () => {
+export default function TicketBookingApproval() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -99,27 +99,6 @@ const TicketBookingApproval = () => {
       approvalLevel: "State Head",
       rejectionDate: "2025-07-19",
       rejectionReason: "Alternative local candidate available"
-    },
-    {
-      id: 4,
-      bookingId: "TB-2025-004",
-      passengerName: "Neha Singh",
-      requestedBy: "Counsellor - Jaipur",
-      travelType: "Flight",
-      from: "Jaipur",
-      to: "Kolkata",
-      departureDate: "2025-08-20",
-      returnDate: "2025-08-22",
-      purpose: "Parent Counselling",
-      estimatedAmount: "₹15,000",
-      actualAmount: "₹14,200",
-      status: "Pending Approval",
-      priority: "Medium",
-      requestDate: "2025-07-23",
-      preferredTime: "Afternoon",
-      classType: "Business",
-      urgency: "Normal",
-      approvalLevel: "Admin"
     }
   ];
 
@@ -165,68 +144,24 @@ const TicketBookingApproval = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 lg:p-6 space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Ticket Booking Approvals</h1>
+          <h1 className="text-3xl font-bold">Ticket Booking Approvals</h1>
           <p className="text-muted-foreground mt-1">Review and approve travel booking requests</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-2">
-          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export Bookings
           </Button>
-          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+          <Button variant="outline" size="sm">
             <FileText className="h-4 w-4 mr-2" />
             Generate Report
           </Button>
         </div>
       </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Search booking ID, passenger..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Status</SelectItem>
-                <SelectItem value="Pending Approval">Pending Approval</SelectItem>
-                <SelectItem value="Approved">Approved</SelectItem>
-                <SelectItem value="Rejected">Rejected</SelectItem>
-                <SelectItem value="Booked">Booked</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Travel Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
-                <SelectItem value="Flight">Flight</SelectItem>
-                <SelectItem value="Train">Train</SelectItem>
-                <SelectItem value="Bus">Bus</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" className="w-full">
-              <Calendar className="h-4 w-4 mr-2" />
-              Date Range
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -235,7 +170,7 @@ const TicketBookingApproval = () => {
             <div className="flex items-center space-x-3">
               <Plane className="h-8 w-8 text-primary" />
               <div>
-                <p className="text-2xl font-bold text-foreground">28</p>
+                <p className="text-2xl font-bold">28</p>
                 <p className="text-sm text-muted-foreground">Total Requests</p>
               </div>
             </div>
@@ -281,7 +216,7 @@ const TicketBookingApproval = () => {
         <CardHeader>
           <CardTitle>Travel Booking Requests</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
@@ -331,176 +266,23 @@ const TicketBookingApproval = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedBooking(booking)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>Travel Booking Details - {booking.bookingId}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-6">
-                            {/* Booking Header */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>Booking ID</Label>
-                                <p className="font-medium">{booking.bookingId}</p>
-                              </div>
-                              <div>
-                                <Label>Request Date</Label>
-                                <p className="font-medium">{booking.requestDate}</p>
-                              </div>
-                              <div>
-                                <Label>Passenger Name</Label>
-                                <p className="font-medium">{booking.passengerName}</p>
-                              </div>
-                              <div>
-                                <Label>Requested By</Label>
-                                <p className="font-medium">{booking.requestedBy}</p>
-                              </div>
-                            </div>
-
-                            {/* Travel Details */}
-                            <div>
-                              <Label className="text-base font-semibold">Travel Information</Label>
-                              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <Label>Travel Type</Label>
-                                  <div className="flex items-center mt-1">
-                                    {getTravelIcon(booking.travelType)}
-                                    <span className="ml-2 font-medium">{booking.travelType}</span>
-                                  </div>
-                                </div>
-                                <div>
-                                  <Label>Class/Type</Label>
-                                  <p className="font-medium">{booking.classType}</p>
-                                </div>
-                                <div>
-                                  <Label>From</Label>
-                                  <p className="font-medium">{booking.from}</p>
-                                </div>
-                                <div>
-                                  <Label>To</Label>
-                                  <p className="font-medium">{booking.to}</p>
-                                </div>
-                                <div>
-                                  <Label>Departure Date</Label>
-                                  <p className="font-medium">{booking.departureDate}</p>
-                                </div>
-                                <div>
-                                  <Label>Return Date</Label>
-                                  <p className="font-medium">{booking.returnDate}</p>
-                                </div>
-                                <div>
-                                  <Label>Preferred Time</Label>
-                                  <p className="font-medium">{booking.preferredTime}</p>
-                                </div>
-                                <div>
-                                  <Label>Priority</Label>
-                                  <Badge className={getPriorityColor(booking.priority)}>
-                                    {booking.priority}
-                                  </Badge>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Financial Details */}
-                            <div>
-                              <Label className="text-base font-semibold">Cost Information</Label>
-                              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                  <Label>Estimated Amount</Label>
-                                  <p className="font-medium text-lg">{booking.estimatedAmount}</p>
-                                </div>
-                                <div>
-                                  <Label>Actual Amount</Label>
-                                  <p className="font-medium text-lg text-green-600">{booking.actualAmount}</p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Purpose */}
-                            <div>
-                              <Label>Travel Purpose</Label>
-                              <p className="mt-1 p-3 bg-secondary/50 rounded-md">{booking.purpose}</p>
-                            </div>
-
-                            {/* Approval Section */}
-                            <div>
-                              <Label className="text-base font-semibold">Approval Status</Label>
-                              <div className="mt-4 p-4 border rounded-lg">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <p className="font-medium">Admin Approval</p>
-                                    <p className="text-sm text-muted-foreground">
-                                      Current Status: {booking.status}
-                                    </p>
-                                    {booking.approvalDate && (
-                                      <p className="text-sm text-muted-foreground">
-                                        Approved on: {booking.approvalDate} by {booking.approvedBy}
-                                      </p>
-                                    )}
-                                  </div>
-                                  <Badge className={getStatusColor(booking.status)}>
-                                    {booking.status}
-                                  </Badge>
-                                </div>
-                              </div>
-                            </div>
-
-                            {booking.rejectionReason && (
-                              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                                <Label className="text-red-800 font-semibold">Rejection Reason</Label>
-                                <p className="mt-1 text-red-700">{booking.rejectionReason}</p>
-                              </div>
-                            )}
-
-                            {/* Admin Remarks */}
-                            {booking.status === "Pending Approval" && (
-                              <div>
-                                <Label>Admin Remarks</Label>
-                                <Textarea 
-                                  placeholder="Add remarks for approval/rejection..."
-                                  className="mt-1"
-                                />
-                              </div>
-                            )}
-
-                            {/* Action Buttons */}
-                            {booking.status === "Pending Approval" && (
-                              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
-                                <Button variant="outline">
-                                  <X className="h-4 w-4 mr-2" />
-                                  Reject Request
-                                </Button>
-                                <Button className="bg-green-600 hover:bg-green-700">
-                                  <Check className="h-4 w-4 mr-2" />
-                                  Approve Booking
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       {booking.status === "Pending Approval" && (
                         <>
                           <Button 
+                            variant="outline" 
                             size="sm" 
-                            className="bg-green-600 hover:bg-green-700"
+                            className="text-green-600"
                             onClick={() => handleApproval(booking.id, 'approve')}
                           >
                             <Check className="h-4 w-4" />
                           </Button>
                           <Button 
                             variant="outline" 
-                            size="sm"
+                            size="sm" 
+                            className="text-red-600"
                             onClick={() => handleApproval(booking.id, 'reject')}
                           >
                             <X className="h-4 w-4" />
@@ -517,6 +299,4 @@ const TicketBookingApproval = () => {
       </Card>
     </div>
   );
-};
-
-export default TicketBookingApproval;
+}

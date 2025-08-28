@@ -22,7 +22,7 @@ import {
   Home
 } from "lucide-react";
 
-const PropertyManagement = () => {
+export default function PropertyManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -106,21 +106,21 @@ const PropertyManagement = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background p-4 lg:p-6 space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Property Management</h1>
+          <h1 className="text-3xl font-bold">Property Management</h1>
           <p className="text-muted-foreground mt-1">Manage training centres, accommodation, and office properties</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-2">
-          <Button variant="outline" size="sm" className="w-full sm:w-auto">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export Properties
           </Button>
           <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
             <DialogTrigger asChild>
-              <Button size="sm" className="w-full sm:w-auto">
+              <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Property
               </Button>
@@ -164,22 +164,6 @@ const PropertyManagement = () => {
                     <Label>Security Deposit</Label>
                     <Input placeholder="Enter security deposit" />
                   </div>
-                  <div>
-                    <Label>Owner Name</Label>
-                    <Input placeholder="Property owner name" />
-                  </div>
-                  <div>
-                    <Label>Owner Contact</Label>
-                    <Input placeholder="Owner contact number" />
-                  </div>
-                  <div>
-                    <Label>Contract Start Date</Label>
-                    <Input type="date" />
-                  </div>
-                  <div>
-                    <Label>Contract End Date</Label>
-                    <Input type="date" />
-                  </div>
                 </div>
                 
                 <div>
@@ -187,26 +171,11 @@ const PropertyManagement = () => {
                   <Textarea placeholder="List available amenities (comma separated)" />
                 </div>
 
-                <div>
-                  <Label>Upload Property Documents</Label>
-                  <div className="mt-2 border-2 border-dashed border-border rounded-lg p-6 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <div className="mt-4">
-                      <Button variant="outline">
-                        Choose Files
-                      </Button>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Upload lease agreement, NOC, property documents (PDF, JPG, PNG - Max 10MB each)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-end gap-3">
-                  <Button variant="outline" onClick={() => setShowAddForm(false)} className="w-full sm:w-auto">
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={() => setShowAddForm(false)}>
                     Cancel
                   </Button>
-                  <Button className="w-full sm:w-auto">
+                  <Button>
                     Save Property
                   </Button>
                 </div>
@@ -219,7 +188,7 @@ const PropertyManagement = () => {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -252,7 +221,7 @@ const PropertyManagement = () => {
                 <SelectItem value="Expired">Expired</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline">
               <FileText className="h-4 w-4 mr-2" />
               Generate Report
             </Button>
@@ -267,7 +236,7 @@ const PropertyManagement = () => {
             <div className="flex items-center space-x-3">
               <Building className="h-8 w-8 text-primary" />
               <div>
-                <p className="text-2xl font-bold text-foreground">12</p>
+                <p className="text-2xl font-bold">12</p>
                 <p className="text-sm text-muted-foreground">Total Properties</p>
               </div>
             </div>
@@ -313,7 +282,7 @@ const PropertyManagement = () => {
         <CardHeader>
           <CardTitle>Property Directory</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
@@ -347,103 +316,9 @@ const PropertyManagement = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedProperty(property)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle>Property Details - {property.propertyName}</DialogTitle>
-                          </DialogHeader>
-                          <div className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <Label>Property Name</Label>
-                                <p className="font-medium">{property.propertyName}</p>
-                              </div>
-                              <div>
-                                <Label>Property Type</Label>
-                                <Badge className={getTypeColor(property.propertyType)}>
-                                  {property.propertyType}
-                                </Badge>
-                              </div>
-                              <div>
-                                <Label>Location</Label>
-                                <p className="font-medium">{property.location}</p>
-                              </div>
-                              <div>
-                                <Label>Area</Label>
-                                <p className="font-medium">{property.area}</p>
-                              </div>
-                              <div>
-                                <Label>Monthly Rent</Label>
-                                <p className="font-medium text-lg">{property.monthlyRent}</p>
-                              </div>
-                              <div>
-                                <Label>Security Deposit</Label>
-                                <p className="font-medium">{property.securityDeposit}</p>
-                              </div>
-                              <div>
-                                <Label>Owner Name</Label>
-                                <p className="font-medium">{property.ownerName}</p>
-                              </div>
-                              <div>
-                                <Label>Owner Contact</Label>
-                                <p className="font-medium">{property.ownerContact}</p>
-                              </div>
-                              <div>
-                                <Label>Contract Period</Label>
-                                <p className="font-medium">{property.contractStart} to {property.contractEnd}</p>
-                              </div>
-                              <div>
-                                <Label>Status</Label>
-                                <Badge className={getStatusColor(property.status)}>
-                                  {property.status}
-                                </Badge>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <Label>Amenities</Label>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {property.amenities.map((amenity, index) => (
-                                  <Badge key={index} variant="outline">
-                                    {amenity}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div>
-                              <Label>Property Documents</Label>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                                <Button variant="outline" size="sm">
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Lease Agreement
-                                </Button>
-                                <Button variant="outline" size="sm">
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  NOC Certificate
-                                </Button>
-                                <Button variant="outline" size="sm">
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Property Tax Receipt
-                                </Button>
-                                <Button variant="outline" size="sm">
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  Insurance Policy
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button variant="outline" size="sm">
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -460,6 +335,4 @@ const PropertyManagement = () => {
       </Card>
     </div>
   );
-};
-
-export default PropertyManagement;
+}

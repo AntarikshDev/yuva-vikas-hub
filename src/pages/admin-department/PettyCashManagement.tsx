@@ -29,6 +29,9 @@ const PettyCashManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showAddMoneyDialog, setShowAddMoneyDialog] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [remarks, setRemarks] = useState("");
 
   // Mock data for petty cash overview
   const walletData = {
@@ -250,7 +253,80 @@ const PettyCashManagement = () => {
               <div className="text-center p-6 bg-primary/5 rounded-lg">
                 <Wallet className="h-12 w-12 mx-auto text-primary mb-2" />
                 <p className="text-3xl font-bold text-foreground">{walletData.currentBalance}</p>
-                <p className="text-muted-foreground">Current Balance</p>
+                <p className="text-muted-foreground mb-4">Current Balance</p>
+                <Dialog open={showAddMoneyDialog} onOpenChange={setShowAddMoneyDialog}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Money to Wallet
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Money to Virtual Wallet</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Amount to Add</Label>
+                        <Input 
+                          placeholder="Enter amount" 
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          type="number"
+                        />
+                      </div>
+                      <div>
+                        <Label>Remarks/Purpose</Label>
+                        <Textarea 
+                          placeholder="Enter purpose for adding money (e.g., Monthly refill, Emergency fund, etc.)" 
+                          value={remarks}
+                          onChange={(e) => setRemarks(e.target.value)}
+                        />
+                      </div>
+                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <CreditCard className="h-5 w-5 text-blue-600" />
+                          <span className="font-medium text-blue-800">Transaction Summary</span>
+                        </div>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span>Current Balance:</span>
+                            <span className="font-medium">{walletData.currentBalance}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Adding:</span>
+                            <span className="font-medium text-green-600">₹{amount || "0"}</span>
+                          </div>
+                          <div className="flex justify-between border-t pt-1 font-semibold">
+                            <span>New Balance:</span>
+                            <span className="text-green-600">₹{(45000 + (parseInt(amount) || 0)).toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-3">
+                        <Button variant="outline" onClick={() => {
+                          setShowAddMoneyDialog(false);
+                          setAmount("");
+                          setRemarks("");
+                        }}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          className="bg-green-600 hover:bg-green-700"
+                          onClick={() => {
+                            // Handle adding money logic here
+                            console.log("Adding money:", amount, remarks);
+                            setShowAddMoneyDialog(false);
+                            setAmount("");
+                            setRemarks("");
+                          }}
+                        >
+                          Add Money
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
