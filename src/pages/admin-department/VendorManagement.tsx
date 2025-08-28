@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Search, 
   Plus, 
@@ -20,7 +21,8 @@ import {
   Building,
   Phone,
   Mail,
-  CreditCard
+  CreditCard,
+  Calendar
 } from "lucide-react";
 
 const VendorManagement = () => {
@@ -29,6 +31,7 @@ const VendorManagement = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedVendor, setSelectedVendor] = useState<any>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const { toast } = useToast();
 
   // Mock data for vendors
   const vendorData = [
@@ -126,32 +129,55 @@ const VendorManagement = () => {
     return matchesSearch && matchesService && matchesStatus;
   });
 
+  const handleAddVendor = () => {
+    toast({
+      title: "Vendor Added",
+      description: "New vendor has been added successfully and sent for approval.",
+    });
+    setShowCreateForm(false);
+  };
+
+  const handleApprovePayment = (paymentId: number) => {
+    toast({
+      title: "Payment Approved",
+      description: "Vendor payment has been approved successfully.",
+    });
+  };
+
+  const handleRejectPayment = (paymentId: number) => {
+    toast({
+      title: "Payment Rejected",
+      description: "Vendor payment has been rejected.",
+      variant: "destructive",
+    });
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-background p-4 lg:p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Vendor Management</h1>
-          <p className="text-gray-600 mt-1">Manage vendors and their payment approvals</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Vendor Management</h1>
+          <p className="text-muted-foreground mt-1">Manage vendors and their payment approvals</p>
         </div>
-        <div className="flex items-center gap-2 mt-4 sm:mt-0">
-          <Button variant="outline" size="sm">
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <Button variant="outline" size="sm" className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
           <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Vendor
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Vendor</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label>Vendor Name</Label>
                     <Input placeholder="Enter vendor name" />
@@ -202,23 +228,23 @@ const VendorManagement = () => {
                 </div>
                 <div>
                   <Label>Upload Contract/Agreement</Label>
-                  <div className="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="mt-2 border-2 border-dashed border-border rounded-lg p-6 text-center">
+                    <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                     <div className="mt-4">
                       <Button variant="outline">
                         Choose File
                       </Button>
-                      <p className="mt-2 text-sm text-gray-500">
+                      <p className="mt-2 text-sm text-muted-foreground">
                         Upload PDF or DOC (Max 10MB)
                       </p>
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-end space-x-3">
-                  <Button variant="outline" onClick={() => setShowCreateForm(false)}>
+                <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+                  <Button variant="outline" onClick={() => setShowCreateForm(false)} className="w-full sm:w-auto">
                     Cancel
                   </Button>
-                  <Button>
+                  <Button onClick={handleAddVendor} className="w-full sm:w-auto">
                     Save & Submit for Approval
                   </Button>
                 </div>
@@ -231,9 +257,9 @@ const VendorManagement = () => {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search vendors..."
                 value={searchTerm}
@@ -241,33 +267,35 @@ const VendorManagement = () => {
                 className="pl-10"
               />
             </div>
-            <Select value={serviceFilter} onValueChange={setServiceFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Service" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Services</SelectItem>
-                <SelectItem value="Accommodation">Accommodation</SelectItem>
-                <SelectItem value="Groceries">Groceries</SelectItem>
-                <SelectItem value="Materials">Materials</SelectItem>
-                <SelectItem value="Transport">Transport</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Pending Approval">Pending Approval</SelectItem>
-                <SelectItem value="Suspended">Suspended</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Advanced Filters
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Select value={serviceFilter} onValueChange={setServiceFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by Service" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Services</SelectItem>
+                  <SelectItem value="Accommodation">Accommodation</SelectItem>
+                  <SelectItem value="Groceries">Groceries</SelectItem>
+                  <SelectItem value="Materials">Materials</SelectItem>
+                  <SelectItem value="Transport">Transport</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Pending Approval">Pending Approval</SelectItem>
+                  <SelectItem value="Suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" className="w-full sm:w-auto">
+                <Plus className="h-4 w-4 mr-2" />
+                Advanced Filters
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

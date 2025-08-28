@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Upload, 
   Download,
@@ -32,6 +33,7 @@ const PettyCashManagement = () => {
   const [showAddMoneyDialog, setShowAddMoneyDialog] = useState(false);
   const [amount, setAmount] = useState("");
   const [remarks, setRemarks] = useState("");
+  const { toast } = useToast();
 
   // Mock data for petty cash overview
   const walletData = {
@@ -129,6 +131,32 @@ const PettyCashManagement = () => {
     transaction.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleAddExpense = () => {
+    toast({
+      title: "Expense Added",
+      description: "New expense has been added successfully.",
+    });
+    setShowAddExpense(false);
+  };
+
+  const handleImportExpenses = () => {
+    toast({
+      title: "Expenses Imported",
+      description: "Expenses have been imported from Excel successfully.",
+    });
+    setShowImportDialog(false);
+  };
+
+  const handleAddMoney = () => {
+    toast({
+      title: "Money Added",
+      description: `₹${amount} has been added to the wallet successfully.`,
+    });
+    setShowAddMoneyDialog(false);
+    setAmount("");
+    setRemarks("");
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 lg:p-6 space-y-6">
       {/* Header */}
@@ -178,7 +206,7 @@ const PettyCashManagement = () => {
                   <Button variant="outline" onClick={() => setShowImportDialog(false)}>
                     Cancel
                   </Button>
-                  <Button>
+                  <Button onClick={handleImportExpenses}>
                     Import Expenses
                   </Button>
                 </div>
@@ -228,7 +256,7 @@ const PettyCashManagement = () => {
                   <Button variant="outline" onClick={() => setShowAddExpense(false)}>
                     Cancel
                   </Button>
-                  <Button>
+                  <Button onClick={handleAddExpense}>
                     Add Expense
                   </Button>
                 </div>
@@ -311,18 +339,12 @@ const PettyCashManagement = () => {
                         }}>
                           Cancel
                         </Button>
-                        <Button 
-                          className="bg-green-600 hover:bg-green-700"
-                          onClick={() => {
-                            // Handle adding money logic here
-                            console.log("Adding money:", amount, remarks);
-                            setShowAddMoneyDialog(false);
-                            setAmount("");
-                            setRemarks("");
-                          }}
-                        >
-                          Add Money
-                        </Button>
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={handleAddMoney}
+                  >
+                    Add Money
+                  </Button>
                       </div>
                     </div>
                   </DialogContent>

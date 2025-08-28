@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Search, 
   Plus,
@@ -21,7 +22,9 @@ import {
   ChefHat,
   Clock,
   Star,
-  MapPin
+  MapPin,
+  Phone,
+  Mail
 } from "lucide-react";
 
 export default function FoodVendorManagement() {
@@ -30,6 +33,7 @@ export default function FoodVendorManagement() {
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedVendor, setSelectedVendor] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const { toast } = useToast();
 
   // Mock data for food vendors
   const foodVendorData = [
@@ -137,22 +141,45 @@ export default function FoodVendorManagement() {
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
+  const handleAddVendor = () => {
+    toast({
+      title: "Food Vendor Added",
+      description: "New food vendor has been added successfully and sent for approval.",
+    });
+    setShowAddForm(false);
+  };
+
+  const handleApproveVendor = (vendorId: number) => {
+    toast({
+      title: "Vendor Approved",
+      description: "Food vendor has been approved successfully.",
+    });
+  };
+
+  const handleRejectVendor = (vendorId: number) => {
+    toast({
+      title: "Vendor Rejected",
+      description: "Food vendor has been rejected.",
+      variant: "destructive",
+    });
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-background p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Food Vendor Management</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold">Food Vendor Management</h1>
           <p className="text-muted-foreground mt-1">Manage food vendors, catering services, and meal providers</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <Button variant="outline" size="sm" className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export Vendors
           </Button>
           <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Food Vendor
               </Button>
@@ -196,11 +223,11 @@ export default function FoodVendorManagement() {
                   <Textarea placeholder="List food specialties (comma separated)" />
                 </div>
 
-                <div className="flex justify-end gap-3">
-                  <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                <div className="flex flex-col sm:flex-row justify-end gap-3">
+                  <Button variant="outline" onClick={() => setShowAddForm(false)} className="w-full sm:w-auto">
                     Cancel
                   </Button>
-                  <Button>
+                  <Button onClick={handleAddVendor} className="w-full sm:w-auto">
                     Save & Submit for Approval
                   </Button>
                 </div>
@@ -209,6 +236,48 @@ export default function FoodVendorManagement() {
           </Dialog>
         </div>
       </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search food vendors..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="Catering">Catering</SelectItem>
+                  <SelectItem value="Meal Service">Meal Service</SelectItem>
+                  <SelectItem value="Restaurant">Restaurant</SelectItem>
+                  <SelectItem value="Snacks & Sweets">Snacks & Sweets</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Status</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Pending Approval">Pending Approval</SelectItem>
+                  <SelectItem value="Contract Expired">Contract Expired</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -258,84 +327,196 @@ export default function FoodVendorManagement() {
         </Card>
       </div>
 
-      {/* Food Vendors Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Food Vendor Directory</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Vendor Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Monthly Amount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredVendorData.map((vendor) => (
-                <TableRow key={vendor.id}>
-                  <TableCell className="font-medium">{vendor.vendorName}</TableCell>
-                  <TableCell>
+      {/* Desktop Table View */}
+      <div className="hidden lg:block">
+        <Card>
+          <CardHeader>
+            <CardTitle>Food Vendor Directory</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Vendor Name</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Rating</TableHead>
+                  <TableHead>Monthly Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredVendorData.map((vendor) => (
+                  <TableRow key={vendor.id}>
+                    <TableCell className="font-medium">{vendor.vendorName}</TableCell>
+                    <TableCell>
+                      <Badge className={getCategoryColor(vendor.category)}>
+                        {vendor.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
+                        {vendor.location}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">{vendor.contactPerson}</p>
+                        <p className="text-xs text-muted-foreground">{vendor.phone}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-1">
+                        {getRatingStars(Math.floor(vendor.rating))}
+                        <span className="text-sm font-medium ml-1">{vendor.rating}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-semibold">{vendor.monthlyAmount}</TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(vendor.status)}>
+                        {vendor.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        {vendor.status === "Pending Approval" && (
+                          <>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-green-600"
+                              onClick={() => handleApproveVendor(vendor.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-red-600"
+                              onClick={() => handleRejectVendor(vendor.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {filteredVendorData.map((vendor) => (
+          <Card key={vendor.id} className="border-l-4 border-l-primary">
+            <CardContent className="p-4">
+              <div className="flex flex-col space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{vendor.vendorName}</h3>
+                    <div className="flex items-center mt-1">
+                      <MapPin className="h-3 w-3 mr-1 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">{vendor.location}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
                     <Badge className={getCategoryColor(vendor.category)}>
                       {vendor.category}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center">
-                      <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
-                      {vendor.location}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{vendor.contactPerson}</p>
-                      <p className="text-xs text-muted-foreground">{vendor.phone}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-1">
-                      {getRatingStars(Math.floor(vendor.rating))}
-                      <span className="text-sm font-medium ml-1">{vendor.rating}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-semibold">{vendor.monthlyAmount}</TableCell>
-                  <TableCell>
                     <Badge className={getStatusColor(vendor.status)}>
                       {vendor.status}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      {vendor.status === "Pending Approval" && (
-                        <>
-                          <Button variant="outline" size="sm" className="text-green-600">
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" className="text-red-600">
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Contact Person</p>
+                    <p className="font-medium">{vendor.contactPerson}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Phone</p>
+                    <p className="font-medium">{vendor.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Rating</p>
+                    <div className="flex items-center space-x-1">
+                      {getRatingStars(Math.floor(vendor.rating))}
+                      <span className="font-medium ml-1">{vendor.rating}</span>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Monthly Amount</p>
+                    <p className="font-semibold text-foreground">{vendor.monthlyAmount}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                  <p className="text-sm text-muted-foreground">Specialties</p>
+                  <div className="flex flex-wrap gap-1">
+                    {vendor.specialties.slice(0, 3).map((specialty, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {specialty}
+                      </Badge>
+                    ))}
+                    {vendor.specialties.length > 3 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{vendor.specialties.length - 3} more
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                  {vendor.status === "Pending Approval" && (
+                    <>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 text-green-600"
+                        onClick={() => handleApproveVendor(vendor.id)}
+                      >
+                        <Check className="h-4 w-4 mr-2" />
+                        Approve
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 text-red-600"
+                        onClick={() => handleRejectVendor(vendor.id)}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

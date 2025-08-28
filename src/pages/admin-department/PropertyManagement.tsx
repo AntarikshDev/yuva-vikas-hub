@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Search, 
   Plus,
@@ -19,7 +20,8 @@ import {
   FileText,
   Building,
   MapPin,
-  Home
+  Home,
+  Calendar
 } from "lucide-react";
 
 export default function PropertyManagement() {
@@ -28,9 +30,7 @@ export default function PropertyManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedProperty, setSelectedProperty] = useState<any>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-
-  // Mock data for properties
-  const propertyData = [
+  const [propertyData, setPropertyData] = useState([
     {
       id: 1,
       propertyName: "Training Centre - Delhi North",
@@ -76,7 +76,9 @@ export default function PropertyManagement() {
       contractEnd: "2026-05-31",
       amenities: ["IT Infrastructure", "Conference Room", "Parking"]
     }
-  ];
+  ]);
+  const { toast } = useToast();
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -105,22 +107,39 @@ export default function PropertyManagement() {
     return matchesSearch && matchesType && matchesStatus;
   });
 
+  const handleAddProperty = () => {
+    toast({
+      title: "Property Added",
+      description: "New property has been added successfully.",
+    });
+    setShowAddForm(false);
+  };
+
+  const handleDeleteProperty = (propertyId: number) => {
+    setPropertyData(prev => prev.filter(property => property.id !== propertyId));
+    toast({
+      title: "Property Deleted",
+      description: "Property has been removed successfully.",
+      variant: "destructive",
+    });
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-background p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Property Management</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold">Property Management</h1>
           <p className="text-muted-foreground mt-1">Manage training centres, accommodation, and office properties</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <Button variant="outline" size="sm" className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export Properties
           </Button>
           <Dialog open={showAddForm} onOpenChange={setShowAddForm}>
             <DialogTrigger asChild>
-              <Button size="sm">
+              <Button size="sm" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Property
               </Button>
@@ -171,11 +190,11 @@ export default function PropertyManagement() {
                   <Textarea placeholder="List available amenities (comma separated)" />
                 </div>
 
-                <div className="flex justify-end gap-3">
-                  <Button variant="outline" onClick={() => setShowAddForm(false)}>
+                <div className="flex flex-col sm:flex-row justify-end gap-3">
+                  <Button variant="outline" onClick={() => setShowAddForm(false)} className="w-full sm:w-auto">
                     Cancel
                   </Button>
-                  <Button>
+                  <Button onClick={handleAddProperty} className="w-full sm:w-auto">
                     Save Property
                   </Button>
                 </div>
@@ -188,8 +207,8 @@ export default function PropertyManagement() {
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="relative">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Search properties..."
@@ -198,33 +217,35 @@ export default function PropertyManagement() {
                 className="pl-10"
               />
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Training Centre">Training Centre</SelectItem>
-                <SelectItem value="Accommodation">Accommodation</SelectItem>
-                <SelectItem value="Office">Office</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Under Renovation">Under Renovation</SelectItem>
-                <SelectItem value="Vacant">Vacant</SelectItem>
-                <SelectItem value="Expired">Expired</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline">
-              <FileText className="h-4 w-4 mr-2" />
-              Generate Report
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="Training Centre">Training Centre</SelectItem>
+                  <SelectItem value="Accommodation">Accommodation</SelectItem>
+                  <SelectItem value="Office">Office</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Filter by Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Under Renovation">Under Renovation</SelectItem>
+                  <SelectItem value="Vacant">Vacant</SelectItem>
+                  <SelectItem value="Expired">Expired</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" className="w-full sm:w-auto">
+                <FileText className="h-4 w-4 mr-2" />
+                Generate Report
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -277,62 +298,137 @@ export default function PropertyManagement() {
         </Card>
       </div>
 
-      {/* Properties Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Property Directory</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Property Name</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Area</TableHead>
-                <TableHead>Monthly Rent</TableHead>
-                <TableHead>Owner</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPropertyData.map((property) => (
-                <TableRow key={property.id}>
-                  <TableCell className="font-medium">{property.propertyName}</TableCell>
-                  <TableCell>
+      {/* Desktop Table View */}
+      <div className="hidden lg:block">
+        <Card>
+          <CardHeader>
+            <CardTitle>Property Directory</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Property Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Area</TableHead>
+                  <TableHead>Monthly Rent</TableHead>
+                  <TableHead>Owner</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPropertyData.map((property) => (
+                  <TableRow key={property.id}>
+                    <TableCell className="font-medium">{property.propertyName}</TableCell>
+                    <TableCell>
+                      <Badge className={getTypeColor(property.propertyType)}>
+                        {property.propertyType}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-[200px] truncate">{property.location}</TableCell>
+                    <TableCell>{property.area}</TableCell>
+                    <TableCell className="font-semibold">{property.monthlyRent}</TableCell>
+                    <TableCell>{property.ownerName}</TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(property.status)}>
+                        {property.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => handleDeleteProperty(property.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="lg:hidden space-y-4">
+        {filteredPropertyData.map((property) => (
+          <Card key={property.id} className="border-l-4 border-l-primary">
+            <CardContent className="p-4">
+              <div className="flex flex-col space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-foreground">{property.propertyName}</h3>
+                    <p className="text-sm text-muted-foreground">{property.location}</p>
+                  </div>
+                  <div className="flex flex-col gap-2">
                     <Badge className={getTypeColor(property.propertyType)}>
                       {property.propertyType}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate">{property.location}</TableCell>
-                  <TableCell>{property.area}</TableCell>
-                  <TableCell className="font-semibold">{property.monthlyRent}</TableCell>
-                  <TableCell>{property.ownerName}</TableCell>
-                  <TableCell>
                     <Badge className={getStatusColor(property.status)}>
                       {property.status}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Area</p>
+                    <p className="font-medium">{property.area}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Monthly Rent</p>
+                    <p className="font-semibold text-foreground">{property.monthlyRent}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Owner</p>
+                    <p className="font-medium">{property.ownerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Contact</p>
+                    <p className="font-medium">{property.ownerContact}</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2 border-t border-border">
+                  <p className="text-sm text-muted-foreground">Contract Period</p>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>{property.contractStart} to {property.contractEnd}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleDeleteProperty(property.id)}
+                    className="flex-1 text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
