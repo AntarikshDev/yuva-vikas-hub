@@ -6,20 +6,22 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Calendar, Users, FileSpreadsheet, CheckCircle, AlertTriangle, Download } from 'lucide-react';
+import { Upload, Calendar, Users, FileSpreadsheet, CheckCircle, AlertTriangle, Download, Plus } from 'lucide-react';
 import { DataTable } from '@/components/common/DataTable';
+import { BatchCreationDialog } from '@/components/dialogs/BatchCreationDialog';
 
 const DailyActivityManagement = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedBatch, setSelectedBatch] = useState('');
+  const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false);
 
-  // Mock data for batches
-  const batches = [
+  // Mock data for batches - now stateful to allow adding new batches
+  const [batches, setBatches] = useState([
     { id: 'B2024-01', name: 'Batch B2024-01 - Retail Sales', candidates: 45 },
     { id: 'B2024-02', name: 'Batch B2024-02 - Customer Service', candidates: 38 },
     { id: 'B2024-03', name: 'Batch B2024-03 - Data Entry', candidates: 42 }
-  ];
+  ]);
 
   // Mock data for recent uploads
   const recentUploads = [
@@ -97,16 +99,32 @@ const DailyActivityManagement = () => {
     console.log(`Uploading ${type} for ${selectedDate}, ${selectedSession}, ${selectedBatch}`);
   };
 
+  const handleBatchCreated = (newBatch: any) => {
+    setBatches(prev => [...prev, {
+      id: newBatch.id,
+      name: `${newBatch.id} - ${newBatch.name}`,
+      candidates: newBatch.candidates
+    }]);
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-6">
       {/* Header */}
       <div className="border-b pb-4">
-        <h1 className="text-3xl font-bold">Daily Activity Management</h1>
-        <p className="text-muted-foreground">Upload daily attendance, curriculum progress, and activity data</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Daily Activity Management</h1>
+            <p className="text-muted-foreground">Upload daily attendance, curriculum progress, and activity data</p>
+          </div>
+          <Button onClick={() => setIsBatchDialogOpen(true)} className="flex items-center gap-2 whitespace-nowrap">
+            <Plus className="h-4 w-4" />
+            Create Batch
+          </Button>
+        </div>
       </div>
 
       {/* Upload Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Upload Form */}
         <Card>
           <CardHeader>
@@ -116,7 +134,7 @@ const DailyActivityManagement = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="date">Date</Label>
                 <Input
@@ -142,7 +160,18 @@ const DailyActivityManagement = () => {
             </div>
 
             <div>
-              <Label htmlFor="batch">Select Batch</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="batch">Select Batch</Label>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setIsBatchDialogOpen(true)}
+                  className="text-xs h-6 px-2"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  New
+                </Button>
+              </div>
               <Select value={selectedBatch} onValueChange={setSelectedBatch}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Batch" />
@@ -275,13 +304,19 @@ const DailyActivityManagement = () => {
             <Button variant="outline" size="sm">View All</Button>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-x-auto">
           <DataTable
             columns={columns}
             data={recentUploads}
           />
         </CardContent>
       </Card>
+
+      <BatchCreationDialog
+        open={isBatchDialogOpen}
+        onOpenChange={setIsBatchDialogOpen}
+        onBatchCreated={handleBatchCreated}
+      />
     </div>
   );
 };
