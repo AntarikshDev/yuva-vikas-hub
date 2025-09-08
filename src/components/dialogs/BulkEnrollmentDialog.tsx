@@ -203,7 +203,7 @@ export function BulkEnrollmentDialog({ open, onClose, candidates, onBulkUpdate }
           )}
         </div>
 
-        <DialogFooter className="flex gap-2">
+        <DialogFooter className="flex gap-2 mt-6 pt-4 border-t">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

@@ -8,6 +8,8 @@ import { Users, CheckCircle, Clock, MapPin, Phone, Mail, Eye } from 'lucide-reac
 import { DataTable } from '@/components/common/DataTable';
 import { CandidateDetailsDialog } from '@/components/dialogs/CandidateDetailsDialog';
 import { BulkEnrollmentDialog } from '@/components/dialogs/BulkEnrollmentDialog';
+import { MigrationReportDialog } from '@/components/dialogs/MigrationReportDialog';
+import { NotificationDialog } from '@/components/dialogs/NotificationDialog';
 import { useToast } from '@/hooks/use-toast';
 
 const ReadyForMigration = () => {
@@ -60,6 +62,8 @@ const ReadyForMigration = () => {
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const statusCounts = {
@@ -311,11 +315,19 @@ const ReadyForMigration = () => {
               <CheckCircle className="h-4 w-4" />
               Bulk Mark as Enrolled
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => setReportDialogOpen(true)}
+            >
               <MapPin className="h-4 w-4" />
               Export Migration Report
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => setNotificationDialogOpen(true)}
+            >
               <Phone className="h-4 w-4" />
               Send Notifications
             </Button>
@@ -368,6 +380,17 @@ const ReadyForMigration = () => {
         onClose={() => setBulkDialogOpen(false)}
         candidates={candidates}
         onBulkUpdate={handleBulkUpdate}
+      />
+
+      <MigrationReportDialog
+        open={reportDialogOpen}
+        onClose={() => setReportDialogOpen(false)}
+      />
+
+      <NotificationDialog
+        open={notificationDialogOpen}
+        onClose={() => setNotificationDialogOpen(false)}
+        candidates={candidates}
       />
     </div>
   );
