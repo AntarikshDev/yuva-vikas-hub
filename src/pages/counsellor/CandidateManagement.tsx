@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, FileText, MessageCircle, UserCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Eye, MessageCircle, UserCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { MultiStageCounsellingDialog } from "@/components/dialogs/MultiStageCounsellingDialog";
 import { ParentCounsellingDialog } from "@/components/dialogs/ParentCounsellingDialog";
 import { DocumentComplianceDialog } from "@/components/dialogs/DocumentComplianceDialog";
@@ -19,7 +19,6 @@ const mockCandidates = [
     batch: "Batch 2025-01",
     stage: "Stage 2",
     parentCounselling: "Completed",
-    ofrStatus: "Pending",
     contactNumber: "9876543210"
   },
   {
@@ -28,7 +27,6 @@ const mockCandidates = [
     batch: "Batch 2025-01", 
     stage: "Stage 1",
     parentCounselling: "Pending",
-    ofrStatus: "Not Started",
     contactNumber: "9876543211"
   },
   {
@@ -37,7 +35,6 @@ const mockCandidates = [
     batch: "Batch 2025-02",
     stage: "Stage 3",
     parentCounselling: "Completed",
-    ofrStatus: "Generated",
     contactNumber: "9876543212"
   },
   {
@@ -46,7 +43,6 @@ const mockCandidates = [
     batch: "Batch 2025-01",
     stage: "Stage 1",
     parentCounselling: "Pending",
-    ofrStatus: "Pending",
     contactNumber: "9876543213"
   },
   {
@@ -55,7 +51,6 @@ const mockCandidates = [
     batch: "Batch 2025-02",
     stage: "Stage 2",
     parentCounselling: "Completed",
-    ofrStatus: "Pending",
     contactNumber: "9876543214"
   }
 ];
