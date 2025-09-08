@@ -20,6 +20,7 @@ interface MultiStageCounsellingDialogProps {
   candidate: any;
   open: boolean;
   onClose: () => void;
+  onStageUpdate?: (candidateId: number, newStage: string) => void;
 }
 
 const mockSessionHistory = [
@@ -39,7 +40,7 @@ const mockSessionHistory = [
   }
 ];
 
-export function MultiStageCounsellingDialog({ candidate, open, onClose }: MultiStageCounsellingDialogProps) {
+export function MultiStageCounsellingDialog({ candidate, open, onClose, onStageUpdate }: MultiStageCounsellingDialogProps) {
   const [activeTab, setActiveTab] = useState("stage1");
   const [sessionData, setSessionData] = useState({
     stage1: { date: "", notes: "", readiness: "", document: null },
@@ -53,6 +54,24 @@ export function MultiStageCounsellingDialog({ candidate, open, onClose }: MultiS
       title: "Session Saved",
       description: `${stage} counselling session has been saved successfully.`,
     });
+    
+    // Update stage progression
+    if (onStageUpdate) {
+      const stageNumber = stage.split(' ')[1];
+      let newStage = candidate.stage;
+      
+      if (stageNumber === "1" && candidate.stage === "Stage 1") {
+        newStage = "Stage 2";
+      } else if (stageNumber === "2" && candidate.stage === "Stage 2") {
+        newStage = "Stage 3";
+      } else if (stageNumber === "3" && candidate.stage === "Stage 3") {
+        newStage = "Completed";
+      }
+      
+      if (newStage !== candidate.stage) {
+        onStageUpdate(candidate.id, newStage);
+      }
+    }
   };
 
   const handleNextStage = () => {
