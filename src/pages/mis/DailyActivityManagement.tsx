@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, Calendar, Users, FileSpreadsheet, CheckCircle, AlertTriangle, Download, Plus, Loader2 } from 'lucide-react';
 import { DataTable } from '@/components/common/DataTable';
 import { BatchCreationDialog } from '@/components/dialogs/BatchCreationDialog';
+import { FileUploadDialog } from '@/components/dialogs/FileUploadDialog';
 import { useToast } from '@/hooks/use-toast';
 
 const DailyActivityManagement = () => {
@@ -16,14 +17,13 @@ const DailyActivityManagement = () => {
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedBatch, setSelectedBatch] = useState('');
   const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false);
+  const [isFileUploadDialogOpen, setIsFileUploadDialogOpen] = useState(false);
+  const [uploadType, setUploadType] = useState<'attendance' | 'curriculum' | 'activities' | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [notes, setNotes] = useState('');
   const { toast } = useToast();
 
-  // File input refs for different upload types
-  const attendanceFileRef = useRef<HTMLInputElement>(null);
-  const curriculumFileRef = useRef<HTMLInputElement>(null);
-  const activitiesFileRef = useRef<HTMLInputElement>(null);
+  // Remove file input refs as we'll use the dialog
 
   // Mock data for batches - now stateful to allow adding new batches
   const [batches, setBatches] = useState([
@@ -104,47 +104,11 @@ const DailyActivityManagement = () => {
   ];
 
   const handleFileUpload = (type: 'attendance' | 'curriculum' | 'activities') => {
-    // Trigger file input click based on type
-    switch (type) {
-      case 'attendance':
-        attendanceFileRef.current?.click();
-        break;
-      case 'curriculum':
-        curriculumFileRef.current?.click();
-        break;
-      case 'activities':
-        activitiesFileRef.current?.click();
-        break;
-    }
+    setUploadType(type);
+    setIsFileUploadDialogOpen(true);
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, type: string) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    const validTypes = ['.xlsx', '.xls', '.csv'];
-    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    
-    if (!validTypes.includes(fileExtension)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload Excel (.xlsx, .xls) or CSV files only.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "File size must be less than 5MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleFileUploadProcess = async (file: File, type: string) => {
     setIsUploading(true);
 
     try {
@@ -165,24 +129,13 @@ const DailyActivityManagement = () => {
 
       setRecentUploads(prev => [newUpload, ...prev]);
 
-      toast({
-        title: "Upload successful",
-        description: `${type.charAt(0).toUpperCase() + type.slice(1)} data uploaded successfully for ${selectedBatch}.`,
-      });
-
       // Reset form
       setNotes('');
       
     } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: "There was an error uploading your file. Please try again.",
-        variant: "destructive",
-      });
+      throw error;
     } finally {
       setIsUploading(false);
-      // Reset file input
-      event.target.value = '';
     }
   };
 
@@ -331,28 +284,6 @@ const DailyActivityManagement = () => {
               />
             </div>
 
-            {/* Hidden file inputs */}
-            <input
-              ref={attendanceFileRef}
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              style={{ display: 'none' }}
-              onChange={(e) => handleFileSelect(e, 'attendance')}
-            />
-            <input
-              ref={curriculumFileRef}
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              style={{ display: 'none' }}
-              onChange={(e) => handleFileSelect(e, 'curriculum')}
-            />
-            <input
-              ref={activitiesFileRef}
-              type="file"
-              accept=".xlsx,.xls,.csv"
-              style={{ display: 'none' }}
-              onChange={(e) => handleFileSelect(e, 'activities')}
-            />
           </CardContent>
         </Card>
 
@@ -440,6 +371,18 @@ const DailyActivityManagement = () => {
         open={isBatchDialogOpen}
         onOpenChange={setIsBatchDialogOpen}
         onBatchCreated={handleBatchCreated}
+      />
+
+      <FileUploadDialog
+        open={isFileUploadDialogOpen}
+        onOpenChange={setIsFileUploadDialogOpen}
+        uploadType={uploadType}
+        onFileUpload={handleFileUploadProcess}
+        batchInfo={{
+          date: selectedDate,
+          session: selectedSession,
+          batch: selectedBatch
+        }}
       />
     </div>
   );
