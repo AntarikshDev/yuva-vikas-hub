@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MainLayout } from "@/layouts/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,20 +10,16 @@ import { Search, Eye, MessageCircle, UserCheck, ChevronLeft, ChevronRight } from
 import { MultiStageCounsellingDialog } from "@/components/dialogs/MultiStageCounsellingDialog";
 import { ParentCounsellingDialog } from "@/components/dialogs/ParentCounsellingDialog";
 import { DocumentComplianceDialog } from "@/components/dialogs/DocumentComplianceDialog";
-import { toast } from "sonner";
 
-// Initial candidate data with all defaults set correctly
-const initialCandidates = [
+// Mock data
+const mockCandidates = [
   {
     id: 1,
     name: "Rajesh Kumar",
     batch: "Batch 2025-01",
-    stage: "Stage 1",
-    parentCounselling: "Pending",
-    contactNumber: "9876543210",
-    email: "rajesh.kumar@email.com",
-    address: "123 Main St, Delhi",
-    aadhar: "1234-5678-9012"
+    stage: "Stage 2",
+    parentCounselling: "Completed",
+    contactNumber: "9876543210"
   },
   {
     id: 2,
@@ -31,21 +27,15 @@ const initialCandidates = [
     batch: "Batch 2025-01", 
     stage: "Stage 1",
     parentCounselling: "Pending",
-    contactNumber: "9876543211",
-    email: "priya.sharma@email.com",
-    address: "456 Park Ave, Mumbai",
-    aadhar: "2345-6789-0123"
+    contactNumber: "9876543211"
   },
   {
     id: 3,
     name: "Amit Singh",
     batch: "Batch 2025-02",
-    stage: "Stage 1",
-    parentCounselling: "Pending",
-    contactNumber: "9876543212",
-    email: "amit.singh@email.com",
-    address: "789 Garden St, Bangalore",
-    aadhar: "3456-7890-1234"
+    stage: "Stage 3",
+    parentCounselling: "Completed",
+    contactNumber: "9876543212"
   },
   {
     id: 4,
@@ -53,59 +43,19 @@ const initialCandidates = [
     batch: "Batch 2025-01",
     stage: "Stage 1",
     parentCounselling: "Pending",
-    contactNumber: "9876543213",
-    email: "sunita.devi@email.com",
-    address: "321 Lake View, Kolkata",
-    aadhar: "4567-8901-2345"
+    contactNumber: "9876543213"
   },
   {
     id: 5,
     name: "Vikash Yadav",
     batch: "Batch 2025-02",
-    stage: "Stage 1",
-    parentCounselling: "Pending",
-    contactNumber: "9876543214",
-    email: "vikash.yadav@email.com",
-    address: "654 Hill Station, Chennai",
-    aadhar: "5678-9012-3456"
-  },
-  {
-    id: 6,
-    name: "Anita Gupta",
-    batch: "Batch 2025-01",
-    stage: "Stage 1",
-    parentCounselling: "Pending",
-    contactNumber: "9876543215",
-    email: "anita.gupta@email.com",
-    address: "987 River Side, Pune",
-    aadhar: "6789-0123-4567"
-  },
-  {
-    id: 7,
-    name: "Rahul Verma",
-    batch: "Batch 2025-02",
-    stage: "Stage 1",
-    parentCounselling: "Pending",
-    contactNumber: "9876543216",
-    email: "rahul.verma@email.com",
-    address: "147 Market St, Hyderabad",
-    aadhar: "7890-1234-5678"
-  },
-  {
-    id: 8,
-    name: "Pooja Kumari",
-    batch: "Batch 2025-01",
-    stage: "Stage 1",
-    parentCounselling: "Pending",
-    contactNumber: "9876543217",
-    email: "pooja.kumari@email.com",
-    address: "258 Temple Road, Ahmedabad",
-    aadhar: "8901-2345-6789"
+    stage: "Stage 2",
+    parentCounselling: "Completed",
+    contactNumber: "9876543214"
   }
 ];
 
 export default function CandidateManagement() {
-  const [candidates, setCandidates] = useState(initialCandidates);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState("all");
@@ -114,7 +64,7 @@ export default function CandidateManagement() {
   const [dialogType, setDialogType] = useState<string>("");
 
   const itemsPerPage = 10;
-  const filteredCandidates = candidates.filter(candidate => {
+  const filteredCandidates = mockCandidates.filter(candidate => {
     return (
       candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedStage === "all" || candidate.stage === selectedStage) &&
@@ -148,49 +98,6 @@ export default function CandidateManagement() {
   const closeDialog = () => {
     setSelectedCandidate(null);
     setDialogType("");
-  };
-
-  const updateCandidateStage = (candidateId: number, newStage: string) => {
-    setCandidates(prev => 
-      prev.map(candidate => 
-        candidate.id === candidateId 
-          ? { ...candidate, stage: newStage }
-          : candidate
-      )
-    );
-    toast.success(`Candidate stage updated to ${newStage}`);
-  };
-
-  const updateParentCounselling = (candidateId: number, status: string) => {
-    setCandidates(prev => 
-      prev.map(candidate => 
-        candidate.id === candidateId 
-          ? { ...candidate, parentCounselling: status }
-          : candidate
-      )
-    );
-    toast.success(`Parent counselling status updated to ${status}`);
-  };
-
-  const handleStageProgress = (candidateId: number) => {
-    const candidate = candidates.find(c => c.id === candidateId);
-    if (!candidate) return;
-
-    let newStage = candidate.stage;
-    switch (candidate.stage) {
-      case "Stage 1":
-        newStage = "Stage 2";
-        break;
-      case "Stage 2":
-        newStage = "Stage 3";
-        break;
-      case "Stage 3":
-        newStage = "Completed";
-        break;
-      default:
-        return;
-    }
-    updateCandidateStage(candidateId, newStage);
   };
 
   return (
@@ -272,9 +179,7 @@ export default function CandidateManagement() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleStageProgress(candidate.id)}
-                          disabled={candidate.stage === "Completed"}
-                          title="Progress Stage"
+                          onClick={() => handleAction("counselling", candidate)}
                         >
                           <UserCheck className="h-4 w-4" />
                         </Button>
@@ -282,7 +187,6 @@ export default function CandidateManagement() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleAction("parent", candidate)}
-                          title="Parent Counselling"
                         >
                           <MessageCircle className="h-4 w-4" />
                         </Button>
@@ -290,7 +194,6 @@ export default function CandidateManagement() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleAction("documents", candidate)}
-                          title="View Documents"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -337,7 +240,6 @@ export default function CandidateManagement() {
             candidate={selectedCandidate}
             open={true}
             onClose={closeDialog}
-            onStageUpdate={(candidateId, newStage) => updateCandidateStage(candidateId, newStage)}
           />
         )}
         {dialogType === "parent" && selectedCandidate && (
@@ -345,7 +247,6 @@ export default function CandidateManagement() {
             candidate={selectedCandidate}
             open={true}
             onClose={closeDialog}
-            onStatusUpdate={(candidateId, status) => updateParentCounselling(candidateId, status)}
           />
         )}
         {dialogType === "documents" && selectedCandidate && (

@@ -18,10 +18,9 @@ interface ParentCounsellingDialogProps {
   candidate: any;
   open: boolean;
   onClose: () => void;
-  onStatusUpdate?: (candidateId: number, status: string) => void;
 }
 
-export function ParentCounsellingDialog({ candidate, open, onClose, onStatusUpdate }: ParentCounsellingDialogProps) {
+export function ParentCounsellingDialog({ candidate, open, onClose }: ParentCounsellingDialogProps) {
   const [formData, setFormData] = useState({
     candidateName: candidate.name,
     parentName: "",
@@ -38,14 +37,6 @@ export function ParentCounsellingDialog({ candidate, open, onClose, onStatusUpda
       title: "Parent Counselling Saved",
       description: "Parent counselling session has been recorded successfully.",
     });
-    
-    // Update parent counselling status based on consent
-    if (onStatusUpdate && formData.parentConsent) {
-      const status = formData.parentConsent === "yes" ? "Completed" : 
-                   formData.parentConsent === "no" ? "Denied" : "Conditional";
-      onStatusUpdate(candidate.id, status);
-    }
-    
     onClose();
   };
 
