@@ -20,6 +20,7 @@ interface MultiStageCounsellingDialogProps {
   candidate: any;
   open: boolean;
   onClose: () => void;
+  onUpdate?: (sessionData: any) => void;
 }
 
 const mockSessionHistory = [
@@ -39,7 +40,7 @@ const mockSessionHistory = [
   }
 ];
 
-export function MultiStageCounsellingDialog({ candidate, open, onClose }: MultiStageCounsellingDialogProps) {
+export function MultiStageCounsellingDialog({ candidate, open, onClose, onUpdate }: MultiStageCounsellingDialogProps) {
   const [activeTab, setActiveTab] = useState("stage1");
   const [sessionData, setSessionData] = useState({
     stage1: { date: "", notes: "", readiness: "", document: null },
@@ -49,10 +50,37 @@ export function MultiStageCounsellingDialog({ candidate, open, onClose }: MultiS
   const { toast } = useToast();
 
   const handleSave = (stage: string) => {
-    toast({
-      title: "Session Saved",
-      description: `${stage} counselling session has been saved successfully.`,
-    });
+    const stageKey = stage.toLowerCase().replace(' ', '');
+    const stageData = sessionData[stageKey as keyof typeof sessionData];
+    
+    if (stageData.date && stageData.notes && stageData.readiness) {
+      // Update current stage based on completed sessions
+      let currentStage = "Stage 1";
+      if (sessionData.stage3.date && sessionData.stage3.notes && sessionData.stage3.readiness) {
+        currentStage = "Stage 3";
+      } else if (sessionData.stage2.date && sessionData.stage2.notes && sessionData.stage2.readiness) {
+        currentStage = "Stage 2";
+      }
+      
+      const completeSessionData = {
+        ...sessionData,
+        currentStage,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      onUpdate?.(completeSessionData);
+      
+      toast({
+        title: "Session Saved",
+        description: `${stage} counselling session has been saved successfully.`,
+      });
+    } else {
+      toast({
+        title: "Incomplete Data",
+        description: "Please fill all required fields before saving.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleNextStage = () => {

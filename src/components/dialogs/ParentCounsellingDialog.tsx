@@ -18,9 +18,10 @@ interface ParentCounsellingDialogProps {
   candidate: any;
   open: boolean;
   onClose: () => void;
+  onUpdate?: (sessionData: any) => void;
 }
 
-export function ParentCounsellingDialog({ candidate, open, onClose }: ParentCounsellingDialogProps) {
+export function ParentCounsellingDialog({ candidate, open, onClose, onUpdate }: ParentCounsellingDialogProps) {
   const [formData, setFormData] = useState({
     candidateName: candidate.name,
     parentName: "",
@@ -33,11 +34,31 @@ export function ParentCounsellingDialog({ candidate, open, onClose }: ParentCoun
   const { toast } = useToast();
 
   const handleSave = () => {
-    toast({
-      title: "Parent Counselling Saved",
-      description: "Parent counselling session has been recorded successfully.",
-    });
-    onClose();
+    if (formData.parentName && formData.sessionDate && formData.parentConsent && formData.feedback) {
+      const sessionData = {
+        candidateId: candidate.id,
+        parentName: formData.parentName,
+        sessionDate: formData.sessionDate,
+        sessionTime: formData.sessionTime,
+        consent: formData.parentConsent,
+        feedback: formData.feedback,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      onUpdate?.(sessionData);
+      
+      toast({
+        title: "Parent Counselling Saved",
+        description: "Parent counselling session has been recorded successfully.",
+      });
+      onClose();
+    } else {
+      toast({
+        title: "Incomplete Data",
+        description: "Please fill all required fields before saving.",
+        variant: "destructive"
+      });
+    }
   };
 
   const updateFormData = (field: string, value: any) => {

@@ -11,14 +11,14 @@ import { MultiStageCounsellingDialog } from "@/components/dialogs/MultiStageCoun
 import { ParentCounsellingDialog } from "@/components/dialogs/ParentCounsellingDialog";
 import { DocumentComplianceDialog } from "@/components/dialogs/DocumentComplianceDialog";
 
-// Mock data
-const mockCandidates = [
+// Mock data with counselling session storage
+const initialCandidates = [
   {
     id: 1,
     name: "Rajesh Kumar",
     batch: "Batch 2025-01",
-    stage: "Stage 2",
-    parentCounselling: "Completed",
+    stage: "Stage 1",
+    parentCounselling: "Pending",
     contactNumber: "9876543210"
   },
   {
@@ -33,8 +33,8 @@ const mockCandidates = [
     id: 3,
     name: "Amit Singh",
     batch: "Batch 2025-02",
-    stage: "Stage 3",
-    parentCounselling: "Completed",
+    stage: "Stage 1",
+    parentCounselling: "Pending",
     contactNumber: "9876543212"
   },
   {
@@ -49,13 +49,18 @@ const mockCandidates = [
     id: 5,
     name: "Vikash Yadav",
     batch: "Batch 2025-02",
-    stage: "Stage 2",
-    parentCounselling: "Completed",
+    stage: "Stage 1",
+    parentCounselling: "Pending",
     contactNumber: "9876543214"
   }
 ];
 
+// In-memory storage for counselling sessions
+let counsellingSessions: { [candidateId: number]: any } = {};
+let parentCoursellingSessions: { [candidateId: number]: any } = {};
+
 export default function CandidateManagement() {
+  const [candidates, setCandidates] = useState(initialCandidates);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState("all");
@@ -64,7 +69,7 @@ export default function CandidateManagement() {
   const [dialogType, setDialogType] = useState<string>("");
 
   const itemsPerPage = 10;
-  const filteredCandidates = mockCandidates.filter(candidate => {
+  const filteredCandidates = candidates.filter(candidate => {
     return (
       candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedStage === "all" || candidate.stage === selectedStage) &&
@@ -98,6 +103,30 @@ export default function CandidateManagement() {
   const closeDialog = () => {
     setSelectedCandidate(null);
     setDialogType("");
+  };
+
+  const handleCounsellingUpdate = (candidateId: number, sessionData: any) => {
+    counsellingSessions[candidateId] = sessionData;
+    // Update candidate stage if session is completed
+    if (sessionData.currentStage) {
+      setCandidates(prev => prev.map(candidate => 
+        candidate.id === candidateId 
+          ? { ...candidate, stage: sessionData.currentStage }
+          : candidate
+      ));
+    }
+  };
+
+  const handleParentCounsellingUpdate = (candidateId: number, sessionData: any) => {
+    parentCoursellingSessions[candidateId] = sessionData;
+    // Update parent counselling status if completed
+    if (sessionData.consent) {
+      setCandidates(prev => prev.map(candidate => 
+        candidate.id === candidateId 
+          ? { ...candidate, parentCounselling: "Completed" }
+          : candidate
+      ));
+    }
   };
 
   return (
@@ -240,6 +269,7 @@ export default function CandidateManagement() {
             candidate={selectedCandidate}
             open={true}
             onClose={closeDialog}
+            onUpdate={(sessionData) => handleCounsellingUpdate(selectedCandidate.id, sessionData)}
           />
         )}
         {dialogType === "parent" && selectedCandidate && (
@@ -247,6 +277,7 @@ export default function CandidateManagement() {
             candidate={selectedCandidate}
             open={true}
             onClose={closeDialog}
+            onUpdate={(sessionData) => handleParentCounsellingUpdate(selectedCandidate.id, sessionData)}
           />
         )}
         {dialogType === "documents" && selectedCandidate && (
@@ -254,6 +285,10 @@ export default function CandidateManagement() {
             candidate={selectedCandidate}
             open={true}
             onClose={closeDialog}
+            counsellingData={counsellingSessions[selectedCandidate.id]}
+            parentCounsellingData={parentCoursellingSessions[selectedCandidate.id]}
+            onEditCounselling={() => handleAction("counselling", selectedCandidate)}
+            onEditParentCounselling={() => handleAction("parent", selectedCandidate)}
           />
         )}
       </div>
