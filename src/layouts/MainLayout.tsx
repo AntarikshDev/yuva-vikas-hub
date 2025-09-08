@@ -457,6 +457,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { name: 'Dashboard', path: '/mis/dashboard', icon: Home },
           { name: 'Daily Activity Management', path: '/mis/daily-activities', icon: Calendar },
           { name: 'Ready for Migration', path: '/mis/ready-for-migration', icon: Users },
+          { name: 'Curriculum Management', path: '/mis/curriculum', icon: BookOpen },
         ]
       }
     ];
@@ -601,6 +602,11 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             name: 'Curriculum Planner', 
             path: '/trainer/curriculum-planner', 
             icon: BookOpen 
+          },
+          { 
+            name: 'Curriculum Schedule', 
+            path: '/trainer/curriculum-schedule', 
+            icon: Calendar 
           },
           { 
             name: 'Attendance Management', 
