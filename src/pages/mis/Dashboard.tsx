@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Users, FileSpreadsheet, Calendar, Upload, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
-
 const MISDashboard = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
@@ -20,72 +19,61 @@ const MISDashboard = () => {
     lastDataUpload: '2025-08-20 09:30:00',
     migrationsPending: 15
   };
-
-  const kpiCards = [
-    {
-      title: 'Total Candidates',
-      value: centerData.totalCandidates.toString(),
-      icon: Users,
-      color: 'text-blue-600'
-    },
-    {
-      title: 'Active Batches',
-      value: centerData.activeBatches.toString(),
-      icon: FileSpreadsheet,
-      color: 'text-green-600'
-    },
-    {
-      title: 'Ready for Migration',
-      value: centerData.readyForMigration.toString(),
-      icon: CheckCircle,
-      color: 'text-purple-600'
-    },
-    {
-      title: 'Pending Activities Upload',
-      value: centerData.pendingActivities.toString(),
-      icon: Upload,
-      color: 'text-orange-600'
-    }
-  ];
-
-  const recentActivities = [
-    {
-      type: 'Attendance Upload',
-      date: '2025-08-20',
-      status: 'completed',
-      details: 'Morning session - 45 candidates'
-    },
-    {
-      type: 'Curriculum Upload',
-      date: '2025-08-20',
-      status: 'completed',
-      details: 'ACPL Module 3 - Batch B2024-01'
-    },
-    {
-      type: 'Evening Attendance',
-      date: '2025-08-20',
-      status: 'pending',
-      details: 'Evening session data pending'
-    },
-    {
-      type: 'Status Update',
-      date: '2025-08-19',
-      status: 'completed',
-      details: '8 candidates moved to Enrolled'
-    }
-  ];
-
+  const kpiCards = [{
+    title: 'Total Candidates',
+    value: centerData.totalCandidates.toString(),
+    icon: Users,
+    color: 'text-blue-600'
+  }, {
+    title: 'Active Batches',
+    value: centerData.activeBatches.toString(),
+    icon: FileSpreadsheet,
+    color: 'text-green-600'
+  }, {
+    title: 'Ready for Migration',
+    value: centerData.readyForMigration.toString(),
+    icon: CheckCircle,
+    color: 'text-purple-600'
+  }, {
+    title: 'Pending Activities Upload',
+    value: centerData.pendingActivities.toString(),
+    icon: Upload,
+    color: 'text-orange-600'
+  }];
+  const recentActivities = [{
+    type: 'Attendance Upload',
+    date: '2025-08-20',
+    status: 'completed',
+    details: 'Morning session - 45 candidates'
+  }, {
+    type: 'Curriculum Upload',
+    date: '2025-08-20',
+    status: 'completed',
+    details: 'ACPL Module 3 - Batch B2024-01'
+  }, {
+    type: 'Evening Attendance',
+    date: '2025-08-20',
+    status: 'pending',
+    details: 'Evening session data pending'
+  }, {
+    type: 'Status Update',
+    date: '2025-08-19',
+    status: 'completed',
+    details: '8 candidates moved to Enrolled'
+  }];
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-500';
-      case 'pending': return 'bg-orange-500';
-      case 'error': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case 'completed':
+        return 'bg-green-500';
+      case 'pending':
+        return 'bg-orange-500';
+      case 'error':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
     }
   };
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       {/* Header */}
       <div className="border-b pb-4">
         <h1 className="text-3xl font-bold">MIS Dashboard</h1>
@@ -93,19 +81,13 @@ const MISDashboard = () => {
         
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-4 mt-4">
-          <DateRangePicker
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            className="w-64"
-            placeholder="Select Date Range"
-          />
+          <DateRangePicker dateRange={dateRange} onDateRangeChange={setDateRange} className="w-64" placeholder="Select Date Range" />
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpiCards.map((kpi, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
+        {kpiCards.map((kpi, index) => <Card key={index} className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {kpi.title}
@@ -115,8 +97,7 @@ const MISDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{kpi.value}</div>
             </CardContent>
-          </Card>
-        ))}
+          </Card>)}
       </div>
 
       {/* Quick Actions */}
@@ -137,10 +118,7 @@ const MISDashboard = () => {
               <Users className="h-4 w-4" />
               View Migration Queue
             </Button>
-            <Button variant="outline" className="flex items-center gap-2" size="lg">
-              <FileSpreadsheet className="h-4 w-4" />
-              Download Templates
-            </Button>
+            
           </div>
         </CardContent>
       </Card>
@@ -160,8 +138,7 @@ const MISDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentActivities.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+              {recentActivities.map((activity, index) => <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                   <div>
                     <p className="text-sm font-medium">{activity.type}</p>
                     <p className="text-xs text-muted-foreground">{activity.details}</p>
@@ -173,8 +150,7 @@ const MISDashboard = () => {
                       {activity.status}
                     </Badge>
                   </div>
-                </div>
-              ))}
+                </div>)}
             </div>
           </CardContent>
         </Card>
@@ -213,8 +189,6 @@ const MISDashboard = () => {
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default MISDashboard;
