@@ -5,59 +5,78 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Progress } from '@/components/ui/progress';
-import { Calendar, Users, Download, Upload, CheckCircle, XCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Search, Eye, Filter, Calendar, Users, Download, Upload, CheckCircle, XCircle } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { useToast } from '@/hooks/use-toast';
+import { StatusBadge } from '@/components/common/StatusBadge';
 
 const AttendanceModule = () => {
   const [selectedBatch, setSelectedBatch] = useState('all');
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
-  const [selectedDate, setSelectedDate] = useState('2024-01-15');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showAtRiskOnly, setShowAtRiskOnly] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
   const { toast } = useToast();
 
-  // Mock data for attendance
+  // Mock data for attendance - showing only absent candidates that need remarks
   const attendanceData = [
     {
       id: 'C-001',
       name: 'Ravi Kumar',
       batch: 'DDU-GKY-B5',
+      center: 'Mumbai Central',
       totalDays: 20,
       present: 18,
       absent: 2,
-      attendance: 90,
-      todayStatus: 'present'
+      attendancePercentage: 90,
+      lastAttended: '2024-06-17',
+      status: 'Active',
+      absentReason: '',
+      expectedReturnDate: ''
     },
     {
       id: 'C-002',
       name: 'Priya Sharma',
       batch: 'DDU-GKY-B6',
+      center: 'Andheri',
       totalDays: 20,
       present: 16,
       absent: 4,
-      attendance: 80,
-      todayStatus: 'absent'
+      attendancePercentage: 80,
+      lastAttended: '2024-06-16',
+      status: 'Active',
+      absentReason: '',
+      expectedReturnDate: ''
     },
     {
       id: 'C-003',
-      name: 'Amit Singh',
+      name: 'Alice Johnson',
       batch: 'DDU-GKY-B5',
+      center: 'Pune East',
       totalDays: 20,
-      present: 19,
-      absent: 1,
-      attendance: 95,
-      todayStatus: 'present'
+      present: 12,
+      absent: 8,
+      attendancePercentage: 60,
+      lastAttended: '2024-06-10',
+      status: 'At Risk',
+      absentReason: '',
+      expectedReturnDate: ''
     },
     {
       id: 'C-004',
       name: 'Sunita Devi',
       batch: 'DDU-GKY-B7',
+      center: 'Mumbai Central',
       totalDays: 15,
       present: 12,
       absent: 3,
-      attendance: 80,
-      todayStatus: 'present'
+      attendancePercentage: 80,
+      lastAttended: '2024-06-15',
+      status: 'Active',
+      absentReason: '',
+      expectedReturnDate: ''
     }
   ];
 
@@ -88,9 +107,18 @@ const AttendanceModule = () => {
     });
   };
 
-  const filteredData = selectedBatch === 'all' 
-    ? attendanceData 
-    : attendanceData.filter(student => student.batch === selectedBatch);
+  // Filter data based on search term, batch selection, and at-risk filter
+  const filteredData = attendanceData
+    .filter(student => {
+      const matchesSearch = student.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesBatch = selectedBatch === 'all' || student.batch === selectedBatch;
+      const matchesAtRisk = !showAtRiskOnly || student.status === 'At Risk';
+      return matchesSearch && matchesBatch && matchesAtRisk;
+    });
+
+  const handleViewDetails = (candidate: any) => {
+    setSelectedCandidate(candidate);
+  };
 
   return (
     <div className="space-y-6">
@@ -131,172 +159,130 @@ const AttendanceModule = () => {
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-2xl font-bold">{filteredData.length}</p>
-                <p className="text-sm text-muted-foreground">Total Students</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-2xl font-bold">
-                  {filteredData.filter(s => s.todayStatus === 'present').length}
-                </p>
-                <p className="text-sm text-muted-foreground">Present Today</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-600" />
-              <div>
-                <p className="text-2xl font-bold">
-                  {filteredData.filter(s => s.todayStatus === 'absent').length}
-                </p>
-                <p className="text-sm text-muted-foreground">Absent Today</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-purple-600" />
-              <div>
-                <p className="text-2xl font-bold">
-                  {Math.round(filteredData.reduce((acc, s) => acc + s.attendance, 0) / filteredData.length)}%
-                </p>
-                <p className="text-sm text-muted-foreground">Avg. Attendance</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Daily Attendance Marking */}
+      {/* Candidate Attendance Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Daily Attendance - {selectedDate}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium">Date:</label>
-                <input 
-                  type="date" 
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="border rounded px-2 py-1"
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Candidate Attendance
+              <span className="text-sm text-muted-foreground">
+                (Absent candidates requiring remarks)
+              </span>
+            </CardTitle>
+            
+            <div className="flex flex-wrap gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search candidates..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-64"
                 />
               </div>
-              <Button onClick={handleBulkAttendance}>
-                Save Attendance
-              </Button>
+              
+              <Select value={showAtRiskOnly ? 'at-risk' : 'all'} onValueChange={(value) => setShowAtRiskOnly(value === 'at-risk')}>
+                <SelectTrigger className="w-48">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Candidates</SelectItem>
+                  <SelectItem value="at-risk">At Risk Only</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student Name</TableHead>
-                  <TableHead>Batch</TableHead>
-                  <TableHead>Present</TableHead>
-                  <TableHead>Absent</TableHead>
-                  <TableHead>Remarks</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell className="font-medium">{student.name}</TableCell>
-                    <TableCell>{student.batch}</TableCell>
-                    <TableCell>
-                      <Checkbox 
-                        checked={student.todayStatus === 'present'}
-                        id={`present-${student.id}`}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Checkbox 
-                        checked={student.todayStatus === 'absent'}
-                        id={`absent-${student.id}`}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <input 
-                        type="text" 
-                        placeholder="Add remarks..."
-                        className="border rounded px-2 py-1 w-full"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Attendance Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Attendance Summary Report</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student Name</TableHead>
-                <TableHead>Batch</TableHead>
-                <TableHead>Total Days</TableHead>
-                <TableHead>Present</TableHead>
-                <TableHead>Absent</TableHead>
+                <TableHead>Candidate Name</TableHead>
+                <TableHead>Attendance</TableHead>
                 <TableHead>Attendance %</TableHead>
+                <TableHead>Last Attended</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Absent Reason</TableHead>
+                <TableHead>Expected Return</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((student) => (
-                <TableRow key={student.id}>
-                  <TableCell className="font-medium">{student.name}</TableCell>
-                  <TableCell>{student.batch}</TableCell>
-                  <TableCell>{student.totalDays}</TableCell>
-                  <TableCell>{student.present}</TableCell>
-                  <TableCell>{student.absent}</TableCell>
+              {filteredData.map((candidate) => (
+                <TableRow key={candidate.id}>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Progress value={student.attendance} className="w-16" />
-                      <span className={`text-sm font-medium ${getAttendanceColor(student.attendance)}`}>
-                        {student.attendance}%
-                      </span>
+                    <div>
+                      <div className="font-medium">{candidate.name}</div>
+                      <div className="text-xs text-muted-foreground">{candidate.batch} • {candidate.center}</div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge 
-                      variant={student.attendance >= 85 ? 'default' : 
-                               student.attendance >= 75 ? 'secondary' : 'destructive'}
+                    <div className="text-center">
+                      <div className="font-medium">{candidate.present}/{candidate.totalDays}</div>
+                      <div className="text-xs text-muted-foreground">Present/Total</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-center">
+                      <div className="font-medium">{candidate.attendancePercentage}%</div>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                        <div 
+                          className={`h-1.5 rounded-full ${
+                            candidate.attendancePercentage >= 85 ? 'bg-green-500' : 
+                            candidate.attendancePercentage >= 75 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${candidate.attendancePercentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center text-sm">{candidate.lastAttended}</TableCell>
+                  <TableCell>
+                    <StatusBadge
+                      variant={
+                        candidate.status === 'Active' ? 'success' : 
+                        candidate.status === 'At Risk' ? 'warning' : 'error'
+                      }
+                      label={candidate.status}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Textarea
+                      placeholder="Why absent?"
+                      value={candidate.absentReason}
+                      onChange={(e) => {
+                        const updatedData = attendanceData.map(item =>
+                          item.id === candidate.id ? { ...item, absentReason: e.target.value } : item
+                        );
+                        // Update the state here if you want to persist changes
+                      }}
+                      className="min-h-[60px] resize-none"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      type="date"
+                      value={candidate.expectedReturnDate}
+                      onChange={(e) => {
+                        const updatedData = attendanceData.map(item =>
+                          item.id === candidate.id ? { ...item, expectedReturnDate: e.target.value } : item
+                        );
+                        // Update the state here if you want to persist changes
+                      }}
+                      className="w-full"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewDetails(candidate)}
                     >
-                      {student.attendance >= 85 ? 'Good' : 
-                       student.attendance >= 75 ? 'Average' : 'Poor'}
-                    </Badge>
+                      <Eye className="h-4 w-4 mr-1" />
+                      View Details
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -304,6 +290,7 @@ const AttendanceModule = () => {
           </Table>
         </CardContent>
       </Card>
+
     </div>
   );
 };

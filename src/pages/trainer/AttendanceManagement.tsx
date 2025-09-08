@@ -145,13 +145,26 @@ const AttendanceManagement = () => {
                     <DialogTitle>Mark Attendance</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                     <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="batch">Batch</Label>
+                        <Select defaultValue="rsd-101">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="rsd-101">Batch RSD-101</SelectItem>
+                            <SelectItem value="css-102">Batch CSS-102</SelectItem>
+                            <SelectItem value="js-103">Batch JS-103</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <div>
                         <Label htmlFor="date">Date</Label>
                         <Input type="date" id="date" defaultValue="2025-07-19" />
                       </div>
                       <div>
-                        <Label htmlFor="session">Session</Label>
+                        <Label htmlFor="session">Session/Class</Label>
                         <Select defaultValue="morning">
                           <SelectTrigger>
                             <SelectValue />
@@ -159,6 +172,9 @@ const AttendanceManagement = () => {
                           <SelectContent>
                             <SelectItem value="morning">Morning Session</SelectItem>
                             <SelectItem value="afternoon">Afternoon Session</SelectItem>
+                            <SelectItem value="class1">Class 1 - Introduction</SelectItem>
+                            <SelectItem value="class2">Class 2 - Basic Concepts</SelectItem>
+                            <SelectItem value="class3">Class 3 - Practical Work</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

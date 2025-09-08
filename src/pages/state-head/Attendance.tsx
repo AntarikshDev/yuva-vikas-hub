@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { EnhancedFilterBar } from '@/components/common/EnhancedFilterBar';
 import { Button } from '@/components/ui/button';
-import { DataTable } from '@/components/common/DataTable';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Eye, Users, User } from 'lucide-react';
+import { Download, Eye, Users, User, Search, Filter } from 'lucide-react';
 import { CandidateAttendanceDialog } from '@/components/dialogs/CandidateAttendanceDialog';
 import { TrainerScheduleDialog } from '@/components/dialogs/TrainerScheduleDialog';
 
@@ -16,7 +20,21 @@ const Attendance: React.FC = () => {
   const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
   const [selectedTrainer, setSelectedTrainer] = useState<any>(null);
   
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showAtRiskOnly, setShowAtRiskOnly] = useState(false);
+  
   const filterOptions = [
+    {
+      id: 'batch',
+      label: 'Batch',
+      type: 'select' as const,
+      options: [
+        { value: 'all', label: 'All Batches' },
+        { value: 'wd001', label: 'WD001' },
+        { value: 'gd002', label: 'GD002' },
+        { value: 'dm003', label: 'DM003' },
+      ],
+    },
     {
       id: 'district',
       label: 'District',
@@ -327,35 +345,215 @@ const Attendance: React.FC = () => {
           </TabsList>
 
           <TabsContent value="candidates">
-            <div className="rounded-md border bg-white">
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold">Candidate Attendance</h2>
-                <p className="text-sm text-muted-foreground">
-                  Attendance tracking for all candidates across batches
-                </p>
-              </div>
-              <DataTable
-                columns={candidateColumns}
-                data={candidateAttendanceData}
-                isLoading={isLoading}
-              />
-            </div>
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Candidate Attendance
+                    <span className="text-sm text-muted-foreground">
+                      (Absent candidates requiring remarks)
+                    </span>
+                  </CardTitle>
+                  
+                  <div className="flex flex-wrap gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search candidates..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    
+                    <Select value={showAtRiskOnly ? 'at-risk' : 'all'} onValueChange={(value) => setShowAtRiskOnly(value === 'at-risk')}>
+                      <SelectTrigger className="w-48">
+                        <Filter className="h-4 w-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Candidates</SelectItem>
+                        <SelectItem value="at-risk">At Risk Only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Candidate Name</TableHead>
+                      <TableHead>Attendance</TableHead>
+                      <TableHead>Attendance %</TableHead>
+                      <TableHead>Last Attended</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Absent Reason</TableHead>
+                      <TableHead>Expected Return</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {candidateAttendanceData
+                      .filter(candidate => {
+                        const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase());
+                        const matchesAtRisk = !showAtRiskOnly || candidate.status === 'At Risk';
+                        return matchesSearch && matchesAtRisk;
+                      })
+                      .map((candidate) => (
+                        <TableRow key={candidate.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{candidate.name}</div>
+                              <div className="text-xs text-muted-foreground">{candidate.batch} • {candidate.center}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-center">
+                              <div className="font-medium">{candidate.presentDays}/{candidate.totalDays}</div>
+                              <div className="text-xs text-muted-foreground">Present/Total</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-center">
+                              <div className="font-medium">{candidate.attendancePercentage}%</div>
+                              <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                                <div 
+                                  className={`h-1.5 rounded-full ${
+                                    candidate.attendancePercentage >= 85 ? 'bg-green-500' : 
+                                    candidate.attendancePercentage >= 75 ? 'bg-yellow-500' : 'bg-red-500'
+                                  }`}
+                                  style={{ width: `${candidate.attendancePercentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center text-sm">{candidate.lastAttended}</TableCell>
+                          <TableCell>
+                            <StatusBadge
+                              variant={
+                                candidate.status === 'Active' ? 'success' : 
+                                candidate.status === 'At Risk' ? 'warning' : 'error'
+                              }
+                              label={candidate.status}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Textarea
+                              placeholder="Why absent?"
+                              className="min-h-[60px] resize-none"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="date"
+                              className="w-full"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedCandidate(candidate);
+                                setCandidateDialogOpen(true);
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="trainers">
-            <div className="rounded-md border bg-white">
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold">Trainer Attendance</h2>
-                <p className="text-sm text-muted-foreground">
-                  Attendance tracking for all trainers and their assigned batches
-                </p>
-              </div>
-              <DataTable
-                columns={trainerColumns}
-                data={trainerAttendanceData}
-                isLoading={isLoading}
-              />
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Trainer Attendance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Trainer Name</TableHead>
+                      <TableHead>Batches</TableHead>
+                      <TableHead>Attendance</TableHead>
+                      <TableHead>Attendance %</TableHead>
+                      <TableHead>Last Attended</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {trainerAttendanceData.map((trainer) => (
+                      <TableRow key={trainer.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{trainer.name}</div>
+                            <div className="text-xs text-muted-foreground">{trainer.center}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-center">
+                            <div className="font-medium">{trainer.batches.length}</div>
+                            <div className="text-xs text-muted-foreground">{trainer.batches.join(', ')}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-center">
+                            <div className="font-medium">{trainer.presentDays}/{trainer.totalDays}</div>
+                            <div className="text-xs text-muted-foreground">Present/Total</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-center">
+                            <div className="font-medium">{trainer.attendancePercentage}%</div>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                              <div 
+                                className={`h-1.5 rounded-full ${
+                                  trainer.attendancePercentage >= 95 ? 'bg-green-500' : 
+                                  trainer.attendancePercentage >= 85 ? 'bg-yellow-500' : 'bg-red-500'
+                                }`}
+                                style={{ width: `${trainer.attendancePercentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center text-sm">{trainer.lastAttended}</TableCell>
+                        <TableCell>
+                          <StatusBadge
+                            variant={trainer.status === 'Active' ? 'success' : 'error'}
+                            label={trainer.status}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedTrainer(trainer);
+                              setTrainerDialogOpen(true);
+                            }}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View Schedule
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
