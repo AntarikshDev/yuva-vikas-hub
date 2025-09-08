@@ -360,7 +360,7 @@ const ReadyForMigration = () => {
               <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold text-sm">3</div>
               <div>
                 <h4 className="font-medium">Enrollment by MIS</h4>
-                <p className="text-sm text-muted-foreground">MIS updates status from "Ready to Migrate to Migrated" and then "Migrated" to "Enrolled" once batch assignment is complete in government portal</p>
+                <p className="text-sm text-muted-foreground">MIS updates status from "Ready to Migrate" to "Migrated" and then "Migrated" to "Enrolled" once batch assignment is complete in government portal</p>
               </div>
             </div>
           </div>
