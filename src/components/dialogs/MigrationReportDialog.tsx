@@ -9,16 +9,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { FileText, Download, Calendar, Filter } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
 interface MigrationReportDialogProps {
   open: boolean;
   onClose: () => void;
 }
-
-export function MigrationReportDialog({ open, onClose }: MigrationReportDialogProps) {
-  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+export function MigrationReportDialog({
+  open,
+  onClose
+}: MigrationReportDialogProps) {
+  const [dateRange, setDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
     from: undefined,
-    to: undefined,
+    to: undefined
   });
   const [selectedBatch, setSelectedBatch] = useState('all');
   const [selectedCompany, setSelectedCompany] = useState('all');
@@ -30,46 +34,41 @@ export function MigrationReportDialog({ open, onClose }: MigrationReportDialogPr
     contactDetails: true,
     placementInfo: true,
     migrationDates: true,
-    enrollmentStatus: true,
+    enrollmentStatus: true
   });
   const [isGenerating, setIsGenerating] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const handleGenerateReport = async () => {
     if (!dateRange.from || !dateRange.to) {
       toast({
         title: "Date Range Required",
         description: "Please select a date range for the report",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setIsGenerating(true);
-    
     try {
       // Mock API call
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
       toast({
         title: "Report Generated",
-        description: "Migration report has been generated and downloaded successfully",
+        description: "Migration report has been generated and downloaded successfully"
       });
-      
       onClose();
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to generate migration report",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
     }
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
+  return <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -90,10 +89,13 @@ export function MigrationReportDialog({ open, onClose }: MigrationReportDialogPr
             <CardContent>
               <div className="space-y-4">
                 <Label>Select date range for migration data</Label>
-                <DateRangePicker
-                  dateRange={dateRange.from && dateRange.to ? { from: dateRange.from, to: dateRange.to } : undefined}
-                  onDateRangeChange={(range) => setDateRange({ from: range?.from, to: range?.to })}
-                />
+                <DateRangePicker dateRange={dateRange.from && dateRange.to ? {
+                from: dateRange.from,
+                to: dateRange.to
+              } : undefined} onDateRangeChange={range => setDateRange({
+                from: range?.from,
+                to: range?.to
+              })} />
               </div>
             </CardContent>
           </Card>
@@ -123,37 +125,9 @@ export function MigrationReportDialog({ open, onClose }: MigrationReportDialogPr
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Company</Label>
-                  <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Companies</SelectItem>
-                      <SelectItem value="reliance">Reliance Retail</SelectItem>
-                      <SelectItem value="hdfc">HDFC Bank</SelectItem>
-                      <SelectItem value="tcs">TCS</SelectItem>
-                      <SelectItem value="infosys">Infosys</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                
 
-                <div className="space-y-2">
-                  <Label>Placement Location</Label>
-                  <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select location" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Locations</SelectItem>
-                      <SelectItem value="delhi">Delhi</SelectItem>
-                      <SelectItem value="mumbai">Mumbai</SelectItem>
-                      <SelectItem value="bangalore">Bangalore</SelectItem>
-                      <SelectItem value="chennai">Chennai</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                
 
                 <div className="space-y-2">
                   <Label>Migration Status</Label>
@@ -198,65 +172,50 @@ export function MigrationReportDialog({ open, onClose }: MigrationReportDialogPr
                   <Label>Include in Report</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="candidate-info"
-                        checked={includeDetails.candidateInfo}
-                        onCheckedChange={(checked) =>
-                          setIncludeDetails(prev => ({ ...prev, candidateInfo: checked as boolean }))
-                        }
-                      />
+                      <Checkbox id="candidate-info" checked={includeDetails.candidateInfo} onCheckedChange={checked => setIncludeDetails(prev => ({
+                      ...prev,
+                      candidateInfo: checked as boolean
+                    }))} />
                       <Label htmlFor="candidate-info" className="text-sm">
                         Candidate Information
                       </Label>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="contact-details"
-                        checked={includeDetails.contactDetails}
-                        onCheckedChange={(checked) =>
-                          setIncludeDetails(prev => ({ ...prev, contactDetails: checked as boolean }))
-                        }
-                      />
+                      <Checkbox id="contact-details" checked={includeDetails.contactDetails} onCheckedChange={checked => setIncludeDetails(prev => ({
+                      ...prev,
+                      contactDetails: checked as boolean
+                    }))} />
                       <Label htmlFor="contact-details" className="text-sm">
                         Contact Details
                       </Label>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="placement-info"
-                        checked={includeDetails.placementInfo}
-                        onCheckedChange={(checked) =>
-                          setIncludeDetails(prev => ({ ...prev, placementInfo: checked as boolean }))
-                        }
-                      />
+                      <Checkbox id="placement-info" checked={includeDetails.placementInfo} onCheckedChange={checked => setIncludeDetails(prev => ({
+                      ...prev,
+                      placementInfo: checked as boolean
+                    }))} />
                       <Label htmlFor="placement-info" className="text-sm">
                         Placement Information
                       </Label>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="migration-dates"
-                        checked={includeDetails.migrationDates}
-                        onCheckedChange={(checked) =>
-                          setIncludeDetails(prev => ({ ...prev, migrationDates: checked as boolean }))
-                        }
-                      />
+                      <Checkbox id="migration-dates" checked={includeDetails.migrationDates} onCheckedChange={checked => setIncludeDetails(prev => ({
+                      ...prev,
+                      migrationDates: checked as boolean
+                    }))} />
                       <Label htmlFor="migration-dates" className="text-sm">
                         Migration Dates
                       </Label>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="enrollment-status"
-                        checked={includeDetails.enrollmentStatus}
-                        onCheckedChange={(checked) =>
-                          setIncludeDetails(prev => ({ ...prev, enrollmentStatus: checked as boolean }))
-                        }
-                      />
+                      <Checkbox id="enrollment-status" checked={includeDetails.enrollmentStatus} onCheckedChange={checked => setIncludeDetails(prev => ({
+                      ...prev,
+                      enrollmentStatus: checked as boolean
+                    }))} />
                       <Label htmlFor="enrollment-status" className="text-sm">
                         Enrollment Status
                       </Label>
@@ -272,15 +231,11 @@ export function MigrationReportDialog({ open, onClose }: MigrationReportDialogPr
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleGenerateReport}
-            disabled={isGenerating}
-          >
+          <Button onClick={handleGenerateReport} disabled={isGenerating}>
             <Download className="h-4 w-4 mr-2" />
             {isGenerating ? "Generating..." : "Generate Report"}
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 }
