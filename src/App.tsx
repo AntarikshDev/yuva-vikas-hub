@@ -80,7 +80,7 @@ import AdminProfileSettings from "./pages/mis-admin/ProfileSettings";
 import MISDashboard from "./pages/mis/Dashboard";
 import DailyActivityManagement from "./pages/mis/DailyActivityManagement";
 import ReadyForMigration from "./pages/mis/ReadyForMigration";
-import CurriculumManagement from "./pages/mis-admin/CurriculumManagement";
+import CurriculumManagement from "./pages/mis/CurriculumManagement";
 
 // Trainer Pages
 import TrainerDashboard from "./pages/trainer/Dashboard";
@@ -249,7 +249,7 @@ const App = () => {
         <Route path="/mis/dashboard" element={<MainLayout role="mis" title="MIS Dashboard"><MISDashboard /></MainLayout>} />
         <Route path="/mis/daily-activities" element={<MainLayout role="mis" title="Daily Activity Management"><DailyActivityManagement /></MainLayout>} />
         <Route path="/mis/ready-for-migration" element={<MainLayout role="mis" title="Ready for Migration"><ReadyForMigration /></MainLayout>} />
-        <Route path="/mis-admin/curriculum" element={<MainLayout role="mis" title="Curriculum Management"><CurriculumManagement /></MainLayout>} />
+        <Route path="/mis/curriculum" element={<MainLayout role="mis" title="Curriculum Management"><CurriculumManagement /></MainLayout>} />
 
         {/* Company HR Routes */}
         <Route path="/company-hr/dashboard" element={<MainLayout role="company_hr" title="Dashboard"><CompanyHRDashboard /></MainLayout>} />
