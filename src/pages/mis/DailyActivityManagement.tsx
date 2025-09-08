@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,15 +6,24 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Upload, Calendar, Users, FileSpreadsheet, CheckCircle, AlertTriangle, Download, Plus } from 'lucide-react';
+import { Upload, Calendar, Users, FileSpreadsheet, CheckCircle, AlertTriangle, Download, Plus, Loader2 } from 'lucide-react';
 import { DataTable } from '@/components/common/DataTable';
 import { BatchCreationDialog } from '@/components/dialogs/BatchCreationDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const DailyActivityManagement = () => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedSession, setSelectedSession] = useState('');
   const [selectedBatch, setSelectedBatch] = useState('');
   const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [notes, setNotes] = useState('');
+  const { toast } = useToast();
+
+  // File input refs for different upload types
+  const attendanceFileRef = useRef<HTMLInputElement>(null);
+  const curriculumFileRef = useRef<HTMLInputElement>(null);
+  const activitiesFileRef = useRef<HTMLInputElement>(null);
 
   // Mock data for batches - now stateful to allow adding new batches
   const [batches, setBatches] = useState([
@@ -23,8 +32,8 @@ const DailyActivityManagement = () => {
     { id: 'B2024-03', name: 'Batch B2024-03 - Data Entry', candidates: 42 }
   ]);
 
-  // Mock data for recent uploads
-  const recentUploads = [
+  // Mock data for recent uploads - now stateful to allow adding new uploads
+  const [recentUploads, setRecentUploads] = useState([
     {
       id: 1,
       date: '2025-08-20',
@@ -55,7 +64,7 @@ const DailyActivityManagement = () => {
       uploadedBy: 'MIS User',
       uploadTime: '06:45 PM'
     }
-  ];
+  ]);
 
   const columns = [
     {
@@ -94,9 +103,87 @@ const DailyActivityManagement = () => {
     }
   ];
 
-  const handleFileUpload = (type: string) => {
-    // Handle file upload logic
-    console.log(`Uploading ${type} for ${selectedDate}, ${selectedSession}, ${selectedBatch}`);
+  const handleFileUpload = (type: 'attendance' | 'curriculum' | 'activities') => {
+    // Trigger file input click based on type
+    switch (type) {
+      case 'attendance':
+        attendanceFileRef.current?.click();
+        break;
+      case 'curriculum':
+        curriculumFileRef.current?.click();
+        break;
+      case 'activities':
+        activitiesFileRef.current?.click();
+        break;
+    }
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, type: string) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['.xlsx', '.xls', '.csv'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    
+    if (!validTypes.includes(fileExtension)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload Excel (.xlsx, .xls) or CSV files only.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "File size must be less than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Simulate file upload with a delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Add new upload to recent uploads
+      const newUpload = {
+        id: Date.now(),
+        date: selectedDate,
+        session: selectedSession,
+        batch: selectedBatch,
+        type: type.charAt(0).toUpperCase() + type.slice(1),
+        status: 'completed',
+        uploadedBy: 'MIS User',
+        uploadTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+
+      setRecentUploads(prev => [newUpload, ...prev]);
+
+      toast({
+        title: "Upload successful",
+        description: `${type.charAt(0).toUpperCase() + type.slice(1)} data uploaded successfully for ${selectedBatch}.`,
+      });
+
+      // Reset form
+      setNotes('');
+      
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading your file. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      event.target.value = '';
+    }
   };
 
   const handleBatchCreated = (newBatch: any) => {
@@ -194,27 +281,39 @@ const DailyActivityManagement = () => {
                     variant="outline" 
                     className="justify-start" 
                     onClick={() => handleFileUpload('attendance')}
-                    disabled={!selectedDate || !selectedSession || !selectedBatch}
+                    disabled={!selectedDate || !selectedSession || !selectedBatch || isUploading}
                   >
-                    <Users className="h-4 w-4 mr-2" />
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Users className="h-4 w-4 mr-2" />
+                    )}
                     Upload Attendance Data (Excel/CSV)
                   </Button>
                   <Button 
                     variant="outline" 
                     className="justify-start"
                     onClick={() => handleFileUpload('curriculum')}
-                    disabled={!selectedDate || !selectedSession || !selectedBatch}
+                    disabled={!selectedDate || !selectedSession || !selectedBatch || isUploading}
                   >
-                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <FileSpreadsheet className="h-4 w-4 mr-2" />
+                    )}
                     Upload ACPL Curriculum Progress
                   </Button>
                   <Button 
                     variant="outline" 
                     className="justify-start"
                     onClick={() => handleFileUpload('activities')}
-                    disabled={!selectedDate || !selectedSession || !selectedBatch}
+                    disabled={!selectedDate || !selectedSession || !selectedBatch || isUploading}
                   >
-                    <Calendar className="h-4 w-4 mr-2" />
+                    {isUploading ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Calendar className="h-4 w-4 mr-2" />
+                    )}
                     Upload Other Activities
                   </Button>
                 </div>
@@ -225,10 +324,35 @@ const DailyActivityManagement = () => {
               <Label htmlFor="notes">Additional Notes</Label>
               <Textarea
                 id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any additional notes about the session or activities..."
                 className="min-h-[80px]"
               />
             </div>
+
+            {/* Hidden file inputs */}
+            <input
+              ref={attendanceFileRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              style={{ display: 'none' }}
+              onChange={(e) => handleFileSelect(e, 'attendance')}
+            />
+            <input
+              ref={curriculumFileRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              style={{ display: 'none' }}
+              onChange={(e) => handleFileSelect(e, 'curriculum')}
+            />
+            <input
+              ref={activitiesFileRef}
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              style={{ display: 'none' }}
+              onChange={(e) => handleFileSelect(e, 'activities')}
+            />
           </CardContent>
         </Card>
 
