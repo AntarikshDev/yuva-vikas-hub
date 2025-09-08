@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Eye, FileText, MessageCircle, UserCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { MultiStageCounsellingDialog } from "@/components/dialogs/MultiStageCounsellingDialog";
 import { ParentCounsellingDialog } from "@/components/dialogs/ParentCounsellingDialog";
-import { OFRFormDialog } from "@/components/dialogs/OFRFormDialog";
 import { DocumentComplianceDialog } from "@/components/dialogs/DocumentComplianceDialog";
 
 // Mock data
@@ -170,7 +169,6 @@ export default function CandidateManagement() {
                   <TableHead>Batch</TableHead>
                   <TableHead>Current Stage</TableHead>
                   <TableHead>Parent Counselling</TableHead>
-                  <TableHead>OFR Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -181,7 +179,6 @@ export default function CandidateManagement() {
                     <TableCell>{candidate.batch}</TableCell>
                     <TableCell>{candidate.stage}</TableCell>
                     <TableCell>{getStatusBadge(candidate.parentCounselling)}</TableCell>
-                    <TableCell>{getStatusBadge(candidate.ofrStatus)}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
                         <Button
@@ -204,13 +201,6 @@ export default function CandidateManagement() {
                           onClick={() => handleAction("documents", candidate)}
                         >
                           <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleAction("ofr", candidate)}
-                        >
-                          <FileText className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -259,13 +249,6 @@ export default function CandidateManagement() {
         )}
         {dialogType === "parent" && selectedCandidate && (
           <ParentCounsellingDialog
-            candidate={selectedCandidate}
-            open={true}
-            onClose={closeDialog}
-          />
-        )}
-        {dialogType === "ofr" && selectedCandidate && (
-          <OFRFormDialog
             candidate={selectedCandidate}
             open={true}
             onClose={closeDialog}
