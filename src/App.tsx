@@ -80,12 +80,18 @@ import AdminProfileSettings from "./pages/mis-admin/ProfileSettings";
 import MISDashboard from "./pages/mis/Dashboard";
 import DailyActivityManagement from "./pages/mis/DailyActivityManagement";
 import ReadyForMigration from "./pages/mis/ReadyForMigration";
+import CurriculumManagement from "./pages/mis-admin/CurriculumManagement";
 
 // Trainer Pages
 import TrainerDashboard from "./pages/trainer/Dashboard";
-import TrainerCurriculumPlanner from "./pages/trainer/CurriculumPlanner";
-import TrainerAttendanceManagement from "./pages/trainer/AttendanceManagement";
+import TrainerProfile from "./pages/trainer/Profile";
+import TrainerReports from "./pages/trainer/Reports";
 import TrainerVideoLogs from "./pages/trainer/VideoLogs";
+import TrainerCurriculumPlanner from "./pages/trainer/CurriculumPlanner";
+import TrainerAssessmentEvaluation from "./pages/trainer/AssessmentEvaluation";
+import TrainerAttendanceManagement from "./pages/trainer/AttendanceManagement";
+import TrainerFeedbackManagement from "./pages/trainer/FeedbackManagement";
+import CurriculumSchedule from "./pages/trainer/CurriculumSchedule";
 import CompanyHRDashboard from "./pages/company-hr/Dashboard";
 import CompanyHRBatchManagement from "./pages/company-hr/BatchManagement";
 import CompanyHRCandidateManagement from "./pages/company-hr/CandidateManagement";
@@ -126,10 +132,6 @@ import PettyCashManagement from "./pages/admin-department/PettyCashManagement";
 import PurchaseOrderManagement from "./pages/admin-department/PurchaseOrderManagement";
 import TicketBookingApproval from "./pages/admin-department/TicketBookingApproval";
 
-import TrainerAssessmentEvaluation from "./pages/trainer/AssessmentEvaluation";
-import TrainerFeedbackManagement from "./pages/trainer/FeedbackManagement";
-import TrainerReports from "./pages/trainer/Reports";
-import TrainerProfile from "./pages/trainer/Profile";
 
 // Candidate Pages
 import CandidateProfile from "./pages/candidate/Profile";
@@ -199,6 +201,7 @@ const App = () => {
             <Route path="/trainer/video-logs" element={<MainLayout role="trainer" title="Video Logs"><TrainerVideoLogs /></MainLayout>} />
             <Route path="/trainer/assessment-evaluation" element={<MainLayout role="trainer" title="Assessment Evaluation"><TrainerAssessmentEvaluation /></MainLayout>} />
             <Route path="/trainer/feedback-management" element={<MainLayout role="trainer" title="Feedback Management"><TrainerFeedbackManagement /></MainLayout>} />
+            <Route path="/trainer/curriculum-schedule" element={<MainLayout role="trainer" title="Curriculum Schedule"><CurriculumSchedule /></MainLayout>} />
             <Route path="/trainer/reports" element={<MainLayout role="trainer" title="Reports & Analytics"><TrainerReports /></MainLayout>} />
             <Route path="/trainer/profile" element={<MainLayout role="trainer" title="Profile & Settings"><TrainerProfile /></MainLayout>} />
             
@@ -246,6 +249,7 @@ const App = () => {
         <Route path="/mis/dashboard" element={<MainLayout role="mis" title="MIS Dashboard"><MISDashboard /></MainLayout>} />
         <Route path="/mis/daily-activities" element={<MainLayout role="mis" title="Daily Activity Management"><DailyActivityManagement /></MainLayout>} />
         <Route path="/mis/ready-for-migration" element={<MainLayout role="mis" title="Ready for Migration"><ReadyForMigration /></MainLayout>} />
+        <Route path="/mis-admin/curriculum" element={<MainLayout role="mis" title="Curriculum Management"><CurriculumManagement /></MainLayout>} />
 
         {/* Company HR Routes */}
         <Route path="/company-hr/dashboard" element={<MainLayout role="company_hr" title="Dashboard"><CompanyHRDashboard /></MainLayout>} />

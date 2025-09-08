@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Users, FileCheck, Award, Briefcase, TrendingUp, AlertTriangle } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
+import CurriculumProgressCard from '@/components/dashboard/CurriculumProgressCard';
 
 const CenterManagerDashboard = () => {
   const [selectedCenter, setSelectedCenter] = useState('C-001');
@@ -184,6 +185,9 @@ const CenterManagerDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Curriculum Progress Section */}
+        <CurriculumProgressCard userRole="center-manager" />
       </div>
   );
 };

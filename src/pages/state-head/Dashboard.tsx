@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { DateRange } from 'react-day-picker';
 import { Download, FileSpreadsheet, BarChart4 } from 'lucide-react';
+import CurriculumProgressCard from '@/components/dashboard/CurriculumProgressCard';
 import {
   LineChart,
   Line,
@@ -569,6 +570,11 @@ const StateHeadDashboard: React.FC = () => {
               </ResponsiveContainer>
             </ChartCard>
           </DashboardGrid>
+        </section>
+
+        {/* Curriculum Progress Section */}
+        <section className="space-y-6">
+          <CurriculumProgressCard userRole="state-head" />
         </section>
       </div>
     </MainLayout>
