@@ -17,56 +17,61 @@ const mockDistricts = [
   "Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad", "Solapur", "Amravati", "Kolhapur"
 ];
 
-const mockMobilizers = [
-  { id: 1, name: "Rajesh Kumar", type: "Mobiliser Manager", district: "Mumbai", ofrCount: 45 },
-  { id: 2, name: "Priya Sharma", type: "CRP", district: "Mumbai", ofrCount: 32 },
-  { id: 3, name: "Amit Patel", type: "Mobiliser Manager", district: "Pune", ofrCount: 28 },
-  { id: 4, name: "Sneha Desai", type: "CRP", district: "Pune", ofrCount: 19 },
-  { id: 5, name: "Vikram Singh", type: "Mobiliser Manager", district: "Nagpur", ofrCount: 38 },
-];
+// Generate comprehensive candidate data for all mobilizers
+const generateCandidates = () => {
+  const firstNames = ["Aadhya", "Bhavesh", "Chitra", "Dhiraj", "Ekta", "Falguni", "Gaurav", "Himani", "Ishaan", "Jaya"];
+  const lastNames = ["Sharma", "Patel", "Singh", "Kumar", "Desai", "Shah", "Gupta", "Yadav", "Mehta", "Joshi"];
+  const fatherNames = ["Ramesh", "Kiran", "Suresh", "Mahesh", "Rajesh", "Dinesh", "Naresh", "Mukesh", "Hitesh", "Prakash"];
+  const districts = ["Mumbai", "Pune", "Nagpur"];
+  const communities = ["General", "OBC", "SC", "ST"];
+  const bloodGroups = ["O+", "A+", "B+", "AB+", "O-", "A-", "B-", "AB-"];
+  const languages = ["Hindi", "Marathi", "Gujarati", "English"];
+  const religions = ["Hindu", "Muslim", "Christian", "Buddhist", "Sikh"];
+  
+  const candidates = [];
+  let id = 1;
+  
+  const mobilizerCounts = {
+    "Rajesh Kumar": 45,
+    "Priya Sharma": 32, 
+    "Amit Patel": 28,
+    "Sneha Desai": 19,
+    "Vikram Singh": 38
+  };
+  
+  Object.entries(mobilizerCounts).forEach(([mobilizer, count]) => {
+    for (let i = 0; i < count; i++) {
+      const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const fatherName = fatherNames[Math.floor(Math.random() * fatherNames.length)];
+      
+      candidates.push({
+        id: id++,
+        name: `${firstName} ${lastName}`,
+        fatherName: `${fatherName} ${lastName}`,
+        mobile: `987654${String(3210 + i).padStart(4, '0')}`,
+        email: `${firstName.toLowerCase()}${i}@email.com`,
+        district: districts[Math.floor(Math.random() * districts.length)],
+        status: "Pending Verification",
+        mobilizer: mobilizer,
+        bloodGroup: bloodGroups[Math.floor(Math.random() * bloodGroups.length)],
+        motherTongue: languages[Math.floor(Math.random() * languages.length)],
+        religion: religions[Math.floor(Math.random() * religions.length)],
+        community: communities[Math.floor(Math.random() * communities.length)],
+        motherName: `Sunita ${lastName}`,
+        guardiansName: `${fatherName} ${lastName}`,
+        maritalStatus: Math.random() > 0.8 ? "Married" : "Single",
+        spouseName: Math.random() > 0.8 ? `Spouse ${lastName}` : "",
+        annualIncome: `${Math.floor(Math.random() * 300000 + 150000).toLocaleString()}`,
+        address: `Plot ${Math.floor(Math.random() * 500 + 100)}, Sector ${Math.floor(Math.random() * 20 + 1)}, ${districts[Math.floor(Math.random() * districts.length)]}`
+      });
+    }
+  });
+  
+  return candidates;
+};
 
-const mockCandidates = [
-  {
-    id: 1,
-    name: "Aadhya Sharma",
-    fatherName: "Ramesh Sharma",
-    mobile: "9876543210",
-    email: "aadhya@email.com",
-    district: "Mumbai",
-    status: "Pending Verification",
-    mobilizer: "Rajesh Kumar",
-    bloodGroup: "O+",
-    motherTongue: "Hindi",
-    religion: "Hindu",
-    community: "General",
-    motherName: "Sunita Sharma",
-    guardiansName: "Ramesh Sharma",
-    maritalStatus: "Single",
-    spouseName: "",
-    annualIncome: "2,50,000",
-    address: "Plot 123, Sector 15, Vashi, Mumbai"
-  },
-  {
-    id: 2,
-    name: "Bhavesh Patel",
-    fatherName: "Kiran Patel",
-    mobile: "9876543211",
-    email: "bhavesh@email.com",
-    district: "Mumbai",
-    status: "Pending Verification",
-    mobilizer: "Rajesh Kumar",
-    bloodGroup: "A+",
-    motherTongue: "Gujarati",
-    religion: "Hindu",
-    community: "OBC",
-    motherName: "Meera Patel",
-    guardiansName: "Kiran Patel",
-    maritalStatus: "Single",
-    spouseName: "",
-    annualIncome: "1,80,000",
-    address: "A-45, Andheri West, Mumbai"
-  }
-];
+const mockCandidates = generateCandidates();
 
 const candidateStatuses = [
   "Ready for Migration",
@@ -79,6 +84,14 @@ const candidateStatuses = [
   "Verification Failed"
 ];
 
+const initialMobilizers = [
+  { id: 1, name: "Rajesh Kumar", type: "Mobiliser Manager", district: "Mumbai", ofrCount: 45 },
+  { id: 2, name: "Priya Sharma", type: "CRP", district: "Mumbai", ofrCount: 32 },
+  { id: 3, name: "Amit Patel", type: "Mobiliser Manager", district: "Pune", ofrCount: 28 },
+  { id: 4, name: "Sneha Desai", type: "CRP", district: "Pune", ofrCount: 19 },
+  { id: 5, name: "Vikram Singh", type: "Mobiliser Manager", district: "Nagpur", ofrCount: 38 },
+];
+
 export default function OFRManagement() {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedMobilizer, setSelectedMobilizer] = useState("");
@@ -89,9 +102,11 @@ export default function OFRManagement() {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [counsellingNotes, setCounsellingNotes] = useState("");
   const [newStatus, setNewStatus] = useState("");
+  const [mobilizers, setMobilizers] = useState(initialMobilizers);
+  const [updatedCandidates, setUpdatedCandidates] = useState<any[]>([]);
   const { toast } = useToast();
 
-  const filteredMobilizers = mockMobilizers.filter(mobilizer => {
+  const filteredMobilizers = mobilizers.filter(mobilizer => {
     const matchesDistrict = !selectedDistrict || mobilizer.district === selectedDistrict;
     const matchesSearch = !searchTerm || 
       mobilizer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -100,7 +115,15 @@ export default function OFRManagement() {
   });
 
   const handlePullOFRs = (mobilizer: any) => {
-    const candidates = mockCandidates.filter(c => c.mobilizer === mobilizer.name);
+    // Get candidates for this mobilizer, applying any previous status updates
+    let candidates = mockCandidates.filter(c => c.mobilizer === mobilizer.name);
+    
+    // Apply any status updates that have been made
+    candidates = candidates.map(candidate => {
+      const updated = updatedCandidates.find(u => u.id === candidate.id);
+      return updated ? { ...candidate, status: updated.status, counsellingNotes: updated.counsellingNotes } : candidate;
+    });
+    
     setPulledCandidates(candidates);
     setShowCandidatesDialog(true);
     toast({
@@ -138,13 +161,36 @@ export default function OFRManagement() {
       return;
     }
 
-    // Update the candidate status
-    const updatedCandidates = pulledCandidates.map(c => 
+    // Update the candidate status in pulled candidates
+    const updatedPulledCandidates = pulledCandidates.map(c => 
       c.id === selectedCandidate.id 
         ? { ...c, status: newStatus, counsellingNotes }
         : c
     );
-    setPulledCandidates(updatedCandidates);
+    setPulledCandidates(updatedPulledCandidates);
+
+    // Store the updated candidate for persistence across pulls
+    const updatedCandidate = { id: selectedCandidate.id, status: newStatus, counsellingNotes };
+    setUpdatedCandidates(prev => {
+      const existing = prev.find(u => u.id === selectedCandidate.id);
+      if (existing) {
+        return prev.map(u => u.id === selectedCandidate.id ? updatedCandidate : u);
+      } else {
+        return [...prev, updatedCandidate];
+      }
+    });
+
+    // If status is "Ready for Migration", decrease the mobilizer's OFR count
+    if (newStatus === "Ready for Migration") {
+      const mobilizerName = selectedCandidate.mobilizer;
+      setMobilizers(prev => 
+        prev.map(m => 
+          m.name === mobilizerName 
+            ? { ...m, ofrCount: Math.max(0, m.ofrCount - 1) }
+            : m
+        )
+      );
+    }
 
     toast({
       title: "Status Updated",
