@@ -100,29 +100,6 @@ const MISDashboard = () => {
           </Card>)}
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Upload className="h-5 w-5" />
-            Quick Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button className="flex items-center gap-2" size="lg">
-              <Calendar className="h-4 w-4" />
-              Upload Daily Activities
-            </Button>
-            <Button variant="outline" className="flex items-center gap-2" size="lg">
-              <Users className="h-4 w-4" />
-              View Migration Queue
-            </Button>
-            
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Recent Activities & System Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activities */}
