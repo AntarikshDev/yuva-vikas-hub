@@ -4,15 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Users, CheckCircle, Clock, MapPin, Phone, Mail } from 'lucide-react';
+import { Users, CheckCircle, Clock, MapPin, Phone, Mail, Eye } from 'lucide-react';
 import { DataTable } from '@/components/common/DataTable';
+import { CandidateDetailsDialog } from '@/components/dialogs/CandidateDetailsDialog';
+import { BulkEnrollmentDialog } from '@/components/dialogs/BulkEnrollmentDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const ReadyForMigration = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Mock data for candidates ready for migration
-  const candidates = [
+  const [candidates, setCandidates] = useState([
     {
       id: 'CND2024001',
       name: 'Aarav Kumar',
@@ -55,13 +56,56 @@ const ReadyForMigration = () => {
       enrollmentStatus: 'Enrolled',
       travelDate: '2025-08-23'
     }
-  ];
+  ]);
+  const [selectedCandidate, setSelectedCandidate] = useState<any>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const statusCounts = {
     readyForMigration: candidates.filter(c => c.migrationStatus === 'Ready for Migration').length,
     migrated: candidates.filter(c => c.migrationStatus === 'Migrated' && c.enrollmentStatus === 'Pending').length,
     enrolled: candidates.filter(c => c.enrollmentStatus === 'Enrolled').length,
     total: candidates.length
+  };
+
+  const handleStatusUpdate = (candidateId: string, newMigrationStatus: string, newEnrollmentStatus: string) => {
+    setCandidates(prev => 
+      prev.map(candidate => 
+        candidate.id === candidateId 
+          ? { ...candidate, migrationStatus: newMigrationStatus, enrollmentStatus: newEnrollmentStatus }
+          : candidate
+      )
+    );
+  };
+
+  const handleBulkUpdate = (candidateIds: string[]) => {
+    setCandidates(prev => 
+      prev.map(candidate => 
+        candidateIds.includes(candidate.id)
+          ? { ...candidate, enrollmentStatus: 'Enrolled' }
+          : candidate
+      )
+    );
+  };
+
+  const handleViewDetails = (candidate: any) => {
+    setSelectedCandidate(candidate);
+    setDetailsDialogOpen(true);
+  };
+
+  const handleQuickEnrollment = (candidateId: string) => {
+    setCandidates(prev => 
+      prev.map(candidate => 
+        candidate.id === candidateId 
+          ? { ...candidate, enrollmentStatus: 'Enrolled' }
+          : candidate
+      )
+    );
+    toast({
+      title: "Status Updated",
+      description: "Candidate marked as enrolled successfully",
+    });
   };
 
   const columns = [
@@ -124,12 +168,17 @@ const ReadyForMigration = () => {
             {canUpdateToEnrolled && (
               <Button
                 size="sm"
-                onClick={() => handleStatusUpdate(item.id, 'Enrolled')}
+                onClick={() => handleQuickEnrollment(item.id)}
               >
                 Mark as Enrolled
               </Button>
             )}
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => handleViewDetails(item)}
+            >
+              <Eye className="h-4 w-4 mr-1" />
               View Details
             </Button>
           </div>
@@ -137,11 +186,6 @@ const ReadyForMigration = () => {
       },
     },
   ];
-
-  const handleStatusUpdate = (candidateId: string, newStatus: string) => {
-    console.log(`Updating candidate ${candidateId} to ${newStatus}`);
-    // Handle status update logic
-  };
 
   const filteredCandidates = candidates.filter(candidate => {
     const matchesSearch = 
@@ -259,7 +303,11 @@ const ReadyForMigration = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => setBulkDialogOpen(true)}
+            >
               <CheckCircle className="h-4 w-4" />
               Bulk Mark as Enrolled
             </Button>
@@ -306,6 +354,21 @@ const ReadyForMigration = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Dialogs */}
+      <CandidateDetailsDialog
+        open={detailsDialogOpen}
+        onClose={() => setDetailsDialogOpen(false)}
+        candidate={selectedCandidate}
+        onStatusUpdate={handleStatusUpdate}
+      />
+
+      <BulkEnrollmentDialog
+        open={bulkDialogOpen}
+        onClose={() => setBulkDialogOpen(false)}
+        candidates={candidates}
+        onBulkUpdate={handleBulkUpdate}
+      />
     </div>
   );
 };
