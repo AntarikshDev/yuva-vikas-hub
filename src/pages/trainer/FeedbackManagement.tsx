@@ -123,19 +123,19 @@ const FeedbackManagement = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <h1 className="text-3xl font-bold">Feedback & Counselling</h1>
-        <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Feedback & Counselling</h1>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           <Dialog>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Add Feedback
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add Candidate Feedback</DialogTitle>
               </DialogHeader>
@@ -156,7 +156,7 @@ const FeedbackManagement = () => {
                   </Select>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <Label>Behaviour Rating</Label>
                     {renderStarRating(rating, true)}
@@ -182,9 +182,9 @@ const FeedbackManagement = () => {
                   />
                 </div>
 
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline">Cancel</Button>
-                  <Button>Save Feedback</Button>
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                  <Button variant="outline" className="w-full sm:w-auto">Cancel</Button>
+                  <Button className="w-full sm:w-auto">Save Feedback</Button>
                 </div>
               </div>
             </DialogContent>
@@ -192,17 +192,18 @@ const FeedbackManagement = () => {
 
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <Phone className="h-4 w-4 mr-2" />
-                Record Parent Interaction
+                <span className="hidden sm:inline">Record Parent Interaction</span>
+                <span className="sm:hidden">Parent Contact</span>
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Record Parent Interaction</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="candidate">Select Candidate</Label>
                     <Select>
@@ -224,7 +225,7 @@ const FeedbackManagement = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="contact">Contact Number</Label>
                     <Input id="contact" placeholder="+91 XXXXX XXXXX" />
@@ -244,7 +245,7 @@ const FeedbackManagement = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="date">Interaction Date</Label>
                     <Input type="date" id="date" />
@@ -279,9 +280,9 @@ const FeedbackManagement = () => {
                   <Input id="followup" placeholder="Any follow-up required..." />
                 </div>
 
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline">Cancel</Button>
-                  <Button>Save Interaction</Button>
+                <div className="flex flex-col sm:flex-row justify-end gap-2">
+                  <Button variant="outline" className="w-full sm:w-auto">Cancel</Button>
+                  <Button className="w-full sm:w-auto">Save Interaction</Button>
                 </div>
               </div>
             </DialogContent>
@@ -290,175 +291,185 @@ const FeedbackManagement = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Feedbacks</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Feedbacks</CardTitle>
+            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{candidateFeedback.length}</div>
+            <div className="text-lg sm:text-2xl font-bold">{candidateFeedback.length}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Performance</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Avg Performance</CardTitle>
+            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4.0/5</div>
+            <div className="text-lg sm:text-2xl font-bold">4.0/5</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Parent Interactions</CardTitle>
-            <Phone className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">Parent Interactions</CardTitle>
+            <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{parentInteractions.length}</div>
+            <div className="text-lg sm:text-2xl font-bold">{parentInteractions.length}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-xs sm:text-sm font-medium">This Month</CardTitle>
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-lg sm:text-2xl font-bold">8</div>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="feedback" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="feedback">Candidate Feedback</TabsTrigger>
-          <TabsTrigger value="interactions">Parent Interactions</TabsTrigger>
+      <Tabs defaultValue="feedback" className="space-y-4 sm:space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="feedback" className="text-xs sm:text-sm">Candidate Feedback</TabsTrigger>
+          <TabsTrigger value="interactions" className="text-xs sm:text-sm">Parent Interactions</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="feedback" className="space-y-6">
+        <TabsContent value="feedback" className="space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Candidate Performance Feedback</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">Candidate Performance Feedback</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Candidate</TableHead>
-                    <TableHead>Attendance</TableHead>
-                    <TableHead>Behaviour</TableHead>
-                    <TableHead>Participation</TableHead>
-                    <TableHead>Skills</TableHead>
-                    <TableHead>Comments</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {candidateFeedback.map((candidate) => (
-                    <TableRow key={candidate.id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{candidate.candidateName}</div>
-                          <div className="text-sm text-muted-foreground">{candidate.candidateId}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className={candidate.attendance >= 80 ? "text-green-600" : "text-red-600"}>
-                          {candidate.attendance}%
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {renderStarRating(candidate.behaviourRating)}
-                          <span className={`text-sm ${getPerformanceColor(candidate.behaviourRating)}`}>
-                            {candidate.behaviourRating}/5
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {renderStarRating(candidate.participationRating)}
-                          <span className={`text-sm ${getPerformanceColor(candidate.participationRating)}`}>
-                            {candidate.participationRating}/5
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {renderStarRating(candidate.skillsRating)}
-                          <span className={`text-sm ${getPerformanceColor(candidate.skillsRating)}`}>
-                            {candidate.skillsRating}/5
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {candidate.comments}
-                      </TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="outline">
-                          Edit Feedback
-                        </Button>
-                      </TableCell>
+            <CardContent className="overflow-x-auto">
+              <div className="min-w-[800px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[150px]">Candidate</TableHead>
+                      <TableHead className="w-[100px]">Attendance</TableHead>
+                      <TableHead className="w-[120px]">Behaviour</TableHead>
+                      <TableHead className="w-[120px]">Participation</TableHead>
+                      <TableHead className="w-[120px]">Skills</TableHead>
+                      <TableHead className="w-[200px]">Comments</TableHead>
+                      <TableHead className="w-[100px]">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {candidateFeedback.map((candidate) => (
+                      <TableRow key={candidate.id}>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-sm">{candidate.candidateName}</div>
+                            <div className="text-xs text-muted-foreground">{candidate.candidateId}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className={candidate.attendance >= 80 ? "text-green-600" : "text-red-600"}>
+                            {candidate.attendance}%
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <div className="flex">{renderStarRating(candidate.behaviourRating)}</div>
+                            <span className={`text-xs sm:text-sm ${getPerformanceColor(candidate.behaviourRating)}`}>
+                              {candidate.behaviourRating}/5
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <div className="flex">{renderStarRating(candidate.participationRating)}</div>
+                            <span className={`text-xs sm:text-sm ${getPerformanceColor(candidate.participationRating)}`}>
+                              {candidate.participationRating}/5
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                            <div className="flex">{renderStarRating(candidate.skillsRating)}</div>
+                            <span className={`text-xs sm:text-sm ${getPerformanceColor(candidate.skillsRating)}`}>
+                              {candidate.skillsRating}/5
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[180px] text-xs sm:text-sm truncate" title={candidate.comments}>
+                            {candidate.comments}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button size="sm" variant="outline" className="text-xs">
+                            Edit
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="interactions" className="space-y-6">
+        <TabsContent value="interactions" className="space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Parent Interaction Records</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">Parent Interaction Records</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Candidate</TableHead>
-                    <TableHead>Parent Details</TableHead>
-                    <TableHead>Interaction</TableHead>
-                    <TableHead>Purpose</TableHead>
-                    <TableHead>Notes</TableHead>
-                    <TableHead>Follow-up</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {parentInteractions.map((interaction) => (
-                    <TableRow key={interaction.id}>
-                      <TableCell>
-                        <div className="font-medium">{interaction.candidateName}</div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{interaction.parentName}</div>
-                          <div className="text-sm text-muted-foreground">{interaction.contactNumber}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <Badge variant="outline">{interaction.interactionType}</Badge>
-                          <div className="text-sm text-muted-foreground mt-1">{interaction.interactionDate}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{interaction.purpose}</TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {interaction.notes}
-                      </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {interaction.followUp}
-                      </TableCell>
-                      <TableCell>
-                        <Button size="sm" variant="outline">
-                          View Details
-                        </Button>
-                      </TableCell>
+            <CardContent className="overflow-x-auto">
+              <div className="min-w-[900px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[120px]">Candidate</TableHead>
+                      <TableHead className="w-[150px]">Parent Details</TableHead>
+                      <TableHead className="w-[130px]">Interaction</TableHead>
+                      <TableHead className="w-[120px]">Purpose</TableHead>
+                      <TableHead className="w-[200px]">Notes</TableHead>
+                      <TableHead className="w-[150px]">Follow-up</TableHead>
+                      <TableHead className="w-[100px]">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {parentInteractions.map((interaction) => (
+                      <TableRow key={interaction.id}>
+                        <TableCell>
+                          <div className="font-medium text-sm">{interaction.candidateName}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium text-sm">{interaction.parentName}</div>
+                            <div className="text-xs text-muted-foreground">{interaction.contactNumber}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <Badge variant="outline" className="text-xs">{interaction.interactionType}</Badge>
+                            <div className="text-xs text-muted-foreground mt-1">{interaction.interactionDate}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">{interaction.purpose}</TableCell>
+                        <TableCell>
+                          <div className="max-w-[180px] text-xs sm:text-sm truncate" title={interaction.notes}>
+                            {interaction.notes}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="max-w-[130px] text-xs sm:text-sm truncate" title={interaction.followUp}>
+                            {interaction.followUp}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button size="sm" variant="outline" className="text-xs">
+                            View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
