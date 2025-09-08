@@ -234,7 +234,7 @@ const DailyActivityManagement = () => {
                     variant="outline" 
                     className="justify-start" 
                     onClick={() => handleFileUpload('attendance')}
-                    disabled={!selectedDate || !selectedSession || !selectedBatch || isUploading}
+                    disabled={isUploading}
                   >
                     {isUploading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -247,7 +247,7 @@ const DailyActivityManagement = () => {
                     variant="outline" 
                     className="justify-start"
                     onClick={() => handleFileUpload('curriculum')}
-                    disabled={!selectedDate || !selectedSession || !selectedBatch || isUploading}
+                    disabled={isUploading}
                   >
                     {isUploading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -260,7 +260,7 @@ const DailyActivityManagement = () => {
                     variant="outline" 
                     className="justify-start"
                     onClick={() => handleFileUpload('activities')}
-                    disabled={!selectedDate || !selectedSession || !selectedBatch || isUploading}
+                    disabled={isUploading}
                   >
                     {isUploading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />

@@ -89,6 +89,16 @@ export const FileUploadDialog: React.FC<FileUploadDialogProps> = ({
   const handleUpload = async () => {
     if (!selectedFile || !uploadType) return;
 
+    // Validate that all batch information is provided
+    if (!batchInfo.date || !batchInfo.session || !batchInfo.batch) {
+      toast({
+        title: "Missing Information",
+        description: "Please select date, session, and batch before uploading.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsUploading(true);
     try {
       await onFileUpload(selectedFile, uploadType);
@@ -145,15 +155,15 @@ export const FileUploadDialog: React.FC<FileUploadDialogProps> = ({
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
                   <Label className="text-muted-foreground">Date</Label>
-                  <p className="font-medium">{batchInfo.date}</p>
+                  <p className="font-medium">{batchInfo.date || 'Not selected'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Session</Label>
-                  <p className="font-medium">{batchInfo.session}</p>
+                  <p className="font-medium">{batchInfo.session || 'Not selected'}</p>
                 </div>
                 <div>
                   <Label className="text-muted-foreground">Batch</Label>
-                  <p className="font-medium">{batchInfo.batch}</p>
+                  <p className="font-medium">{batchInfo.batch || 'Not selected'}</p>
                 </div>
               </div>
             </CardContent>
