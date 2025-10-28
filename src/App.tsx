@@ -23,6 +23,7 @@ import QualityTracker from "./pages/admin/QualityTracker";
 import SosEscalationTracker from "./pages/admin/SosEscalationTracker";
 import DataExportHub from "./pages/admin/DataExportHub";
 import SystemSettings from "./pages/admin/SystemSettings";
+import AdminProfile from "./pages/admin/Profile";
 
 // State Head Routes
 import StateHeadDashboard from "./pages/state-head/Dashboard";
@@ -83,6 +84,7 @@ import MISDashboard from "./pages/mis/Dashboard";
 import DailyActivityManagement from "./pages/mis/DailyActivityManagement";
 import ReadyForMigration from "./pages/mis/ReadyForMigration";
 import CurriculumManagement from "./pages/mis/CurriculumManagement";
+import MISProfile from "./pages/mis/Profile";
 
 // Trainer Pages
 import TrainerDashboard from "./pages/trainer/Dashboard";
@@ -173,6 +175,7 @@ const App = () => {
             <Route path="/admin/sos" element={<SosEscalationTracker />} />
             <Route path="/admin/export" element={<DataExportHub />} />
             <Route path="/admin/settings" element={<SystemSettings />} />
+            <Route path="/admin/profile" element={<AdminProfile />} />
             
             {/* State Head Routes */}
             <Route path="/state-head/dashboard" element={<StateHeadDashboard />} />
@@ -253,6 +256,7 @@ const App = () => {
         <Route path="/mis/daily-activities" element={<MainLayout role="mis" title="Daily Activity Management"><DailyActivityManagement /></MainLayout>} />
         <Route path="/mis/ready-for-migration" element={<MainLayout role="mis" title="Ready for Migration"><ReadyForMigration /></MainLayout>} />
         <Route path="/mis/curriculum" element={<MainLayout role="mis" title="Curriculum Management"><CurriculumManagement /></MainLayout>} />
+        <Route path="/mis/profile" element={<MISProfile />} />
 
         {/* Company HR Routes */}
         <Route path="/company-hr/dashboard" element={<MainLayout role="company_hr" title="Dashboard"><CompanyHRDashboard /></MainLayout>} />

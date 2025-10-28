@@ -13,7 +13,7 @@ import {
   SidebarFooter,
   SidebarTrigger
 } from '@/components/ui/sidebar';
-import { Bell, Settings, Home, Map, Building, Users, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp, BookOpen, Video, MessageSquare, FileText, MapPin } from 'lucide-react';
+import { Bell, Settings, Home, Map, Building, Users, User, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp, BookOpen, Video, MessageSquare, FileText, MapPin } from 'lucide-react';
 import { NotificationCenter } from '@/components/common/NotificationCenter';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
@@ -335,6 +335,11 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             path: '/admin/settings', 
             icon: Settings 
           },
+          { 
+            name: 'Profile', 
+            path: '/admin/profile', 
+            icon: User 
+          },
         ]
       }
     ];
@@ -458,6 +463,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
           { name: 'Daily Activity Management', path: '/mis/daily-activities', icon: Calendar },
           { name: 'Ready for Migration', path: '/mis/ready-for-migration', icon: Users },
           { name: 'Curriculum Management', path: '/mis/curriculum', icon: BookOpen },
+          { name: 'Profile', path: '/mis/profile', icon: User },
         ]
       }
     ];
