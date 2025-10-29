@@ -184,6 +184,7 @@ function getPageTitle(path: string): string {
     'sos-tracker': 'SOS Tracker',
     'export-reports': 'Export Reports',
     'attendance': 'Attendance Module',
+    'mobilisation': 'Mobilisation Monitoring',
   };
   
   return titleMap[lastSegment] || 'Dashboard';
@@ -297,6 +298,11 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             name: 'Reports & Analytics', 
             path: '/admin/reports', 
             icon: BarChart 
+          },
+          { 
+            name: 'Mobilisation Monitoring', 
+            path: '/admin/mobilisation', 
+            icon: TrendingUp 
           },
           { 
             name: 'Video Log Manager', 

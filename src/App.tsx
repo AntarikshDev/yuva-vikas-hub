@@ -179,6 +179,7 @@ const App = () => {
             <Route path="/admin/export" element={<DataExportHub />} />
             <Route path="/admin/settings" element={<SystemSettings />} />
             <Route path="/admin/profile" element={<AdminProfile />} />
+            <Route path="/admin/mobilisation" element={<MobilisationMonitoring />} />
             
             {/* State Head Routes */}
             <Route path="/state-head/dashboard" element={<StateHeadDashboard />} />
@@ -193,8 +194,6 @@ const App = () => {
             <Route path="/state-head/sos-tracker" element={<SOSTracker />} />
             <Route path="/state-head/export-reports" element={<ExportReports />} />
             
-            {/* State Admin Routes */}
-            <Route path="/platform/mobilisation/state-monitoring" element={<MobilisationMonitoring />} />
             
             {/* Mobilizer App Routes */}
             <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />
