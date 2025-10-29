@@ -42,10 +42,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
   const handleReset = () => {
     const resetFilters = {
       dateRange: [null, null],
-      campaign: '',
+      campaign: 'all',
       targetType: 'mobilisations',
       geoLevel: 'state',
-      status: '',
+      status: 'all',
       searchQuery: '',
     };
     setLocalFilters(resetFilters);
@@ -90,7 +90,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 <SelectValue placeholder="All campaigns" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Campaigns</SelectItem>
+                <SelectItem value="all">All Campaigns</SelectItem>
                 <SelectItem value="campaign1">Campaign 1</SelectItem>
                 <SelectItem value="campaign2">Campaign 2</SelectItem>
               </SelectContent>
@@ -128,7 +128,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="on-track">On Track</SelectItem>
                 <SelectItem value="at-risk">At Risk</SelectItem>
                 <SelectItem value="off-track">Off Track</SelectItem>

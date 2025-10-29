@@ -106,10 +106,10 @@ const initialState: MobilisationState = {
   },
   filters: {
     dateRange: [null, null],
-    campaign: '',
+    campaign: 'all',
     targetType: 'mobilisations',
     geoLevel: 'state',
-    status: '',
+    status: 'all',
     searchQuery: '',
   },
   isLoading: false,
