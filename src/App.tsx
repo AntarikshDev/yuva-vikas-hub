@@ -38,6 +38,9 @@ import SOSTracker from "./pages/state-head/SOSTracker";
 import ExportReports from "./pages/state-head/ExportReports";
 import Attendance from "./pages/state-head/Attendance";
 
+// State Admin Routes
+import MobilisationMonitoring from "./pages/state-admin/MobilisationMonitoring";
+
 // Mobilizer App Routes
 import MobilizerNewCandidate from "./pages/mobilizer/NewCandidate";
 
@@ -189,6 +192,9 @@ const App = () => {
             <Route path="/state-head/batch-tracker" element={<BatchTracker />} />
             <Route path="/state-head/sos-tracker" element={<SOSTracker />} />
             <Route path="/state-head/export-reports" element={<ExportReports />} />
+            
+            {/* State Admin Routes */}
+            <Route path="/platform/mobilisation/state-monitoring" element={<MobilisationMonitoring />} />
             
             {/* Mobilizer App Routes */}
             <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />
