@@ -4,10 +4,10 @@ import { AppDispatch } from '@/store';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import {
   fetchStateKPIs,
-  fetchDistricts,
+  fetchClusters,
   fetchAlerts,
   setFilters,
-  setSelectedDistrict,
+  setSelectedCluster,
 } from '@/store/slices/mobilisationSlice';
 import { KPIRow } from '@/components/mobilisation/KPIRow';
 import { DistrictTable } from '@/components/mobilisation/DistrictTable';
@@ -29,8 +29,8 @@ export default function MobilisationMonitoring() {
   const dispatch = useDispatch<AppDispatch>();
   const {
     stateKPIs,
-    districts,
-    selectedDistrict,
+    clusters,
+    selectedCluster,
     filters,
     isLoading,
   } = useAppSelector((state) => state.mobilisation);
@@ -41,7 +41,7 @@ export default function MobilisationMonitoring() {
 
   useEffect(() => {
     dispatch(fetchStateKPIs(filters));
-    dispatch(fetchDistricts(filters));
+    dispatch(fetchClusters(filters));
     dispatch(fetchAlerts());
   }, [dispatch, filters]);
 
@@ -126,19 +126,19 @@ export default function MobilisationMonitoring() {
 
         {/* Main Content - Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          {/* Left: District Table */}
+          {/* Left: Cluster Table */}
           <div className="lg:col-span-2">
             <DistrictTable
-              districts={districts}
+              clusters={clusters}
               isLoading={isLoading}
-              onDistrictSelect={(district) => dispatch(setSelectedDistrict(district))}
-              selectedDistrictId={selectedDistrict?.id}
+              onClusterSelect={(cluster) => dispatch(setSelectedCluster(cluster))}
+              selectedClusterId={selectedCluster?.id}
             />
           </div>
 
           {/* Right: Detail Panel */}
           <div className="lg:col-span-1">
-            <DetailPanel district={selectedDistrict} />
+            <DetailPanel cluster={selectedCluster} />
           </div>
         </div>
       </main>

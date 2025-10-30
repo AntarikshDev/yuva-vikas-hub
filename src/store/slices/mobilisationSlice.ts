@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 // Types
-export interface District {
+export interface Cluster {
   id: string;
   name: string;
+  districts: string[]; // Array of district names in this cluster
   managersCount: number;
   assignedTarget: number;
   achieved: number;
@@ -16,11 +17,14 @@ export interface District {
 export interface Manager {
   id: string;
   name: string;
-  districtId: string;
+  clusterId: string;
+  districts: string[]; // Districts managed by this manager
   target: number;
   achieved: number;
   percentAchieved: number;
   mobilisersCount: number;
+  contactNumber?: string;
+  email?: string;
 }
 
 export interface Mobiliser {
@@ -38,7 +42,7 @@ export interface Alert {
   severity: 'info' | 'warning' | 'critical';
   title: string;
   description: string;
-  entityType: 'district' | 'manager' | 'mobiliser';
+  entityType: 'cluster' | 'manager' | 'mobiliser';
   entityId: string;
   timestamp: string;
   acknowledged: boolean;
@@ -48,7 +52,7 @@ export interface StateKPIs {
   stateTarget: number;
   achieved: number;
   percentAchieved: number;
-  activeDistricts: number;
+  activeClusters: number;
   onTrackPercentage: number;
   mobilisations: number;
   counselling: number;
@@ -68,8 +72,8 @@ export interface TargetAssignment {
 
 interface MobilisationState {
   stateKPIs: StateKPIs | null;
-  districts: District[];
-  selectedDistrict: District | null;
+  clusters: Cluster[];
+  selectedCluster: Cluster | null;
   managers: Manager[];
   mobilisers: Mobiliser[];
   alerts: Alert[];
@@ -93,8 +97,8 @@ interface MobilisationState {
 
 const initialState: MobilisationState = {
   stateKPIs: null,
-  districts: [],
-  selectedDistrict: null,
+  clusters: [],
+  selectedCluster: null,
   managers: [],
   mobilisers: [],
   alerts: [],
@@ -132,7 +136,7 @@ export const fetchStateKPIs = createAsyncThunk(
           stateTarget: 10000,
           achieved: 7543,
           percentAchieved: 75.43,
-          activeDistricts: 12,
+          activeClusters: 12,
           onTrackPercentage: 83.3,
           mobilisations: 7543,
           counselling: 6234,
@@ -146,7 +150,7 @@ export const fetchStateKPIs = createAsyncThunk(
         stateTarget: 10000,
         achieved: 7543,
         percentAchieved: 75.43,
-        activeDistricts: 12,
+        activeClusters: 12,
         onTrackPercentage: 83.3,
         mobilisations: 7543,
         counselling: 6234,
@@ -156,20 +160,21 @@ export const fetchStateKPIs = createAsyncThunk(
   }
 );
 
-export const fetchDistricts = createAsyncThunk(
-  'mobilisation/fetchDistricts',
+export const fetchClusters = createAsyncThunk(
+  'mobilisation/fetchClusters',
   async (filters: any, { rejectWithValue }) => {
     try {
-      const response = await fetch('/api/mobilisation/districts', {
+      const response = await fetch('/api/mobilisation/clusters', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(filters),
       });
       if (!response.ok) {
-        // Return mock districts for development
+        // Return mock clusters for development
         return Array.from({ length: 12 }, (_, i) => ({
-          id: `district-${i + 1}`,
-          name: `District ${i + 1}`,
+          id: `cluster-${i + 1}`,
+          name: `Cluster ${i + 1}`,
+          districts: [`District ${i * 2 + 1}`, `District ${i * 2 + 2}`],
           managersCount: Math.floor(Math.random() * 10) + 5,
           assignedTarget: Math.floor(Math.random() * 1000) + 500,
           achieved: Math.floor(Math.random() * 800) + 300,
@@ -181,10 +186,11 @@ export const fetchDistricts = createAsyncThunk(
       }
       return await response.json();
     } catch (error: any) {
-      // Return mock districts on error
+      // Return mock clusters on error
       return Array.from({ length: 12 }, (_, i) => ({
-        id: `district-${i + 1}`,
-        name: `District ${i + 1}`,
+        id: `cluster-${i + 1}`,
+        name: `Cluster ${i + 1}`,
+        districts: [`District ${i * 2 + 1}`, `District ${i * 2 + 2}`],
         managersCount: Math.floor(Math.random() * 10) + 5,
         assignedTarget: Math.floor(Math.random() * 1000) + 500,
         achieved: Math.floor(Math.random() * 800) + 300,
@@ -197,15 +203,49 @@ export const fetchDistricts = createAsyncThunk(
   }
 );
 
-export const fetchDistrictDetails = createAsyncThunk(
-  'mobilisation/fetchDistrictDetails',
-  async (districtId: string, { rejectWithValue }) => {
+export const fetchClusterDetails = createAsyncThunk(
+  'mobilisation/fetchClusterDetails',
+  async (clusterId: string, { rejectWithValue }) => {
     try {
-      const response = await fetch(`/api/mobilisation/districts/${districtId}`);
-      if (!response.ok) throw new Error('Failed to fetch district details');
+      const response = await fetch(`/api/mobilisation/clusters/${clusterId}`);
+      if (!response.ok) {
+        // Return mock data for development
+        return {
+          managers: Array.from({ length: 5 }, (_, i) => ({
+            id: `mgr-${i + 1}`,
+            name: `Manager ${i + 1}`,
+            clusterId,
+            districts: [`District ${i + 1}`, `District ${i + 2}`],
+            target: Math.floor(Math.random() * 500) + 200,
+            achieved: Math.floor(Math.random() * 400) + 150,
+            percentAchieved: Math.random() * 100,
+            mobilisersCount: Math.floor(Math.random() * 8) + 3,
+            contactNumber: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+            email: `manager${i + 1}@example.com`,
+          })),
+          mobilisers: [],
+          auditTrail: [],
+        };
+      }
       return await response.json();
     } catch (error: any) {
-      return rejectWithValue(error.message);
+      // Return mock data on error
+      return {
+        managers: Array.from({ length: 5 }, (_, i) => ({
+          id: `mgr-${i + 1}`,
+          name: `Manager ${i + 1}`,
+          clusterId,
+          districts: [`District ${i + 1}`, `District ${i + 2}`],
+          target: Math.floor(Math.random() * 500) + 200,
+          achieved: Math.floor(Math.random() * 400) + 150,
+          percentAchieved: Math.random() * 100,
+          mobilisersCount: Math.floor(Math.random() * 8) + 3,
+          contactNumber: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+          email: `manager${i + 1}@example.com`,
+        })),
+        mobilisers: [],
+        auditTrail: [],
+      };
     }
   }
 );
@@ -222,9 +262,9 @@ export const fetchAlerts = createAsyncThunk(
             id: 'alert-1',
             severity: 'critical' as const,
             title: 'Low Achievement Rate',
-            description: 'District 3 is at 45% achievement, below 50% threshold',
-            entityType: 'district' as const,
-            entityId: 'district-3',
+            description: 'Cluster 3 is at 45% achievement, below 50% threshold',
+            entityType: 'cluster' as const,
+            entityId: 'cluster-3',
             timestamp: new Date().toISOString(),
             acknowledged: false,
           },
@@ -248,9 +288,9 @@ export const fetchAlerts = createAsyncThunk(
           id: 'alert-1',
           severity: 'critical' as const,
           title: 'Low Achievement Rate',
-          description: 'District 3 is at 45% achievement, below 50% threshold',
-          entityType: 'district' as const,
-          entityId: 'district-3',
+          description: 'Cluster 3 is at 45% achievement, below 50% threshold',
+          entityType: 'cluster' as const,
+          entityId: 'cluster-3',
           timestamp: new Date().toISOString(),
           acknowledged: false,
         },
@@ -309,8 +349,8 @@ const mobilisationSlice = createSlice({
     setFilters: (state, action: PayloadAction<Partial<MobilisationState['filters']>>) => {
       state.filters = { ...state.filters, ...action.payload };
     },
-    setSelectedDistrict: (state, action: PayloadAction<District | null>) => {
-      state.selectedDistrict = action.payload;
+    setSelectedCluster: (state, action: PayloadAction<Cluster | null>) => {
+      state.selectedCluster = action.payload;
     },
     clearError: (state) => {
       state.error = null;
@@ -330,12 +370,12 @@ const mobilisationSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
-      // Districts
-      .addCase(fetchDistricts.fulfilled, (state, action) => {
-        state.districts = action.payload;
+      // Clusters
+      .addCase(fetchClusters.fulfilled, (state, action) => {
+        state.clusters = action.payload;
       })
-      // District details
-      .addCase(fetchDistrictDetails.fulfilled, (state, action) => {
+      // Cluster details
+      .addCase(fetchClusterDetails.fulfilled, (state, action) => {
         state.managers = action.payload.managers || [];
         state.mobilisers = action.payload.mobilisers || [];
         state.auditTrail = action.payload.auditTrail || [];
@@ -355,5 +395,5 @@ const mobilisationSlice = createSlice({
   },
 });
 
-export const { setFilters, setSelectedDistrict, clearError } = mobilisationSlice.actions;
+export const { setFilters, setSelectedCluster, clearError } = mobilisationSlice.actions;
 export default mobilisationSlice.reducer;

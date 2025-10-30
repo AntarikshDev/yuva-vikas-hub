@@ -70,7 +70,7 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({ className }) => {
         {/* Conversion Funnel */}
         <Card>
           <CardHeader>
-            <CardTitle>Conversion Funnel</CardTitle>
+            <CardTitle>Conversion Funnel (Monthly)</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>

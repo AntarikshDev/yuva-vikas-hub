@@ -6,9 +6,9 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,9 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { toast } from 'sonner';
+import { DateRange } from 'react-day-picker';
+import { format } from 'date-fns';
 
 interface TargetAssignmentDialogProps {
   open: boolean;
@@ -34,165 +37,164 @@ export const TargetAssignmentDialog: React.FC<TargetAssignmentDialogProps> = ({
   onOpenChange,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    targetType: 'mobilisations',
-    totalValue: '',
-    period: '',
-    allocationMethod: 'equal',
-    cascadeToManagers: false,
-    notifyRecipients: true,
-    notes: '',
-  });
+  const [targetType, setTargetType] = useState('mobilisations');
+  const [totalValue, setTotalValue] = useState('');
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [allocationMethod, setAllocationMethod] = useState('equal');
+  const [cascadeToManagers, setCascadeToManagers] = useState(true);
+  const [notifyAssignees, setNotifyAssignees] = useState(true);
+  const [notes, setNotes] = useState('');
 
   const handleSubmit = async () => {
+    if (!totalValue || !dateRange?.from || !dateRange?.to) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
     try {
       await dispatch(
         assignTargets({
-          ...formData,
-          totalValue: parseInt(formData.totalValue),
+          targetType,
+          totalValue: parseInt(totalValue),
+          period: {
+            from: format(dateRange.from, 'yyyy-MM-dd'),
+            to: format(dateRange.to, 'yyyy-MM-dd'),
+            duration: `${Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))} days`
+          },
+          allocationMethod,
+          cascadeToManagers,
+          notifyAssignees,
+          notes,
         })
       ).unwrap();
 
-      toast({
-        title: 'Targets Assigned',
-        description: 'Target assignments have been created successfully.',
-      });
-
+      toast.success('Targets assigned successfully');
       onOpenChange(false);
+      
+      // Reset form
+      setTotalValue('');
+      setDateRange(undefined);
+      setNotes('');
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to assign targets. Please try again.',
-        variant: 'destructive',
-      });
+      toast.error('Failed to assign targets');
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Assign State Targets</DialogTitle>
           <DialogDescription>
-            Create and allocate targets to districts and managers
+            Set targets for clusters and cascade them down to managers and mobilisers
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="targetType">Target Type</Label>
-              <Select
-                value={formData.targetType}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, targetType: value })
-                }
-              >
-                <SelectTrigger id="targetType">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="mobilisations">Mobilisations</SelectItem>
-                  <SelectItem value="enrollments">Enrollments</SelectItem>
-                  <SelectItem value="placements">Placements</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="totalValue">Total Target Value</Label>
-              <Input
-                id="totalValue"
-                type="number"
-                placeholder="50000"
-                value={formData.totalValue}
-                onChange={(e) =>
-                  setFormData({ ...formData, totalValue: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
+        <div className="space-y-6 py-4">
+          {/* Target Type */}
           <div className="space-y-2">
-            <Label htmlFor="period">Period</Label>
-            <Input
-              id="period"
-              placeholder="e.g., January 2025"
-              value={formData.period}
-              onChange={(e) =>
-                setFormData({ ...formData, period: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="allocationMethod">Allocation Method</Label>
-            <Select
-              value={formData.allocationMethod}
-              onValueChange={(value) =>
-                setFormData({ ...formData, allocationMethod: value })
-              }
-            >
-              <SelectTrigger id="allocationMethod">
+            <Label htmlFor="targetType">Target Type</Label>
+            <Select value={targetType} onValueChange={setTargetType}>
+              <SelectTrigger id="targetType">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="equal">Equal Split</SelectItem>
-                <SelectItem value="population">Weighted by Population</SelectItem>
-                <SelectItem value="historical">
-                  Weighted by Historical Achievement
-                </SelectItem>
-                <SelectItem value="manual">Manual Allocation</SelectItem>
+                <SelectItem value="mobilisations">Mobilisations</SelectItem>
+                <SelectItem value="counselling">Counselling Sessions</SelectItem>
+                <SelectItem value="enrollments">Enrollments</SelectItem>
+                <SelectItem value="placements">Placements</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
+          {/* Total Value */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes / Justification</Label>
-            <Textarea
-              id="notes"
-              placeholder="Provide context or justification for this target assignment..."
-              value={formData.notes}
-              onChange={(e) =>
-                setFormData({ ...formData, notes: e.target.value })
-              }
-              rows={3}
+            <Label htmlFor="totalValue">Total Target Value</Label>
+            <Input
+              id="totalValue"
+              type="number"
+              placeholder="Enter total target value"
+              value={totalValue}
+              onChange={(e) => setTotalValue(e.target.value)}
             />
           </div>
 
-          <div className="space-y-3">
+          {/* Period with Date Range Picker */}
+          <div className="space-y-2">
+            <Label>Target Period</Label>
+            <DateRangePicker
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              placeholder="Select date range"
+            />
+            {dateRange?.from && dateRange?.to && (
+              <p className="text-sm text-muted-foreground">
+                Duration: {Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24))} days
+              </p>
+            )}
+          </div>
+
+          {/* Allocation Method */}
+          <div className="space-y-2">
+            <Label htmlFor="allocationMethod">Allocation Method</Label>
+            <Select value={allocationMethod} onValueChange={setAllocationMethod}>
+              <SelectTrigger id="allocationMethod">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="equal">Equal Distribution</SelectItem>
+                <SelectItem value="weighted">Weighted by Past Performance</SelectItem>
+                <SelectItem value="capacity">Based on Team Capacity</SelectItem>
+                <SelectItem value="manual">Manual Assignment</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Options */}
+          <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="cascade"
-                checked={formData.cascadeToManagers}
+                checked={cascadeToManagers}
                 onCheckedChange={(checked) =>
-                  setFormData({
-                    ...formData,
-                    cascadeToManagers: checked as boolean,
-                  })
+                  setCascadeToManagers(checked as boolean)
                 }
               />
-              <Label htmlFor="cascade" className="cursor-pointer">
-                Auto-cascade to managers and mobilisers
+              <Label
+                htmlFor="cascade"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Automatically cascade to managers and mobilisers
               </Label>
             </div>
 
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="notify"
-                checked={formData.notifyRecipients}
+                checked={notifyAssignees}
                 onCheckedChange={(checked) =>
-                  setFormData({
-                    ...formData,
-                    notifyRecipients: checked as boolean,
-                  })
+                  setNotifyAssignees(checked as boolean)
                 }
               />
-              <Label htmlFor="notify" className="cursor-pointer">
-                Send notifications to recipients
+              <Label
+                htmlFor="notify"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Send notification to all assignees
               </Label>
             </div>
+          </div>
+
+          {/* Notes */}
+          <div className="space-y-2">
+            <Label htmlFor="notes">Additional Notes</Label>
+            <Textarea
+              id="notes"
+              placeholder="Add any additional instructions or context..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+            />
           </div>
         </div>
 

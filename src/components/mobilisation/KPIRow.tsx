@@ -42,8 +42,8 @@ export const KPIRow: React.FC<KPIRowProps> = ({ kpis, isLoading }) => {
       progress: kpis.percentAchieved,
     },
     {
-      label: 'Active Districts',
-      value: kpis.activeDistricts.toString(),
+      label: 'Active Clusters',
+      value: kpis.activeClusters.toString(),
       subtitle: `${kpis.onTrackPercentage}% On Track`,
       icon: Users,
       color: 'text-blue-600',

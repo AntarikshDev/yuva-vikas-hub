@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
-import { District, fetchDistrictDetails } from '@/store/slices/mobilisationSlice';
+import { Cluster, fetchClusterDetails } from '@/store/slices/mobilisationSlice';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,26 +11,26 @@ import { AuditTrail } from './AuditTrail';
 import { TrendingUp, Users, Target } from 'lucide-react';
 
 interface DetailPanelProps {
-  district: District | null;
+  cluster: Cluster | null;
 }
 
-export const DetailPanel: React.FC<DetailPanelProps> = ({ district }) => {
+export const DetailPanel: React.FC<DetailPanelProps> = ({ cluster }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { managers, alerts, auditTrail } = useAppSelector(
     (state) => state.mobilisation
   );
 
   useEffect(() => {
-    if (district?.id) {
-      dispatch(fetchDistrictDetails(district.id));
+    if (cluster?.id) {
+      dispatch(fetchClusterDetails(cluster.id));
     }
-  }, [district?.id, dispatch]);
+  }, [cluster?.id, dispatch]);
 
-  if (!district) {
+  if (!cluster) {
     return (
       <Card>
         <CardContent className="p-6 text-center text-muted-foreground">
-          Select a district to view details
+          Select a cluster to view details
         </CardContent>
       </Card>
     );
@@ -39,7 +39,10 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ district }) => {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>{district.name} - Details</CardTitle>
+        <CardTitle>{cluster.name} - Details</CardTitle>
+        <p className="text-sm text-muted-foreground mt-1">
+          Districts: {cluster.districts.join(', ')}
+        </p>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="overview" className="w-full">
@@ -59,7 +62,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ district }) => {
                     <span className="text-sm text-muted-foreground">Target</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {district.assignedTarget.toLocaleString()}
+                    {cluster.assignedTarget.toLocaleString()}
                   </p>
                 </CardContent>
               </Card>
@@ -71,7 +74,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ district }) => {
                     <span className="text-sm text-muted-foreground">Achieved</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {district.achieved.toLocaleString()}
+                    {cluster.achieved.toLocaleString()}
                   </p>
                 </CardContent>
               </Card>
@@ -82,7 +85,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ district }) => {
                     <Users className="w-4 h-4 text-blue-600" />
                     <span className="text-sm text-muted-foreground">Managers</span>
                   </div>
-                  <p className="text-2xl font-bold">{district.managersCount}</p>
+                  <p className="text-2xl font-bold">{cluster.managersCount}</p>
                 </CardContent>
               </Card>
 
@@ -92,7 +95,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ district }) => {
                     <span className="text-sm text-muted-foreground">Avg Score</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {district.avgMobiliserScore.toFixed(1)}
+                    {cluster.avgMobiliserScore.toFixed(1)}
                   </p>
                 </CardContent>
               </Card>
@@ -104,7 +107,7 @@ export const DetailPanel: React.FC<DetailPanelProps> = ({ district }) => {
           </TabsContent>
 
           <TabsContent value="alerts">
-            <AlertsPanel alerts={alerts.filter(a => a.entityId === district.id)} />
+            <AlertsPanel alerts={alerts.filter(a => a.entityId === cluster.id)} />
           </TabsContent>
 
           <TabsContent value="audit">

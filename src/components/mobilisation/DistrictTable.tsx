@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { District } from '@/store/slices/mobilisationSlice';
+import { Cluster } from '@/store/slices/mobilisationSlice';
 import {
   Table,
   TableBody,
@@ -17,29 +17,29 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface DistrictTableProps {
-  districts: District[];
+  clusters: Cluster[];
   isLoading: boolean;
-  onDistrictSelect: (district: District) => void;
-  selectedDistrictId?: string;
+  onClusterSelect: (cluster: Cluster) => void;
+  selectedClusterId?: string;
 }
 
 export const DistrictTable: React.FC<DistrictTableProps> = ({
-  districts,
+  clusters,
   isLoading,
-  onDistrictSelect,
-  selectedDistrictId,
+  onClusterSelect,
+  selectedClusterId,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof District;
+    key: keyof Cluster;
     direction: 'asc' | 'desc';
   }>({ key: 'rank', direction: 'asc' });
 
-  const filteredDistricts = districts.filter((d) =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredClusters = clusters.filter((c) =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const sortedDistricts = [...filteredDistricts].sort((a, b) => {
+  const sortedClusters = [...filteredClusters].sort((a, b) => {
     const aVal = a[sortConfig.key];
     const bVal = b[sortConfig.key];
     if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -47,7 +47,7 @@ export const DistrictTable: React.FC<DistrictTableProps> = ({
     return 0;
   });
 
-  const handleSort = (key: keyof District) => {
+  const handleSort = (key: keyof Cluster) => {
     setSortConfig({
       key,
       direction:
@@ -78,12 +78,12 @@ export const DistrictTable: React.FC<DistrictTableProps> = ({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>District Performance</CardTitle>
+          <CardTitle>Cluster Performance</CardTitle>
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search districts..."
+                placeholder="Search clusters..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-9 w-64"
@@ -107,7 +107,7 @@ export const DistrictTable: React.FC<DistrictTableProps> = ({
                   className="cursor-pointer"
                   onClick={() => handleSort('name')}
                 >
-                  District
+                  Cluster
                 </TableHead>
                 <TableHead>Managers</TableHead>
                 <TableHead
@@ -133,34 +133,34 @@ export const DistrictTable: React.FC<DistrictTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedDistricts.map((district) => (
+              {sortedClusters.map((cluster) => (
                 <TableRow
-                  key={district.id}
+                  key={cluster.id}
                   className={`cursor-pointer ${
-                    selectedDistrictId === district.id ? 'bg-muted' : ''
+                    selectedClusterId === cluster.id ? 'bg-muted' : ''
                   }`}
-                  onClick={() => onDistrictSelect(district)}
+                  onClick={() => onClusterSelect(cluster)}
                 >
                   <TableCell className="font-medium">
-                    #{district.rank}
+                    #{cluster.rank}
                   </TableCell>
                   <TableCell className="font-medium">
-                    {district.name}
+                    {cluster.name}
                   </TableCell>
-                  <TableCell>{district.managersCount}</TableCell>
-                  <TableCell>{district.assignedTarget.toLocaleString()}</TableCell>
-                  <TableCell>{district.achieved.toLocaleString()}</TableCell>
+                  <TableCell>{cluster.managersCount}</TableCell>
+                  <TableCell>{cluster.assignedTarget.toLocaleString()}</TableCell>
+                  <TableCell>{cluster.achieved.toLocaleString()}</TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-medium">
-                          {district.percentAchieved}%
+                          {cluster.percentAchieved.toFixed(2)}%
                         </span>
                       </div>
-                      <Progress value={district.percentAchieved} className="h-2" />
+                      <Progress value={cluster.percentAchieved} className="h-2" />
                     </div>
                   </TableCell>
-                  <TableCell>{getStatusBadge(district.percentAchieved)}</TableCell>
+                  <TableCell>{getStatusBadge(cluster.percentAchieved)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
                       <Button
@@ -168,7 +168,8 @@ export const DistrictTable: React.FC<DistrictTableProps> = ({
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('Export district:', district.id);
+                          // Export cluster data
+                          console.log('Export cluster:', cluster.id);
                         }}
                       >
                         <Download className="w-4 h-4" />
@@ -178,7 +179,8 @@ export const DistrictTable: React.FC<DistrictTableProps> = ({
                         size="icon"
                         onClick={(e) => {
                           e.stopPropagation();
-                          console.log('Assign target:', district.id);
+                          // Assign target to cluster
+                          console.log('Assign target to cluster:', cluster.id);
                         }}
                       >
                         <Target className="w-4 h-4" />
