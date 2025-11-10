@@ -15,6 +15,11 @@ const Index = () => {
 
   const userRoles = [
     {
+      value: "director",
+      label: "Director (Super Admin)",
+      path: "/director/dashboard",
+    },
+    {
       value: "admin",
       label: "Admin",
       path: "/admin/dashboard",

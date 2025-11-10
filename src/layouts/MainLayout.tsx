@@ -38,7 +38,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
   role: 'admin' | 'state_head' | 'center_manager' | 'mobilizer' | 
          'candidate' | 'ppc_team' | 'company_hr' | 'mobilization_manager' | 
-         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis' | 'ppc_admin' | 'poc';
+         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis' | 'ppc_admin' | 'poc' | 'director';
   title?: string; // Optional title override
 }
 
@@ -185,6 +185,12 @@ function getPageTitle(path: string): string {
     'export-reports': 'Export Reports',
     'attendance': 'Attendance Module',
     'mobilisation': 'Mobilisation Monitoring',
+    'mobilisation-monitoring': 'National Mobilisation Monitoring',
+    'state-performance': 'State Performance Analysis',
+    'program-health': 'Program Health Overview',
+    'targets': 'Target Assignment',
+    'national-heads': 'National Heads Management',
+    'compliance': 'Compliance & Alerts',
   };
   
   return titleMap[lastSegment] || 'Dashboard';
@@ -418,6 +424,36 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             path: '/state-head/export-reports', 
             icon: FileOutput 
           },
+        ]
+      }
+    ];
+  }
+  
+  if (role === 'director') {
+    return [
+      {
+        label: 'National Overview',
+        items: [
+          { name: 'Dashboard', path: '/director/dashboard', icon: Home },
+          { name: 'Mobilisation Monitoring', path: '/director/mobilisation-monitoring', icon: TrendingUp },
+          { name: 'State Performance', path: '/director/state-performance', icon: Map },
+          { name: 'Program Health', path: '/director/program-health', icon: ({ className }) => <span className={className || ''}>🎯</span> },
+        ]
+      },
+      {
+        label: 'Management',
+        items: [
+          { name: 'Target Assignment', path: '/director/targets', icon: ({ className }) => <span className={className || ''}>🎯</span> },
+          { name: 'National Heads', path: '/director/national-heads', icon: Users },
+          { name: 'Compliance & Alerts', path: '/director/compliance', icon: AlertCircle },
+          { name: 'Reports & Analytics', path: '/director/reports', icon: BarChart },
+        ]
+      },
+      {
+        label: 'Settings',
+        items: [
+          { name: 'Profile', path: '/director/profile', icon: User },
+          { name: 'System Settings', path: '/director/settings', icon: Settings },
         ]
       }
     ];
