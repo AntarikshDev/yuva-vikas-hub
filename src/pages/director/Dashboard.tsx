@@ -23,6 +23,7 @@ import { Download, Bell } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { ExportDialog } from '@/components/director/ExportDialog';
 import { KPIAlertDialog } from '@/components/director/KPIAlertDialog';
+import { DateRange } from 'react-day-picker';
 
 const DirectorDashboard = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -52,8 +53,8 @@ const DirectorDashboard = () => {
           
           <div className="flex flex-wrap gap-3">
             <DateRangePicker
-              value={filters.dateRange}
-              onChange={(range) => dispatch(setFilters({ dateRange: range }))}
+              dateRange={filters.dateRange[0] && filters.dateRange[1] ? { from: new Date(filters.dateRange[0]), to: new Date(filters.dateRange[1]) } : undefined}
+              onDateRangeChange={(range) => dispatch(setFilters({ dateRange: [range?.from?.toISOString() || null, range?.to?.toISOString() || null] }))}
             />
             
             <Select value={filters.state} onValueChange={(value) => dispatch(setFilters({ state: value }))}>

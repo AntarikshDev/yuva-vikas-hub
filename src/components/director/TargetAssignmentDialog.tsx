@@ -12,6 +12,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
 import { assignNationalTargets } from '@/store/slices/directorSlice';
 import { format, differenceInDays } from 'date-fns';
+import { DateRange } from 'react-day-picker';
 
 interface TargetAssignmentDialogProps {
   open: boolean;
@@ -24,14 +25,14 @@ export const TargetAssignmentDialog: React.FC<TargetAssignmentDialogProps> = ({ 
 
   const [targetType, setTargetType] = useState('');
   const [totalValue, setTotalValue] = useState('');
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [allocationMethod, setAllocationMethod] = useState('');
   const [cascadeToManagers, setCascadeToManagers] = useState(false);
   const [notifyAssignees, setNotifyAssignees] = useState(true);
   const [notes, setNotes] = useState('');
 
   const handleSubmit = async () => {
-    if (!targetType || !totalValue || !dateRange[0] || !dateRange[1] || !allocationMethod) {
+    if (!targetType || !totalValue || !dateRange?.from || !dateRange?.to || !allocationMethod) {
       toast({
         title: 'Validation Error',
         description: 'Please fill in all required fields',
@@ -44,8 +45,8 @@ export const TargetAssignmentDialog: React.FC<TargetAssignmentDialogProps> = ({ 
       await dispatch(assignNationalTargets({
         targetType,
         totalValue: parseInt(totalValue),
-        startDate: format(dateRange[0], 'yyyy-MM-dd'),
-        endDate: format(dateRange[1], 'yyyy-MM-dd'),
+        startDate: format(dateRange.from, 'yyyy-MM-dd'),
+        endDate: format(dateRange.to, 'yyyy-MM-dd'),
         allocationMethod,
         cascadeToManagers,
         notifyAssignees,
@@ -61,7 +62,7 @@ export const TargetAssignmentDialog: React.FC<TargetAssignmentDialogProps> = ({ 
       // Reset form
       setTargetType('');
       setTotalValue('');
-      setDateRange([null, null]);
+      setDateRange(undefined);
       setAllocationMethod('');
       setNotes('');
     } catch (error) {
@@ -73,8 +74,8 @@ export const TargetAssignmentDialog: React.FC<TargetAssignmentDialogProps> = ({ 
     }
   };
 
-  const duration = dateRange[0] && dateRange[1] 
-    ? differenceInDays(dateRange[1], dateRange[0]) + 1
+  const duration = dateRange?.from && dateRange?.to 
+    ? differenceInDays(dateRange.to, dateRange.from) + 1
     : 0;
 
   return (
@@ -115,13 +116,13 @@ export const TargetAssignmentDialog: React.FC<TargetAssignmentDialogProps> = ({ 
           <div className="space-y-2">
             <Label>Period *</Label>
             <DateRangePicker
-              value={dateRange}
-              onChange={setDateRange}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
             />
-            {duration > 0 && (
+            {duration > 0 && dateRange?.from && dateRange?.to && (
               <p className="text-sm text-muted-foreground">
                 Duration: {duration} day{duration !== 1 ? 's' : ''} 
-                ({format(dateRange[0]!, 'MMM dd, yyyy')} - {format(dateRange[1]!, 'MMM dd, yyyy')})
+                ({format(dateRange.from, 'MMM dd, yyyy')} - {format(dateRange.to, 'MMM dd, yyyy')})
               </p>
             )}
           </div>

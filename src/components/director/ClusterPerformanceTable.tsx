@@ -38,15 +38,14 @@ export const ClusterPerformanceTable: React.FC<ClusterPerformanceTableProps> = (
     {
       id: 'rank',
       header: 'Rank',
-      accessorKey: 'rank',
-      cell: (row: any, index: number) => (
-        <div className="font-medium text-sm">{index + 1}</div>
-      ),
+      cell: (row: any) => {
+        const index = filteredClusters.findIndex(c => c.clusterId === row.clusterId);
+        return <div className="font-medium text-sm">{index + 1}</div>;
+      },
     },
     {
       id: 'name',
       header: 'Cluster Name',
-      accessorKey: 'name',
       cell: (row: any) => (
         <div>
           <div className="font-medium">{row.name}</div>
@@ -55,36 +54,36 @@ export const ClusterPerformanceTable: React.FC<ClusterPerformanceTableProps> = (
       ),
     },
     {
+      id: 'districts',
       header: 'Districts',
-      accessorKey: 'districts',
       cell: (row: any) => (
         <div className="text-sm">{row.districts.join(', ')}</div>
       ),
     },
     {
+      id: 'managers',
       header: 'Managers',
-      accessorKey: 'managers',
       cell: (row: any) => (
         <div className="text-center font-medium">{row.managers}</div>
       ),
     },
     {
+      id: 'target',
       header: 'Target',
-      accessorKey: 'target',
       cell: (row: any) => (
         <div className="text-right font-medium">{row.target.toLocaleString()}</div>
       ),
     },
     {
+      id: 'achieved',
       header: 'Achieved',
-      accessorKey: 'achieved',
       cell: (row: any) => (
         <div className="text-right font-medium text-green-600">{row.achieved.toLocaleString()}</div>
       ),
     },
     {
+      id: 'percentAchieved',
       header: '% Achieved',
-      accessorKey: 'percentAchieved',
       cell: (row: any) => (
         <div className="text-right">
           <Badge variant={row.percentAchieved >= 90 ? 'default' : row.percentAchieved >= 75 ? 'secondary' : 'destructive'}>
@@ -94,8 +93,8 @@ export const ClusterPerformanceTable: React.FC<ClusterPerformanceTableProps> = (
       ),
     },
     {
+      id: 'status',
       header: 'Status',
-      accessorKey: 'status',
       cell: (row: any) => (
         <Badge variant={getStatusVariant(row.status)}>
           {row.status}
@@ -103,8 +102,8 @@ export const ClusterPerformanceTable: React.FC<ClusterPerformanceTableProps> = (
       ),
     },
     {
+      id: 'actions',
       header: 'Actions',
-      accessorKey: 'actions',
       cell: (row: any) => (
         <div className="flex gap-2">
           <Button size="sm" variant="outline">
@@ -135,8 +134,6 @@ export const ClusterPerformanceTable: React.FC<ClusterPerformanceTableProps> = (
         <DataTable
           columns={columns}
           data={filteredClusters}
-          searchPlaceholder="Search clusters..."
-          onSearch={setSearchTerm}
         />
       </CardContent>
     </Card>

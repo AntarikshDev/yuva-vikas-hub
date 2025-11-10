@@ -41,6 +41,10 @@ import Attendance from "./pages/state-head/Attendance";
 // State Admin Routes
 import MobilisationMonitoring from "./pages/state-admin/MobilisationMonitoring";
 
+// Director Routes
+import DirectorDashboard from "./pages/director/Dashboard";
+import DirectorMobilisationMonitoring from "./pages/director/MobilisationMonitoring";
+
 // Mobilizer App Routes
 import MobilizerNewCandidate from "./pages/mobilizer/NewCandidate";
 
@@ -194,6 +198,9 @@ const App = () => {
             <Route path="/state-head/sos-tracker" element={<SOSTracker />} />
             <Route path="/state-head/export-reports" element={<ExportReports />} />
             
+            {/* Director Routes */}
+            <Route path="/director/dashboard" element={<DirectorDashboard />} />
+            <Route path="/director/mobilisation-monitoring" element={<DirectorMobilisationMonitoring />} />
             
             {/* Mobilizer App Routes */}
             <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />

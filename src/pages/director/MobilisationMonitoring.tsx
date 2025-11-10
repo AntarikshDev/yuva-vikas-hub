@@ -18,6 +18,7 @@ import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Target, Calendar, Download, Filter } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { DateRange } from 'react-day-picker';
 
 const MobilisationMonitoring = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -43,6 +44,7 @@ const MobilisationMonitoring = () => {
     activeClusters: mobilisationData.clusterPerformance.length,
     onTrackPercentage: 75,
     mobilisations: mobilisationData.conversionFunnel.mobilisations,
+    counselling: mobilisationData.conversionFunnel.counselling,
     enrollments: mobilisationData.conversionFunnel.enrollments,
   } : null;
 
@@ -71,8 +73,8 @@ const MobilisationMonitoring = () => {
                 </SheetHeader>
                 <div className="space-y-4 mt-4">
                   <DateRangePicker
-                    value={filters.dateRange}
-                    onChange={(range) => dispatch(setFilters({ dateRange: range }))}
+                    dateRange={filters.dateRange[0] && filters.dateRange[1] ? { from: new Date(filters.dateRange[0]), to: new Date(filters.dateRange[1]) } : undefined}
+                    onDateRangeChange={(range) => dispatch(setFilters({ dateRange: [range?.from?.toISOString() || null, range?.to?.toISOString() || null] }))}
                   />
                   <Select value={filters.state} onValueChange={(value) => dispatch(setFilters({ state: value }))}>
                     <SelectTrigger>
@@ -102,8 +104,8 @@ const MobilisationMonitoring = () => {
             {/* Desktop Filters */}
             <div className="hidden lg:flex gap-3">
               <DateRangePicker
-                value={filters.dateRange}
-                onChange={(range) => dispatch(setFilters({ dateRange: range }))}
+                dateRange={filters.dateRange[0] && filters.dateRange[1] ? { from: new Date(filters.dateRange[0]), to: new Date(filters.dateRange[1]) } : undefined}
+                onDateRangeChange={(range) => dispatch(setFilters({ dateRange: [range?.from?.toISOString() || null, range?.to?.toISOString() || null] }))}
               />
               
               <Select value={filters.state} onValueChange={(value) => dispatch(setFilters({ state: value }))}>
