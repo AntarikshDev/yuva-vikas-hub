@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StateDetailDialog } from '@/components/dialogs/StateDetailDialog';
 
 interface StateData {
   stateId: string;
@@ -16,6 +17,9 @@ interface Props {
 }
 
 export const NHStateHeatmap: React.FC<Props> = ({ states, isLoading }) => {
+  const [selectedState, setSelectedState] = useState<StateData | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   if (isLoading) {
     return (
       <Card className="p-6">
@@ -24,6 +28,11 @@ export const NHStateHeatmap: React.FC<Props> = ({ states, isLoading }) => {
       </Card>
     );
   }
+
+  const handleStateClick = (state: StateData) => {
+    setSelectedState(state);
+    setDialogOpen(true);
+  };
 
   const getColor = (percent: number) => {
     if (percent >= 90) return 'bg-green-500';
@@ -41,6 +50,7 @@ export const NHStateHeatmap: React.FC<Props> = ({ states, isLoading }) => {
         {states.map((state) => (
           <div
             key={state.stateId}
+            onClick={() => handleStateClick(state)}
             className={`p-5 rounded-lg ${getColor(state.percent)} text-white hover:scale-105 transition-transform cursor-pointer`}
           >
             <div className="font-semibold text-sm mb-2">{state.name}</div>
@@ -85,6 +95,19 @@ export const NHStateHeatmap: React.FC<Props> = ({ states, isLoading }) => {
           <span className="text-muted-foreground">&lt;60% (Critical)</span>
         </div>
       </div>
+
+      {selectedState && (
+        <StateDetailDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          stateName={selectedState.name}
+          stateData={{
+            target: selectedState.target,
+            achieved: selectedState.achieved,
+            percent: selectedState.percent,
+          }}
+        />
+      )}
     </Card>
   );
 };
