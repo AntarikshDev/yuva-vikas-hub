@@ -16,15 +16,17 @@ import { NHStateHeatmap } from '@/components/national-head/NHStateHeatmap';
 import { NHProgramHealthCards } from '@/components/national-head/NHProgramHealthCards';
 import { NHCentreHealthSnapshot } from '@/components/national-head/NHCentreHealthSnapshot';
 import { NHAlertsPanel } from '@/components/national-head/NHAlertsPanel';
+import { MetricsComparisonDialog } from '@/components/dialogs/MetricsComparisonDialog';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { Download, Bell, Target } from 'lucide-react';
+import { Download, Bell, Target, GitCompare } from 'lucide-react';
 
 const NationalHeadDashboard = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { summary, statePerformance, programHealth, centreHealth, alerts, filters, isLoading } = useAppSelector(
     (state) => state.nationalHead
   );
+  const [comparisonOpen, setComparisonOpen] = React.useState(false);
 
   useEffect(() => {
     dispatch(fetchNHSummary(filters));
@@ -87,13 +89,21 @@ const NationalHeadDashboard = () => {
 
         {/* Section 4: Centre Performance */}
         <div>
-          <h2 className="text-2xl font-bold mb-4">Centre Performance</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Centre Performance</h2>
+            <Button variant="outline" onClick={() => setComparisonOpen(true)}>
+              <GitCompare className="mr-2 h-4 w-4" />
+              Compare Metrics
+            </Button>
+          </div>
           <NHProgramHealthCards programHealth={programHealth} isLoading={isLoading} />
         </div>
 
         {/* Section 5: Alerts & Tasks */}
         <NHAlertsPanel alerts={alerts} isLoading={isLoading} />
       </div>
+
+      <MetricsComparisonDialog open={comparisonOpen} onOpenChange={setComparisonOpen} />
     </MainLayout>
   );
 };
