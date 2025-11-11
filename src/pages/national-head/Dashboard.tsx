@@ -13,7 +13,6 @@ import {
 } from '@/store/slices/nationalHeadSlice';
 import { NHSummaryKPIs } from '@/components/national-head/NHSummaryKPIs';
 import { NHStateHeatmap } from '@/components/national-head/NHStateHeatmap';
-import { NHStateLeaderboard } from '@/components/national-head/NHStateLeaderboard';
 import { NHProgramHealthCards } from '@/components/national-head/NHProgramHealthCards';
 import { NHCentreHealthSnapshot } from '@/components/national-head/NHCentreHealthSnapshot';
 import { NHAlertsPanel } from '@/components/national-head/NHAlertsPanel';
@@ -68,20 +67,29 @@ const NationalHeadDashboard = () => {
           </div>
         </div>
 
-        {/* Section 1: Summary KPIs */}
-        <NHSummaryKPIs summary={summary} isLoading={isLoading} />
-
-        {/* Section 2: State Performance */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <NHStateHeatmap states={statePerformance} isLoading={isLoading} />
-          <NHStateLeaderboard states={statePerformance} isLoading={isLoading} />
+        {/* Section 1: Main KPIs */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Main</h2>
+          <NHSummaryKPIs summary={summary} isLoading={isLoading} />
         </div>
 
-        {/* Section 3: Program Health */}
-        <NHProgramHealthCards programHealth={programHealth} isLoading={isLoading} />
+        {/* Section 2: Mobilisation */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Mobilisation</h2>
+          <NHStateHeatmap states={statePerformance} isLoading={isLoading} />
+        </div>
 
-        {/* Section 4: Centre Health Snapshot */}
-        <NHCentreHealthSnapshot centreHealth={centreHealth} isLoading={isLoading} />
+        {/* Section 3: Centre Health */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Centre Health</h2>
+          <NHCentreHealthSnapshot centreHealth={centreHealth} isLoading={isLoading} />
+        </div>
+
+        {/* Section 4: Centre Performance */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Centre Performance</h2>
+          <NHProgramHealthCards programHealth={programHealth} isLoading={isLoading} />
+        </div>
 
         {/* Section 5: Alerts & Tasks */}
         <NHAlertsPanel alerts={alerts} isLoading={isLoading} />

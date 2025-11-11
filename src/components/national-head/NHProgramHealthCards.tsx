@@ -2,10 +2,11 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { GraduationCap, CheckCircle, Clock } from 'lucide-react';
+import { BookOpen, Users, CheckCircle, Clock } from 'lucide-react';
 
 interface ProgramHealthData {
   trainingCompletion: number;
+  counsellingCompletion?: number;
   assessmentPass: number;
   avgTimeToMigrate: number;
 }
@@ -18,8 +19,8 @@ interface Props {
 export const NHProgramHealthCards: React.FC<Props> = ({ programHealth, isLoading }) => {
   if (isLoading) {
     return (
-      <div className="grid gap-4 md:grid-cols-3">
-        {[...Array(3)].map((_, i) => (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
           <Skeleton key={i} className="h-32" />
         ))}
       </div>
@@ -29,16 +30,28 @@ export const NHProgramHealthCards: React.FC<Props> = ({ programHealth, isLoading
   if (!programHealth) return null;
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">Training Completion</h3>
-          <GraduationCap className="h-5 w-5 text-primary" />
+          <h3 className="font-semibold">Curriculum Completion</h3>
+          <BookOpen className="h-5 w-5 text-primary" />
         </div>
         <div className="text-3xl font-bold mb-2">{programHealth.trainingCompletion}%</div>
         <Progress value={programHealth.trainingCompletion} className="mb-2" />
         <p className="text-sm text-muted-foreground">
           {programHealth.trainingCompletion >= 80 ? 'On track' : 'Needs attention'}
+        </p>
+      </Card>
+
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold">Counselling Completion</h3>
+          <Users className="h-5 w-5 text-primary" />
+        </div>
+        <div className="text-3xl font-bold mb-2">{programHealth.counsellingCompletion || 0}%</div>
+        <Progress value={programHealth.counsellingCompletion || 0} className="mb-2" />
+        <p className="text-sm text-muted-foreground">
+          {(programHealth.counsellingCompletion || 0) >= 85 ? 'Excellent' : 'In progress'}
         </p>
       </Card>
 
