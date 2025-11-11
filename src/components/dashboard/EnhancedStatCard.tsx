@@ -120,7 +120,7 @@ export const EnhancedStatCard = React.forwardRef<HTMLDivElement, EnhancedStatCar
                     damping: 10 
                   }}
                 >
-                  {trend.isPositive ? '↑' : '↓'} {trend.value}%
+                  {trend.isPositive ? '↑' : '↓'} {Number(trend.value).toFixed(2)}%
                 </motion.span>
                 <span className="ml-1 text-xs text-neutral-500">
                   {trend.isPositive ? 'increase' : 'decrease'} vs last period
