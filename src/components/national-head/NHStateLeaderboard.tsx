@@ -79,22 +79,22 @@ export const NHStateLeaderboard: React.FC<Props> = ({ states, isLoading }) => {
 
   return (
     <Card className="p-6">
-      <h2 className="text-xl font-bold mb-4">State Leaderboard</h2>
+      <h2 className="text-xl font-bold mb-6">State Leaderboard</h2>
       
-      {/* Top 10 States */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
+      {/* Top Performers */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
           <Trophy className="h-5 w-5 text-yellow-500" />
-          <h3 className="text-sm font-medium">Top 10 Performers</h3>
+          <h3 className="text-base font-semibold">Top Performers</h3>
         </div>
         <DataTable columns={columns} data={topStates} />
       </div>
 
-      {/* Bottom 10 States */}
+      {/* Bottom Performers */}
       <div>
-        <div className="flex items-center gap-2 mb-3">
-          <TrendingDown className="h-5 w-5 text-red-500" />
-          <h3 className="text-sm font-medium">Bottom 10 States (Need Attention)</h3>
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingDown className="h-5 w-5 text-destructive" />
+          <h3 className="text-base font-semibold">Need Attention</h3>
         </div>
         <DataTable columns={columns} data={bottomStates} />
       </div>

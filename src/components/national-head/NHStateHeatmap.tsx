@@ -5,6 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface StateData {
   stateId: string;
   name: string;
+  target: number;
+  achieved: number;
   percent: number;
 }
 
@@ -33,33 +35,54 @@ export const NHStateHeatmap: React.FC<Props> = ({ states, isLoading }) => {
 
   return (
     <Card className="p-6">
-      <h2 className="text-xl font-bold mb-4">State Performance Heatmap</h2>
+      <h2 className="text-xl font-bold mb-6">State Performance Heatmap</h2>
       
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         {states.map((state) => (
           <div
             key={state.stateId}
-            className={`p-4 rounded-lg ${getColor(state.percent)} text-white hover:scale-105 transition-transform cursor-pointer`}
+            className={`p-5 rounded-lg ${getColor(state.percent)} text-white hover:scale-105 transition-transform cursor-pointer`}
           >
-            <div className="font-semibold">{state.name}</div>
-            <div className="text-2xl font-bold">{state.percent}%</div>
+            <div className="font-semibold text-sm mb-2">{state.name}</div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <div className="text-xs opacity-90">Target</div>
+                <div className="font-bold">{state.target.toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-xs opacity-90">Achieved</div>
+                <div className="font-bold">{state.achieved.toLocaleString()}</div>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-white/20">
+              <div className="text-2xl font-bold">{state.percent}%</div>
+              <div className="text-xs opacity-90">Achievement Rate</div>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex items-center gap-4 text-sm">
+      <div className="mt-6 flex flex-wrap items-center gap-4 text-sm border-t pt-4">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-green-500 rounded" />
-          <span>≥90%</span>
+          <span className="text-muted-foreground">≥90% (Excellent)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-green-400 rounded" />
+          <span className="text-muted-foreground">80-90% (Good)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-yellow-400 rounded" />
-          <span>70-90%</span>
+          <span className="text-muted-foreground">70-80% (Fair)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-orange-400 rounded" />
+          <span className="text-muted-foreground">60-70% (At Risk)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 bg-red-500 rounded" />
-          <span>&lt;70%</span>
+          <span className="text-muted-foreground">&lt;60% (Critical)</span>
         </div>
       </div>
     </Card>
