@@ -43,32 +43,30 @@ export const NHStateHeatmap: React.FC<Props> = ({ states, isLoading }) => {
   };
 
   return (
-    <Card className="p-6">
-      <h2 className="text-xl font-bold mb-6">State Performance Heatmap</h2>
-      
-      <div className="grid grid-cols-2 gap-4">
+    <div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {states.map((state) => (
-          <div
+          <Card
             key={state.stateId}
             onClick={() => handleStateClick(state)}
-            className={`p-5 rounded-lg ${getColor(state.percent)} text-white hover:scale-105 transition-transform cursor-pointer`}
+            className={`p-4 ${getColor(state.percent)} text-white hover:shadow-lg transition-all cursor-pointer`}
           >
             <div className="font-semibold text-sm mb-2">{state.name}</div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="flex items-baseline justify-between mb-2">
+              <span className="text-xl font-bold">{state.percent}%</span>
+              <span className="text-xs opacity-90">Achievement</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-white/20">
               <div>
-                <div className="text-xs opacity-90">Target</div>
-                <div className="font-bold">{state.target.toLocaleString()}</div>
+                <div className="opacity-80">Target</div>
+                <div className="font-semibold">{state.target.toLocaleString()}</div>
               </div>
               <div>
-                <div className="text-xs opacity-90">Achieved</div>
-                <div className="font-bold">{state.achieved.toLocaleString()}</div>
+                <div className="opacity-80">Achieved</div>
+                <div className="font-semibold">{state.achieved.toLocaleString()}</div>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-white/20">
-              <div className="text-2xl font-bold">{state.percent}%</div>
-              <div className="text-xs opacity-90">Achievement Rate</div>
-            </div>
-          </div>
+          </Card>
         ))}
       </div>
 
@@ -108,6 +106,6 @@ export const NHStateHeatmap: React.FC<Props> = ({ states, isLoading }) => {
           }}
         />
       )}
-    </Card>
+    </div>
   );
 };
