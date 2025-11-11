@@ -81,7 +81,7 @@ const MobilisationMonitoring = () => {
                       <SelectValue placeholder="All States" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All States</SelectItem>
+                      <SelectItem value="all">All States</SelectItem>
                       <SelectItem value="maharashtra">Maharashtra</SelectItem>
                       <SelectItem value="karnataka">Karnataka</SelectItem>
                       <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
@@ -92,7 +92,7 @@ const MobilisationMonitoring = () => {
                       <SelectValue placeholder="All Programs" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Programs</SelectItem>
+                      <SelectItem value="all">All Programs</SelectItem>
                       <SelectItem value="retail">Retail Management</SelectItem>
                       <SelectItem value="healthcare">Healthcare Assistant</SelectItem>
                     </SelectContent>
@@ -113,7 +113,7 @@ const MobilisationMonitoring = () => {
                   <SelectValue placeholder="All States" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All States</SelectItem>
+                  <SelectItem value="all">All States</SelectItem>
                   <SelectItem value="maharashtra">Maharashtra</SelectItem>
                   <SelectItem value="karnataka">Karnataka</SelectItem>
                   <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
@@ -125,7 +125,7 @@ const MobilisationMonitoring = () => {
                   <SelectValue placeholder="All Programs" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Programs</SelectItem>
+                  <SelectItem value="all">All Programs</SelectItem>
                   <SelectItem value="retail">Retail Management</SelectItem>
                   <SelectItem value="healthcare">Healthcare Assistant</SelectItem>
                 </SelectContent>
@@ -136,7 +136,7 @@ const MobilisationMonitoring = () => {
                   <SelectValue placeholder="All Clusters" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Clusters</SelectItem>
+                  <SelectItem value="all">All Clusters</SelectItem>
                   <SelectItem value="mumbai">Mumbai Metro</SelectItem>
                   <SelectItem value="pune">Pune Region</SelectItem>
                 </SelectContent>
