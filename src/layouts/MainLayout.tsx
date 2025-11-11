@@ -54,8 +54,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role, title })
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen w-full bg-neutral-100">
-        <Sidebar className="border-r border-indigo-800 bg-gradient-to-b from-indigo-900 to-violet-900 text-white">
+      <div className="flex min-h-screen w-full bg-neutral-100">
+        <Sidebar className="border-r border-indigo-800 bg-gradient-to-b from-indigo-900 to-violet-900 text-white w-64 flex-shrink-0">
           <SidebarHeader className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -131,8 +131,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role, title })
           </SidebarFooter>
         </Sidebar>
 
-        <div className="flex flex-col flex-1">
-          <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-6 shadow-sm">
+        <div className="flex flex-col flex-1 min-w-0">
+          <header className="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-6 shadow-sm flex-shrink-0">
             <div className="flex items-center">
               <SidebarTrigger />
               <h1 className="ml-4 text-xl font-semibold">{pageTitle}</h1>
@@ -147,7 +147,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role, title })
             </div>
           </header>
           
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 overflow-auto p-6 w-full">
             {children}
           </main>
         </div>
