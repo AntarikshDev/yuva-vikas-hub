@@ -3,18 +3,53 @@ import { MainLayout } from '@/layouts/MainLayout';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
-import { fetchNHMobilisation } from '@/store/slices/nationalHeadSlice';
-import { Card } from '@/components/ui/card';
+import { fetchNHMobilisation, fetchMobiliserLeaderboard } from '@/store/slices/nationalHeadSlice';
 import { Button } from '@/components/ui/button';
 import { Download, Bell, Target } from 'lucide-react';
+import { NHClusterPerformanceTable } from '@/components/national-head/NHClusterPerformanceTable';
+import { NHMobiliserLeaderboard } from '@/components/national-head/NHMobiliserLeaderboard';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const NationalHeadMobilisationMonitoring = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { mobilisation, filters, isLoading } = useAppSelector((state) => state.nationalHead);
 
   useEffect(() => {
     dispatch(fetchNHMobilisation(filters));
+    dispatch(fetchMobiliserLeaderboard(filters));
   }, [dispatch, filters]);
+
+  const handleClusterDrillDown = (clusterId: string) => {
+    navigate(`/cluster/${clusterId}/dashboard`);
+  };
+
+  const handleClusterExport = (clusterId: string) => {
+    toast({
+      title: 'Export Started',
+      description: `Exporting data for cluster ${clusterId}...`,
+    });
+  };
+
+  const handleSendMessage = (id: string) => {
+    toast({
+      title: 'Message Dialog',
+      description: 'Message functionality will open here',
+    });
+  };
+
+  const handleMobiliserProfile = (mobiliserId: string) => {
+    navigate(`/mobiliser/${mobiliserId}/profile`);
+  };
+
+  const handleCall = (mobiliserId: string) => {
+    toast({
+      title: 'Call Initiated',
+      description: `Calling mobiliser ${mobiliserId}...`,
+    });
+  };
 
   return (
     <MainLayout role="national-head">
@@ -41,10 +76,21 @@ const NationalHeadMobilisationMonitoring = () => {
           </div>
         </div>
 
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Mobilisation Overview</h2>
-          <p className="text-muted-foreground">Detailed monitoring features coming soon...</p>
-        </Card>
+        <NHClusterPerformanceTable
+          clusters={mobilisation?.clusters || []}
+          isLoading={isLoading}
+          onDrillDown={handleClusterDrillDown}
+          onExport={handleClusterExport}
+          onSendMessage={handleSendMessage}
+        />
+
+        <NHMobiliserLeaderboard
+          mobilisers={mobilisation?.mobiliserLeaderboard || []}
+          isLoading={isLoading}
+          onViewProfile={handleMobiliserProfile}
+          onSendMessage={handleSendMessage}
+          onCall={handleCall}
+        />
       </div>
     </MainLayout>
   );
