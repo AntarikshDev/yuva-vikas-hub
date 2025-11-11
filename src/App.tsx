@@ -45,6 +45,11 @@ import MobilisationMonitoring from "./pages/state-admin/MobilisationMonitoring";
 import DirectorDashboard from "./pages/director/Dashboard";
 import DirectorMobilisationMonitoring from "./pages/director/MobilisationMonitoring";
 
+// National Head Routes
+import NationalHeadDashboard from "./pages/national-head/Dashboard";
+import NationalHeadMobilisationMonitoring from "./pages/national-head/MobilisationMonitoring";
+import NationalHeadProfile from "./pages/national-head/Profile";
+
 // Mobilizer App Routes
 import MobilizerNewCandidate from "./pages/mobilizer/NewCandidate";
 
@@ -201,6 +206,11 @@ const App = () => {
             {/* Director Routes */}
             <Route path="/director/dashboard" element={<DirectorDashboard />} />
             <Route path="/director/mobilisation-monitoring" element={<DirectorMobilisationMonitoring />} />
+            
+            {/* National Head Routes */}
+            <Route path="/national-head/dashboard" element={<NationalHeadDashboard />} />
+            <Route path="/national-head/mobilisation-monitoring" element={<NationalHeadMobilisationMonitoring />} />
+            <Route path="/national-head/profile" element={<NationalHeadProfile />} />
             
             {/* Mobilizer App Routes */}
             <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />

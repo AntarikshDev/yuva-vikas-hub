@@ -38,7 +38,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
   role: 'admin' | 'state_head' | 'center_manager' | 'mobilizer' | 
          'candidate' | 'ppc_team' | 'company_hr' | 'mobilization_manager' | 
-         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis' | 'ppc_admin' | 'poc' | 'director';
+         'trainer' | 'outreach_admin' | 'accounts_team' | 'audit' | 'counsellor' | 'mis' | 'ppc_admin' | 'poc' | 'director' | 'national-head';
   title?: string; // Optional title override
 }
 
@@ -454,6 +454,34 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
         items: [
           { name: 'Profile', path: '/director/profile', icon: User },
           { name: 'System Settings', path: '/director/settings', icon: Settings },
+        ]
+      }
+    ];
+  }
+  
+  if (role === 'national-head') {
+    return [
+      {
+        label: 'Overview',
+        items: [
+          { name: 'Dashboard', path: '/national-head/dashboard', icon: Home },
+          { name: 'Mobilisation Monitoring', path: '/national-head/mobilisation-monitoring', icon: TrendingUp },
+          { name: 'State Performance', path: '/national-head/state-performance', icon: Map },
+        ]
+      },
+      {
+        label: 'Management',
+        items: [
+          { name: 'Assign Targets', path: '/national-head/assign-targets', icon: ({ className }) => <span className={className || ''}>🎯</span> },
+          { name: 'State Admins', path: '/national-head/state-admins', icon: Users },
+          { name: 'Reports & Scheduler', path: '/national-head/reports', icon: BarChart },
+          { name: 'Notifications', path: '/national-head/notifications', icon: Bell },
+        ]
+      },
+      {
+        label: 'Settings',
+        items: [
+          { name: 'Profile', path: '/national-head/profile', icon: User },
         ]
       }
     ];
