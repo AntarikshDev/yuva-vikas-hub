@@ -8,6 +8,12 @@ interface NationalKPIs {
   placementRate: number;
   retentionRate6Months: number;
   centreUtilisation: { current: number; total: number };
+  stateHeadSalary: number;
+  mobManagerSalary: number;
+  mobilisationTeamCost: number;
+  transportationCost: number;
+  candidatesPerMonth: number;
+  mobilisationCostPerCandidate: number;
 }
 
 interface ProgramTarget {
@@ -179,6 +185,15 @@ export const fetchNationalKPIs = createAsyncThunk(
       return await response.json();
     } catch (error: any) {
       // Mock data fallback
+      const stateHeadSalary = 120000;
+      const mobManagerSalary = 85000;
+      const mobilisationTeamCost = 450000;
+      const transportationCost = 280000;
+      const candidatesPerMonth = 3803;
+      
+      const mobilisationCostPerCandidate = 
+        ((stateHeadSalary * 0.4) + mobManagerSalary + mobilisationTeamCost + transportationCost) / candidatesPerMonth;
+      
       return {
         totalCandidates: 45632,
         totalCandidatesGrowth: 12.5,
@@ -186,6 +201,12 @@ export const fetchNationalKPIs = createAsyncThunk(
         placementRate: 78.4,
         retentionRate6Months: 85.2,
         centreUtilisation: { current: 18456, total: 24800 },
+        stateHeadSalary,
+        mobManagerSalary,
+        mobilisationTeamCost,
+        transportationCost,
+        candidatesPerMonth,
+        mobilisationCostPerCandidate: Math.round(mobilisationCostPerCandidate),
       };
     }
   }
