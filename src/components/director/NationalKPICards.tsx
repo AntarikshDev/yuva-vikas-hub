@@ -1,6 +1,6 @@
 import React from 'react';
 import { EnhancedStatCard } from '@/components/dashboard/EnhancedStatCard';
-import { Users, Building, TrendingUp, Target, BarChart } from 'lucide-react';
+import { Users, Building, TrendingUp, Target, BarChart, IndianRupee } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface NationalKPICardsProps {
@@ -11,6 +11,12 @@ interface NationalKPICardsProps {
     placementRate: number;
     retentionRate6Months: number;
     centreUtilisation: { current: number; total: number };
+    stateHeadSalary: number;
+    mobManagerSalary: number;
+    mobilisationTeamCost: number;
+    transportationCost: number;
+    candidatesPerMonth: number;
+    mobilisationCostPerCandidate: number;
   } | null;
   isLoading: boolean;
 }
@@ -18,8 +24,8 @@ interface NationalKPICardsProps {
 export const NationalKPICards: React.FC<NationalKPICardsProps> = ({ kpis, isLoading }) => {
   if (isLoading || !kpis) {
     return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {[...Array(5)].map((_, i) => (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {[...Array(6)].map((_, i) => (
           <Skeleton key={i} className="h-32" />
         ))}
       </div>
@@ -27,7 +33,7 @@ export const NationalKPICards: React.FC<NationalKPICardsProps> = ({ kpis, isLoad
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <EnhancedStatCard
         title="Total Candidates"
         value={kpis.totalCandidates.toLocaleString()}
@@ -43,6 +49,14 @@ export const NationalKPICards: React.FC<NationalKPICardsProps> = ({ kpis, isLoad
         icon={<Building className="h-6 w-6" />}
         footer="Operational centres"
         intent="info"
+      />
+
+      <EnhancedStatCard
+        title="Mobilisation Cost"
+        value={`₹${kpis.mobilisationCostPerCandidate.toLocaleString()}`}
+        icon={<IndianRupee className="h-6 w-6" />}
+        footer={`Per candidate (${kpis.candidatesPerMonth.toLocaleString()}/month)`}
+        intent="warning"
       />
 
       <EnhancedStatCard
