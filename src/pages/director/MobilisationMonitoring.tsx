@@ -9,6 +9,7 @@ import { ConversionFunnel } from '@/components/director/ConversionFunnel';
 import { StateLeaderboard } from '@/components/director/StateLeaderboard';
 import { ClusterPerformanceTable } from '@/components/director/ClusterPerformanceTable';
 import { ActivityMetricsPanel } from '@/components/director/ActivityMetricsPanel';
+import { ActivityDetailsDialog } from '@/components/director/ActivityDetailsDialog';
 import { CandidatePipelineFlow } from '@/components/director/CandidatePipelineFlow';
 import { CentreHealthPanel } from '@/components/director/CentreHealthPanel';
 import { TargetAssignmentDialog } from '@/components/director/TargetAssignmentDialog';
@@ -27,6 +28,7 @@ const MobilisationMonitoring = () => {
   const [targetDialogOpen, setTargetDialogOpen] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const [activityDialogOpen, setActivityDialogOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchMobilisationData(filters));
@@ -175,10 +177,11 @@ const MobilisationMonitoring = () => {
             states={mobilisationData?.stateLeaderboard || []} 
             isLoading={isLoading} 
           />
-          <ActivityMetricsPanel 
-            activities={mobilisationData?.activities} 
-            isLoading={isLoading} 
-          />
+            <ActivityMetricsPanel 
+              activities={mobilisationData?.activities} 
+              isLoading={isLoading}
+              onCardClick={() => setActivityDialogOpen(true)}
+            />
         </div>
 
         <ClusterPerformanceTable 
@@ -201,6 +204,11 @@ const MobilisationMonitoring = () => {
         {/* Dialogs */}
         <TargetAssignmentDialog open={targetDialogOpen} onOpenChange={setTargetDialogOpen} />
         <ReportScheduleDialog open={reportDialogOpen} onOpenChange={setReportDialogOpen} />
+        <ActivityDetailsDialog
+          open={activityDialogOpen}
+          onOpenChange={setActivityDialogOpen}
+          activities={mobilisationData?.activities.recentActivities || []}
+        />
       </div>
     </MainLayout>
   );
