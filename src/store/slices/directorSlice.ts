@@ -99,7 +99,35 @@ interface ActivityMetrics {
   rozgaarMelaCount: number;
   sabhaCount: number;
   influencersRegistered: number;
-  byState: Array<{ state: string; count: number }>;
+  byState: Array<{ 
+    state: string; 
+    rozgaarMela: number;
+    rozgaarSabha: number;
+    influencers: number;
+  }>;
+  recentActivities: ActivityDetail[];
+}
+
+interface ActivityDetail {
+  id: string;
+  type: 'Rozgaar Mela' | 'Rozgaar Sabha' | 'Auto Mic-ing' | 'Influencer Registration';
+  date: string;
+  state: string;
+  district: string;
+  block: string;
+  village: string;
+  organizer: string;
+  organizerRole: 'Mobiliser' | 'Mobiliser Manager';
+  participantCount: number;
+  status: 'Completed' | 'In Progress' | 'Scheduled';
+  description: string;
+  images: string[];
+  location: {
+    coordinates?: { lat: number; lng: number };
+    address: string;
+  };
+  influencersOnboarded?: number;
+  candidatesMobilised?: number;
 }
 
 interface CandidatePipeline {
@@ -422,14 +450,117 @@ export const fetchMobilisationData = createAsyncThunk(
           sabhaCount: 89,
           influencersRegistered: 2340,
           byState: [
-            { state: 'Maharashtra', count: 28 },
-            { state: 'Karnataka', count: 22 },
-            { state: 'Tamil Nadu', count: 19 },
-            { state: 'Gujarat', count: 18 },
-            { state: 'Rajasthan', count: 15 },
-            { state: 'Uttar Pradesh', count: 23 },
-            { state: 'Madhya Pradesh', count: 12 },
-            { state: 'West Bengal', count: 8 },
+            { state: 'Maharashtra', rozgaarMela: 28, rozgaarSabha: 18, influencers: 420 },
+            { state: 'Karnataka', rozgaarMela: 22, rozgaarSabha: 15, influencers: 350 },
+            { state: 'Tamil Nadu', rozgaarMela: 19, rozgaarSabha: 12, influencers: 310 },
+            { state: 'Gujarat', rozgaarMela: 18, rozgaarSabha: 11, influencers: 290 },
+            { state: 'Rajasthan', rozgaarMela: 15, rozgaarSabha: 9, influencers: 240 },
+            { state: 'Uttar Pradesh', rozgaarMela: 23, rozgaarSabha: 14, influencers: 380 },
+            { state: 'Madhya Pradesh', rozgaarMela: 12, rozgaarSabha: 6, influencers: 190 },
+            { state: 'West Bengal', rozgaarMela: 8, rozgaarSabha: 4, influencers: 160 },
+          ],
+          recentActivities: [
+            {
+              id: '1',
+              type: 'Rozgaar Mela',
+              date: '2025-11-10T10:00:00Z',
+              state: 'Maharashtra',
+              district: 'Mumbai',
+              block: 'Andheri',
+              village: 'Andheri West',
+              organizer: 'Rajesh Kumar',
+              organizerRole: 'Mobiliser Manager',
+              participantCount: 250,
+              status: 'Completed',
+              description: 'Large scale job fair with 15+ employers',
+              images: ['https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=400', 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=400'],
+              location: { address: 'Mumbai Central, Andheri West, Mumbai', coordinates: { lat: 19.1197, lng: 72.8464 } },
+              candidatesMobilised: 180,
+            },
+            {
+              id: '2',
+              type: 'Rozgaar Sabha',
+              date: '2025-11-12T14:00:00Z',
+              state: 'Karnataka',
+              district: 'Bangalore Urban',
+              block: 'Whitefield',
+              village: 'ITPL',
+              organizer: 'Priya Sharma',
+              organizerRole: 'Mobiliser',
+              participantCount: 120,
+              status: 'Completed',
+              description: 'Community gathering for employment awareness',
+              images: ['https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400'],
+              location: { address: 'ITPL Main Road, Whitefield, Bangalore' },
+              candidatesMobilised: 85,
+            },
+            {
+              id: '3',
+              type: 'Auto Mic-ing',
+              date: '2025-11-13T09:00:00Z',
+              state: 'Tamil Nadu',
+              district: 'Chennai',
+              block: 'T Nagar',
+              village: 'Pondy Bazaar',
+              organizer: 'Arun Vijay',
+              organizerRole: 'Mobiliser',
+              participantCount: 500,
+              status: 'Completed',
+              description: 'Mobile announcement campaign in busy market area',
+              images: ['https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=400'],
+              location: { address: 'Pondy Bazaar, T Nagar, Chennai' },
+              candidatesMobilised: 45,
+            },
+            {
+              id: '4',
+              type: 'Influencer Registration',
+              date: '2025-11-11T11:00:00Z',
+              state: 'Gujarat',
+              district: 'Ahmedabad',
+              block: 'Satellite',
+              village: 'Jodhpur',
+              organizer: 'Neha Patel',
+              organizerRole: 'Mobiliser Manager',
+              participantCount: 35,
+              status: 'Completed',
+              description: 'Influencer onboarding and training session',
+              images: ['https://images.unsplash.com/photo-1552664730-d307ca884978?w=400'],
+              location: { address: 'Satellite Road, Ahmedabad' },
+              influencersOnboarded: 35,
+            },
+            {
+              id: '5',
+              type: 'Rozgaar Mela',
+              date: '2025-11-14T10:30:00Z',
+              state: 'Uttar Pradesh',
+              district: 'Lucknow',
+              block: 'Gomti Nagar',
+              village: 'Vibhuti Khand',
+              organizer: 'Amit Singh',
+              organizerRole: 'Mobiliser Manager',
+              participantCount: 300,
+              status: 'In Progress',
+              description: 'Major employment fair with government participation',
+              images: ['https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400'],
+              location: { address: 'Vibhuti Khand, Gomti Nagar, Lucknow' },
+              candidatesMobilised: 220,
+            },
+            {
+              id: '6',
+              type: 'Rozgaar Sabha',
+              date: '2025-11-15T15:00:00Z',
+              state: 'Rajasthan',
+              district: 'Jaipur',
+              block: 'Malviya Nagar',
+              village: 'Jagatpura',
+              organizer: 'Kavita Meena',
+              organizerRole: 'Mobiliser',
+              participantCount: 90,
+              status: 'Scheduled',
+              description: 'Employment awareness session for youth',
+              images: [],
+              location: { address: 'Jagatpura, Malviya Nagar, Jaipur' },
+            },
           ],
         },
         candidatePipeline: {
