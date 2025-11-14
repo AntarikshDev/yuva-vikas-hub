@@ -11,9 +11,13 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
   SidebarFooter,
-  SidebarTrigger
+  SidebarTrigger,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
-import { Bell, Settings, Home, Map, Building, Users, User, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp, BookOpen, Video, MessageSquare, FileText, MapPin } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Bell, Settings, Home, Map, Building, Users, User, BarChart, Brain, Calendar, Package, AlertCircle, FileOutput, FileSpreadsheet, ClipboardList, FileCheck, Briefcase, TrendingUp, BookOpen, Video, MessageSquare, FileText, MapPin, ChevronDown } from 'lucide-react';
 import { NotificationCenter } from '@/components/common/NotificationCenter';
 import { Button } from '@/components/ui/button';
 import { Toaster } from '@/components/ui/toaster';
@@ -27,6 +31,7 @@ interface NavItem {
   path: string;
   icon?: NavIcon;
   phase?: number;
+  subItems?: NavItem[];
 }
 
 type NavGroup = {
@@ -88,6 +93,48 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, role, title })
                   <SidebarMenu>
                     {group.items.map((item) => {
                       const isActive = location.pathname === item.path;
+                      const hasSubItems = item.subItems && item.subItems.length > 0;
+                      const isSubItemActive = hasSubItems && item.subItems?.some(sub => location.pathname === sub.path);
+                      
+                      if (hasSubItems) {
+                        return (
+                          <Collapsible key={item.name} defaultOpen={isSubItemActive} className="group/collapsible">
+                            <SidebarMenuItem>
+                              <CollapsibleTrigger asChild>
+                                <SidebarMenuButton 
+                                  className={`hover:bg-indigo-800/70 transition-all duration-200 ${isSubItemActive ? 'bg-indigo-800/90 font-medium' : ''}`}
+                                >
+                                  {item.icon && <item.icon className="mr-2 h-5 w-5" />}
+                                  <span>{item.name}</span>
+                                  <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                                </SidebarMenuButton>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent>
+                                <SidebarMenuSub>
+                                  {item.subItems?.map((subItem) => {
+                                    const isSubActive = location.pathname === subItem.path;
+                                    return (
+                                      <SidebarMenuSubItem key={subItem.name}>
+                                        <SidebarMenuSubButton 
+                                          asChild 
+                                          isActive={isSubActive}
+                                          className={`hover:bg-indigo-800/70 transition-all duration-200 ${isSubActive ? 'bg-indigo-800/90 font-medium shadow-md' : ''}`}
+                                        >
+                                          <Link to={subItem.path} className="flex items-center">
+                                            {subItem.icon && <subItem.icon className="mr-2 h-4 w-4" />}
+                                            <span>{subItem.name}</span>
+                                          </Link>
+                                        </SidebarMenuSubButton>
+                                      </SidebarMenuSubItem>
+                                    );
+                                  })}
+                                </SidebarMenuSub>
+                              </CollapsibleContent>
+                            </SidebarMenuItem>
+                          </Collapsible>
+                        );
+                      }
+                      
                       return (
                         <SidebarMenuItem key={item.name}>
                           <SidebarMenuButton 
@@ -435,7 +482,15 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
         label: 'National Overview',
         items: [
           { name: 'Dashboard', path: '/director/dashboard', icon: Home },
-          { name: 'Mobilisation Monitoring', path: '/director/mobilisation-monitoring', icon: TrendingUp },
+          { 
+            name: 'Mobilisation Monitoring', 
+            path: '/director/mobilisation-monitoring', 
+            icon: TrendingUp,
+            subItems: [
+              { name: 'Activities Monitoring', path: '/director/activities-monitoring', icon: Calendar },
+              { name: 'OFR Monitoring', path: '/director/ofr-monitoring', icon: FileText },
+            ]
+          },
           { name: 'State Performance', path: '/director/state-performance', icon: Map },
           { name: 'Program Health', path: '/director/program-health', icon: ({ className }) => <span className={className || ''}>🎯</span> },
         ]

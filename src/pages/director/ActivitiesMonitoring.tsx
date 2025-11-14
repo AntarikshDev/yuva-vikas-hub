@@ -1,10 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { MainLayout } from '@/layouts/MainLayout';
+import { useAppSelector } from '@/hooks/useAppSelector';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import {
@@ -16,17 +12,16 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import {
-  Calendar,
+  Download,
+  Filter,
   MapPin,
   User,
   Users,
-  Download,
-  X,
   Image as ImageIcon,
-  Filter,
+  X,
 } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 
@@ -52,17 +47,10 @@ interface ActivityDetail {
   candidatesMobilised?: number;
 }
 
-interface ActivityDetailsDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  activities: ActivityDetail[];
-}
+const ActivitiesMonitoring = () => {
+  const { mobilisationData } = useAppSelector((state) => state.director);
+  const activities: ActivityDetail[] = mobilisationData?.activities.recentActivities || [];
 
-export const ActivityDetailsDialog: React.FC<ActivityDetailsDialogProps> = ({
-  open,
-  onOpenChange,
-  activities,
-}) => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedState, setSelectedState] = useState<string>('all');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
@@ -153,56 +141,54 @@ export const ActivityDetailsDialog: React.FC<ActivityDetailsDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] p-0">
-        <DialogHeader className="px-6 pt-6 pb-4">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl">Activity Details</DialogTitle>
-            <Button variant="outline" size="sm" onClick={() => console.log('Export')}>
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
+    <MainLayout role="director">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Activities Monitoring</h1>
+            <p className="text-muted-foreground">Track all mobilisation activities across the nation</p>
           </div>
-        </DialogHeader>
-
-        {/* Statistics Bar */}
-        <div className="px-6 pb-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            <div className="text-center p-3 bg-primary/5 rounded-lg">
-              <div className="text-xl font-bold text-primary">{stats.total}</div>
-              <div className="text-xs text-muted-foreground">Activities</div>
-            </div>
-            <div className="text-center p-3 bg-blue-500/5 rounded-lg">
-              <div className="text-xl font-bold text-blue-600">{stats.participants}</div>
-              <div className="text-xs text-muted-foreground">Participants</div>
-            </div>
-            <div className="text-center p-3 bg-green-500/5 rounded-lg">
-              <div className="text-xl font-bold text-green-600">{stats.candidates}</div>
-              <div className="text-xs text-muted-foreground">Mobilised</div>
-            </div>
-            <div className="text-center p-3 bg-orange-500/5 rounded-lg">
-              <div className="text-xl font-bold text-orange-600">{stats.influencers}</div>
-              <div className="text-xs text-muted-foreground">Influencers</div>
-            </div>
-            <div className="text-center p-3 bg-secondary/50 rounded-lg">
-              <div className="text-xl font-bold text-foreground">{stats.districts}</div>
-              <div className="text-xs text-muted-foreground">Districts</div>
-            </div>
-            <div className="text-center p-3 bg-secondary/50 rounded-lg">
-              <div className="text-xl font-bold text-foreground">{stats.blocks}</div>
-              <div className="text-xs text-muted-foreground">Blocks</div>
-            </div>
-            <div className="text-center p-3 bg-secondary/50 rounded-lg">
-              <div className="text-xl font-bold text-foreground">{stats.villages}</div>
-              <div className="text-xs text-muted-foreground">Villages</div>
-            </div>
-          </div>
+          <Button variant="outline" onClick={() => console.log('Export')}>
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
         </div>
 
-        <Separator />
+        {/* Statistics Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          <Card className="p-4 text-center bg-primary/5">
+            <div className="text-2xl font-bold text-primary">{stats.total}</div>
+            <div className="text-xs text-muted-foreground mt-1">Activities</div>
+          </Card>
+          <Card className="p-4 text-center bg-blue-500/5">
+            <div className="text-2xl font-bold text-blue-600">{stats.participants}</div>
+            <div className="text-xs text-muted-foreground mt-1">Participants</div>
+          </Card>
+          <Card className="p-4 text-center bg-green-500/5">
+            <div className="text-2xl font-bold text-green-600">{stats.candidates}</div>
+            <div className="text-xs text-muted-foreground mt-1">Mobilised</div>
+          </Card>
+          <Card className="p-4 text-center bg-orange-500/5">
+            <div className="text-2xl font-bold text-orange-600">{stats.influencers}</div>
+            <div className="text-xs text-muted-foreground mt-1">Influencers</div>
+          </Card>
+          <Card className="p-4 text-center bg-secondary/50">
+            <div className="text-2xl font-bold text-foreground">{stats.districts}</div>
+            <div className="text-xs text-muted-foreground mt-1">Districts</div>
+          </Card>
+          <Card className="p-4 text-center bg-secondary/50">
+            <div className="text-2xl font-bold text-foreground">{stats.blocks}</div>
+            <div className="text-xs text-muted-foreground mt-1">Blocks</div>
+          </Card>
+          <Card className="p-4 text-center bg-secondary/50">
+            <div className="text-2xl font-bold text-foreground">{stats.villages}</div>
+            <div className="text-xs text-muted-foreground mt-1">Villages</div>
+          </Card>
+        </div>
 
         {/* Filters Section */}
-        <div className="px-6 py-4 bg-muted/30">
+        <Card className="p-4 bg-muted/30">
           <div className="flex items-center gap-2 mb-3">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium">Filters</span>
@@ -287,100 +273,100 @@ export const ActivityDetailsDialog: React.FC<ActivityDetailsDialogProps> = ({
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        <Separator />
+        </Card>
 
         {/* Activities List */}
-        <ScrollArea className="h-[400px] px-6">
-          <div className="space-y-4 py-4">
-            {filteredActivities.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No activities found matching the selected filters.</p>
+        <div className="space-y-4">
+          {filteredActivities.length === 0 ? (
+            <Card className="p-12">
+              <div className="text-center text-muted-foreground">
+                No activities found matching the selected filters.
               </div>
-            ) : (
-              filteredActivities.map((activity) => (
-                <Card key={activity.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex flex-col md:flex-row gap-4">
-                      {/* Activity Images */}
-                      {activity.images.length > 0 ? (
-                        <div className="flex gap-2 md:w-48 flex-shrink-0">
-                          {activity.images.slice(0, 2).map((image, idx) => (
-                            <img
-                              key={idx}
-                              src={image}
-                              alt={`Activity ${activity.id}`}
-                              className="w-full md:w-20 h-20 object-cover rounded-lg"
-                            />
-                          ))}
-                          {activity.images.length > 2 && (
-                            <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center text-xs text-muted-foreground">
-                              +{activity.images.length - 2}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="md:w-48 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                      )}
+            </Card>
+          ) : (
+            filteredActivities.map((activity) => (
+              <Card key={activity.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex flex-col md:flex-row gap-4">
+                    {/* Activity Images */}
+                    {activity.images.length > 0 ? (
+                      <div className="flex gap-2 md:w-48 flex-shrink-0">
+                        {activity.images.slice(0, 2).map((image, idx) => (
+                          <img
+                            key={idx}
+                            src={image}
+                            alt={`Activity ${activity.id}`}
+                            className="w-full md:w-20 h-20 object-cover rounded-lg"
+                          />
+                        ))}
+                        {activity.images.length > 2 && (
+                          <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center text-xs text-muted-foreground">
+                            +{activity.images.length - 2}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="md:w-48 h-20 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                    )}
 
-                      {/* Activity Details */}
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <Badge className={`${getActivityColor(activity.type)} text-white border-0`}>
-                              {activity.type}
-                            </Badge>
-                            <Badge variant="outline" className={getStatusColor(activity.status)}>
-                              {activity.status}
-                            </Badge>
-                          </div>
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
-                            {new Date(activity.date).toLocaleDateString('en-US', { 
-                              month: 'short', 
-                              day: 'numeric', 
-                              year: 'numeric' 
-                            })}
-                          </span>
+                    {/* Activity Details */}
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge className={`${getActivityColor(activity.type)} text-white border-0`}>
+                            {activity.type}
+                          </Badge>
+                          <Badge variant="outline" className={getStatusColor(activity.status)}>
+                            {activity.status}
+                          </Badge>
                         </div>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(activity.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                        </span>
+                      </div>
 
-                        <p className="text-sm text-foreground font-medium">{activity.description}</p>
+                      <p className="text-sm text-foreground font-medium">{activity.description}</p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            <span>{activity.village}, {activity.block}, {activity.district}, {activity.state}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <User className="h-3 w-3" />
-                            <span>{activity.organizer} ({activity.organizerRole})</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Users className="h-3 w-3" />
-                            <span>{activity.participantCount} participants</span>
-                          </div>
-                          {activity.candidatesMobilised !== undefined && (
-                            <div className="flex items-center gap-2 text-green-600">
-                              <span className="font-medium">{activity.candidatesMobilised} mobilised</span>
-                            </div>
-                          )}
-                          {activity.influencersOnboarded !== undefined && (
-                            <div className="flex items-center gap-2 text-orange-600">
-                              <span className="font-medium">{activity.influencersOnboarded} influencers</span>
-                            </div>
-                          )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <MapPin className="h-3 w-3" />
+                          <span>{activity.village}, {activity.block}, {activity.district}, {activity.state}</span>
                         </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <User className="h-3 w-3" />
+                          <span>{activity.organizer} ({activity.organizerRole})</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <Users className="h-3 w-3" />
+                          <span>{activity.participantCount} participants</span>
+                        </div>
+                        {activity.candidatesMobilised !== undefined && (
+                          <div className="flex items-center gap-2 text-green-600">
+                            <span className="font-medium">{activity.candidatesMobilised} mobilised</span>
+                          </div>
+                        )}
+                        {activity.influencersOnboarded !== undefined && (
+                          <div className="flex items-center gap-2 text-orange-600">
+                            <span className="font-medium">{activity.influencersOnboarded} influencers</span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      </div>
+    </MainLayout>
   );
 };
+
+export default ActivitiesMonitoring;

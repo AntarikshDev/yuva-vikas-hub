@@ -9,11 +9,11 @@ import { ConversionFunnel } from '@/components/director/ConversionFunnel';
 import { StateLeaderboard } from '@/components/director/StateLeaderboard';
 import { ClusterPerformanceTable } from '@/components/director/ClusterPerformanceTable';
 import { ActivityMetricsPanel } from '@/components/director/ActivityMetricsPanel';
-import { ActivityDetailsDialog } from '@/components/director/ActivityDetailsDialog';
 import { CandidatePipelineFlow } from '@/components/director/CandidatePipelineFlow';
 import { CentreHealthPanel } from '@/components/director/CentreHealthPanel';
 import { TargetAssignmentDialog } from '@/components/director/TargetAssignmentDialog';
 import { ReportScheduleDialog } from '@/components/director/ReportScheduleDialog';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,12 +23,12 @@ import { DateRange } from 'react-day-picker';
 
 const MobilisationMonitoring = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { mobilisationData, filters, isLoading } = useAppSelector((state) => state.director);
 
   const [targetDialogOpen, setTargetDialogOpen] = useState(false);
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
-  const [activityDialogOpen, setActivityDialogOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchMobilisationData(filters));
@@ -180,7 +180,7 @@ const MobilisationMonitoring = () => {
             <ActivityMetricsPanel 
               activities={mobilisationData?.activities} 
               isLoading={isLoading}
-              onCardClick={() => setActivityDialogOpen(true)}
+              onCardClick={() => navigate('/director/activities-monitoring')}
             />
         </div>
 
@@ -204,11 +204,6 @@ const MobilisationMonitoring = () => {
         {/* Dialogs */}
         <TargetAssignmentDialog open={targetDialogOpen} onOpenChange={setTargetDialogOpen} />
         <ReportScheduleDialog open={reportDialogOpen} onOpenChange={setReportDialogOpen} />
-        <ActivityDetailsDialog
-          open={activityDialogOpen}
-          onOpenChange={setActivityDialogOpen}
-          activities={mobilisationData?.activities.recentActivities || []}
-        />
       </div>
     </MainLayout>
   );
