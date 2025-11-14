@@ -157,6 +157,76 @@ interface CentreHealth {
   leaveDropoutSummary: LeaveDropoutSummary[];
 }
 
+interface OFREntry {
+  id: string;
+  candidateId: string;
+  candidateName: string;
+  fatherName: string;
+  mobile: string;
+  email: string;
+  dateOfBirth: string;
+  gender: 'Male' | 'Female' | 'Other';
+  
+  state: string;
+  district: string;
+  block: string;
+  village: string;
+  address: string;
+  pincode: string;
+  
+  community: 'General' | 'OBC' | 'SC' | 'ST';
+  religion: string;
+  bloodGroup: string;
+  motherTongue: string;
+  maritalStatus: 'Single' | 'Married';
+  education: string;
+  
+  mobiliserName: string;
+  mobiliserRole: 'Mobiliser' | 'Mobiliser Manager';
+  mobiliserId: string;
+  
+  registrationDate: string;
+  registrationTime: string;
+  status: 'Pending Verification' | 'Verified' | 'Rejected' | 'Ready for Migration' | 'Migrated';
+  
+  documents: {
+    photo: string;
+    aadhar: string;
+    pan?: string;
+    educationCertificate: string;
+    casteCertificate?: string;
+    incomeCertificate?: string;
+  };
+  
+  verificationNotes?: string;
+  verifiedBy?: string;
+  verifiedDate?: string;
+  rejectionReason?: string;
+}
+
+interface OFRStatistics {
+  totalEntries: number;
+  pendingVerification: number;
+  verified: number;
+  rejected: number;
+  readyForMigration: number;
+  migrated: number;
+  byState: Array<{
+    state: string;
+    total: number;
+    pending: number;
+    verified: number;
+  }>;
+  byMobiliser: Array<{
+    name: string;
+    role: string;
+    total: number;
+    verified: number;
+  }>;
+  recentEntries: number;
+  conversionRate: number;
+}
+
 interface MobilisationData {
   nationalTarget: number;
   achieved: number;
@@ -175,6 +245,10 @@ interface DirectorState {
   statePerformance: StatePerformance[];
   compliance: Compliance | null;
   mobilisationData: MobilisationData | null;
+  ofrData: {
+    entries: OFREntry[];
+    statistics: OFRStatistics;
+  } | null;
   filters: {
     dateRange: [string | null, string | null];
     state: string;
@@ -193,6 +267,7 @@ const initialState: DirectorState = {
   statePerformance: [],
   compliance: null,
   mobilisationData: null,
+  ofrData: null,
   filters: {
     dateRange: [null, null],
     state: 'all',
@@ -592,6 +667,126 @@ export const fetchMobilisationData = createAsyncThunk(
   }
 );
 
+export const fetchOFRData = createAsyncThunk(
+  'director/fetchOFRData',
+  async (filters: {
+    dateRange?: [Date | null, Date | null];
+    state?: string;
+    district?: string;
+    block?: string;
+    village?: string;
+    status?: string;
+  }, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/director/ofr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filters),
+      });
+      if (!response.ok) throw new Error('Failed to fetch OFR data');
+      return await response.json();
+    } catch (error: any) {
+      // Mock data fallback
+      const states = ['Maharashtra', 'Karnataka', 'Tamil Nadu', 'Gujarat', 'Rajasthan', 'Uttar Pradesh'];
+      const districts = ['Mumbai', 'Bangalore', 'Chennai', 'Ahmedabad', 'Jaipur', 'Lucknow'];
+      const blocks = ['Block A', 'Block B', 'Block C', 'Block D'];
+      const villages = ['Village 1', 'Village 2', 'Village 3', 'Village 4', 'Village 5'];
+      const statuses: OFREntry['status'][] = ['Pending Verification', 'Verified', 'Rejected', 'Ready for Migration', 'Migrated'];
+      const communities: OFREntry['community'][] = ['General', 'OBC', 'SC', 'ST'];
+      const educations = ['10th Pass', '12th Pass', 'Graduate', 'Post Graduate', 'ITI', 'Diploma'];
+      
+      const entries: OFREntry[] = Array.from({ length: 250 }, (_, i) => {
+        const state = states[Math.floor(Math.random() * states.length)];
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        const registrationDate = new Date(2024, 10, Math.floor(Math.random() * 30) + 1).toISOString().split('T')[0];
+        
+        return {
+          id: `OFR-${String(i + 1).padStart(6, '0')}`,
+          candidateId: `CND-${String(i + 1).padStart(6, '0')}`,
+          candidateName: `Candidate ${i + 1}`,
+          fatherName: `Father ${i + 1}`,
+          mobile: `98${String(Math.floor(Math.random() * 100000000)).padStart(8, '0')}`,
+          email: `candidate${i + 1}@email.com`,
+          dateOfBirth: `${1995 + Math.floor(Math.random() * 10)}-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}`,
+          gender: Math.random() > 0.5 ? 'Male' : 'Female',
+          state,
+          district: districts[Math.floor(Math.random() * districts.length)],
+          block: blocks[Math.floor(Math.random() * blocks.length)],
+          village: villages[Math.floor(Math.random() * villages.length)],
+          address: `Address line ${i + 1}, Locality ${i + 1}`,
+          pincode: String(400000 + Math.floor(Math.random() * 100000)),
+          community: communities[Math.floor(Math.random() * communities.length)],
+          religion: Math.random() > 0.5 ? 'Hindu' : Math.random() > 0.5 ? 'Muslim' : 'Christian',
+          bloodGroup: ['A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-'][Math.floor(Math.random() * 8)],
+          motherTongue: ['Hindi', 'Marathi', 'Tamil', 'Telugu', 'Kannada', 'Gujarati'][Math.floor(Math.random() * 6)],
+          maritalStatus: Math.random() > 0.7 ? 'Married' : 'Single',
+          education: educations[Math.floor(Math.random() * educations.length)],
+          mobiliserName: `Mobiliser ${Math.floor(Math.random() * 50) + 1}`,
+          mobiliserRole: Math.random() > 0.7 ? 'Mobiliser Manager' : 'Mobiliser',
+          mobiliserId: `MOB-${String(Math.floor(Math.random() * 500) + 1).padStart(4, '0')}`,
+          registrationDate,
+          registrationTime: `${Math.floor(Math.random() * 12) + 8}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')} ${Math.random() > 0.5 ? 'AM' : 'PM'}`,
+          status,
+          documents: {
+            photo: '/api/placeholder/200/200',
+            aadhar: '/api/placeholder/400/300',
+            educationCertificate: '/api/placeholder/400/300',
+            pan: Math.random() > 0.5 ? '/api/placeholder/400/300' : undefined,
+            casteCertificate: Math.random() > 0.7 ? '/api/placeholder/400/300' : undefined,
+            incomeCertificate: Math.random() > 0.8 ? '/api/placeholder/400/300' : undefined,
+          },
+          verificationNotes: status === 'Verified' ? 'All documents verified' : undefined,
+          verifiedBy: status === 'Verified' ? `Verifier ${Math.floor(Math.random() * 10) + 1}` : undefined,
+          verifiedDate: status === 'Verified' ? new Date(2024, 10, Math.floor(Math.random() * 30) + 1).toISOString().split('T')[0] : undefined,
+          rejectionReason: status === 'Rejected' ? 'Incomplete documents' : undefined,
+        };
+      });
+      
+      // Apply filters
+      let filteredEntries = entries;
+      if (filters.state && filters.state !== 'all') {
+        filteredEntries = filteredEntries.filter(e => e.state === filters.state);
+      }
+      if (filters.status && filters.status !== 'all') {
+        filteredEntries = filteredEntries.filter(e => e.status === filters.status);
+      }
+      
+      const statistics: OFRStatistics = {
+        totalEntries: filteredEntries.length,
+        pendingVerification: filteredEntries.filter(e => e.status === 'Pending Verification').length,
+        verified: filteredEntries.filter(e => e.status === 'Verified').length,
+        rejected: filteredEntries.filter(e => e.status === 'Rejected').length,
+        readyForMigration: filteredEntries.filter(e => e.status === 'Ready for Migration').length,
+        migrated: filteredEntries.filter(e => e.status === 'Migrated').length,
+        byState: states.map(state => ({
+          state,
+          total: entries.filter(e => e.state === state).length,
+          pending: entries.filter(e => e.state === state && e.status === 'Pending Verification').length,
+          verified: entries.filter(e => e.state === state && e.status === 'Verified').length,
+        })),
+        byMobiliser: Array.from({ length: 10 }, (_, i) => ({
+          name: `Mobiliser ${i + 1}`,
+          role: Math.random() > 0.7 ? 'Mobiliser Manager' : 'Mobiliser',
+          total: Math.floor(Math.random() * 50) + 10,
+          verified: Math.floor(Math.random() * 30) + 5,
+        })),
+        recentEntries: filteredEntries.filter(e => {
+          const entryDate = new Date(e.registrationDate);
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return entryDate >= weekAgo;
+        }).length,
+        conversionRate: Math.floor(Math.random() * 30) + 50,
+      };
+      
+      return {
+        entries: filteredEntries,
+        statistics,
+      };
+    }
+  }
+);
+
 export const assignNationalTargets = createAsyncThunk(
   'director/assignTargets',
   async (targetData: any, { rejectWithValue }) => {
@@ -684,6 +879,18 @@ const directorSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       })
+      // Fetch OFR Data
+      .addCase(fetchOFRData.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchOFRData.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.ofrData = action.payload;
+      })
+      .addCase(fetchOFRData.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
       // Assign Targets
       .addCase(assignNationalTargets.pending, (state) => {
         state.isLoading = true;
@@ -700,3 +907,6 @@ const directorSlice = createSlice({
 
 export const { setFilters, clearError } = directorSlice.actions;
 export default directorSlice.reducer;
+
+// Export types
+export type { OFREntry, OFRStatistics };
