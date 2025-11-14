@@ -8,9 +8,10 @@ import { OFREntry } from '@/store/slices/directorSlice';
 interface OFRCardProps {
   entry: OFREntry;
   onViewDetails: (entry: OFREntry) => void;
+  viewMode?: 'grid' | 'list';
 }
 
-export const OFRCard: React.FC<OFRCardProps> = ({ entry, onViewDetails }) => {
+export const OFRCard: React.FC<OFRCardProps> = ({ entry, onViewDetails, viewMode = 'grid' }) => {
   const getStatusColor = (status: OFREntry['status']) => {
     switch (status) {
       case 'Pending Verification':
@@ -28,6 +29,89 @@ export const OFRCard: React.FC<OFRCardProps> = ({ entry, onViewDetails }) => {
     }
   };
 
+  if (viewMode === 'list') {
+    return (
+      <Card className="p-4 hover:shadow-lg transition-shadow">
+        <div className="flex gap-4 items-center">
+          {/* Candidate Photo */}
+          <div className="flex-shrink-0">
+            <img
+              src={entry.documents.photo}
+              alt={entry.candidateName}
+              className="w-16 h-16 rounded-lg object-cover border-2 border-border"
+            />
+          </div>
+
+          {/* Main Content - Expanded in List View */}
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-4 items-center min-w-0">
+            {/* Name & ID */}
+            <div className="min-w-0">
+              <h3 className="font-semibold text-foreground truncate">{entry.candidateName}</h3>
+              <p className="text-sm text-muted-foreground truncate">{entry.id}</p>
+            </div>
+
+            {/* Contact */}
+            <div className="min-w-0">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Phone className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{entry.mobile}</span>
+              </div>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <User className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{entry.fatherName}</span>
+              </div>
+            </div>
+
+            {/* Location */}
+            <div className="min-w-0">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{entry.village}, {entry.block}</span>
+              </div>
+              <p className="text-sm text-muted-foreground truncate">{entry.district}, {entry.state}</p>
+            </div>
+
+            {/* Date & Mobiliser */}
+            <div className="min-w-0">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Calendar className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{entry.registrationDate}</span>
+              </div>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <User className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate">{entry.mobiliserName}</span>
+              </div>
+            </div>
+
+            {/* Status & Actions */}
+            <div className="flex items-center gap-2 justify-end">
+              <Badge className={`${getStatusColor(entry.status)} flex-shrink-0`}>
+                {entry.status}
+              </Badge>
+              <div className="flex gap-2 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onViewDetails(entry)}
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  Details
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                >
+                  <FileText className="h-3 w-3 mr-1" />
+                  Docs
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-4 hover:shadow-lg transition-shadow">
       <div className="flex gap-4">
@@ -43,37 +127,37 @@ export const OFRCard: React.FC<OFRCardProps> = ({ entry, onViewDetails }) => {
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           {/* Header */}
-          <div className="flex items-start justify-between mb-2">
+          <div className="flex items-start justify-between mb-2 gap-2">
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-foreground truncate">{entry.candidateName}</h3>
               <p className="text-sm text-muted-foreground truncate">{entry.id}</p>
             </div>
-            <Badge className={`${getStatusColor(entry.status)} ml-2 flex-shrink-0`}>
+            <Badge className={`${getStatusColor(entry.status)} flex-shrink-0 text-xs`}>
               {entry.status}
             </Badge>
           </div>
 
           {/* Details Grid */}
           <div className="grid grid-cols-2 gap-2 mb-3">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0">
               <User className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">{entry.fatherName}</span>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0">
               <Phone className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">{entry.mobile}</span>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground col-span-2">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground col-span-2 min-w-0">
               <MapPin className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">
                 {entry.village}, {entry.block}, {entry.district}, {entry.state}
               </span>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0">
               <Calendar className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">{entry.registrationDate}</span>
             </div>
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground min-w-0">
               <User className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">{entry.mobiliserName}</span>
             </div>
@@ -85,18 +169,18 @@ export const OFRCard: React.FC<OFRCardProps> = ({ entry, onViewDetails }) => {
               variant="outline"
               size="sm"
               onClick={() => onViewDetails(entry)}
-              className="flex-1"
+              className="flex-1 text-xs h-8"
             >
               <Eye className="h-3 w-3 mr-1" />
-              View Details
+              <span className="truncate">Details</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
+              className="flex-1 text-xs h-8"
             >
               <FileText className="h-3 w-3 mr-1" />
-              Documents
+              <span className="truncate">Docs</span>
             </Button>
           </div>
         </div>

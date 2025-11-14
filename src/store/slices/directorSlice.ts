@@ -747,6 +747,12 @@ export const fetchOFRData = createAsyncThunk(
       if (filters.state && filters.state !== 'all') {
         filteredEntries = filteredEntries.filter(e => e.state === filters.state);
       }
+      if (filters.district && filters.district !== 'all') {
+        filteredEntries = filteredEntries.filter(e => e.district === filters.district);
+      }
+      if (filters.block && filters.block !== 'all') {
+        filteredEntries = filteredEntries.filter(e => e.block === filters.block);
+      }
       if (filters.status && filters.status !== 'all') {
         filteredEntries = filteredEntries.filter(e => e.status === filters.status);
       }
