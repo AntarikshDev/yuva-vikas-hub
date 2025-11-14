@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { Download, Search, Filter } from 'lucide-react';
+import { Download, Search, Filter, Grid3x3, List, LayoutGrid } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
 import { fetchOFRData } from '@/store/slices/directorSlice';
 import { OFRStatisticsBar } from '@/components/director/OFRStatisticsBar';
@@ -20,9 +20,13 @@ const OFRMonitoring = () => {
   const [filters, setFilters] = useState({
     dateRange: [null, null] as [Date | null, Date | null],
     state: 'all',
+    district: 'all',
+    block: 'all',
     status: 'all',
     searchQuery: '',
   });
+  
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   const [selectedEntry, setSelectedEntry] = useState<OFREntry | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -31,9 +35,11 @@ const OFRMonitoring = () => {
     dispatch(fetchOFRData({
       dateRange: filters.dateRange,
       state: filters.state !== 'all' ? filters.state : undefined,
+      district: filters.district !== 'all' ? filters.district : undefined,
+      block: filters.block !== 'all' ? filters.block : undefined,
       status: filters.status !== 'all' ? filters.status : undefined,
     }));
-  }, [dispatch, filters.dateRange, filters.state, filters.status]);
+  }, [dispatch, filters.dateRange, filters.state, filters.district, filters.block, filters.status]);
 
   const handleViewDetails = (entry: OFREntry) => {
     setSelectedEntry(entry);
@@ -61,10 +67,30 @@ const OFRMonitoring = () => {
             <h1 className="text-3xl font-bold text-foreground">OFR Monitoring</h1>
             <p className="text-muted-foreground">Monitor and track On Field Registration entries nationwide</p>
           </div>
-          <Button>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          <div className="flex gap-2">
+            <div className="flex items-center gap-1 border rounded-lg p-1">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="h-8 w-8 p-0"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="h-8 w-8 p-0"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+            <Button>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
         </div>
 
         {/* Statistics Bar */}
@@ -73,7 +99,7 @@ const OFRMonitoring = () => {
         {/* Filters */}
         <Card>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
               {/* Search */}
               <div className="lg:col-span-2">
                 <div className="relative">
@@ -102,7 +128,7 @@ const OFRMonitoring = () => {
               {/* State Filter */}
               <Select
                 value={filters.state}
-                onValueChange={(value) => setFilters({ ...filters, state: value })}
+                onValueChange={(value) => setFilters({ ...filters, state: value, district: 'all', block: 'all' })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select State" />
@@ -118,23 +144,80 @@ const OFRMonitoring = () => {
                 </SelectContent>
               </Select>
 
-              {/* Status Filter */}
+              {/* District Filter */}
               <Select
-                value={filters.status}
-                onValueChange={(value) => setFilters({ ...filters, status: value })}
+                value={filters.district}
+                onValueChange={(value) => setFilters({ ...filters, district: value, block: 'all' })}
+                disabled={filters.state === 'all'}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Status" />
+                  <SelectValue placeholder="Select District" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="Pending Verification">Pending Verification</SelectItem>
-                  <SelectItem value="Verified">Verified</SelectItem>
-                  <SelectItem value="Rejected">Rejected</SelectItem>
-                  <SelectItem value="Ready for Migration">Ready for Migration</SelectItem>
-                  <SelectItem value="Migrated">Migrated</SelectItem>
+                  <SelectItem value="all">All Districts</SelectItem>
+                  {filters.state === 'Maharashtra' && (
+                    <>
+                      <SelectItem value="Mumbai">Mumbai</SelectItem>
+                      <SelectItem value="Pune">Pune</SelectItem>
+                      <SelectItem value="Nagpur">Nagpur</SelectItem>
+                    </>
+                  )}
+                  {filters.state === 'Gujarat' && (
+                    <>
+                      <SelectItem value="Ahmedabad">Ahmedabad</SelectItem>
+                      <SelectItem value="Surat">Surat</SelectItem>
+                      <SelectItem value="Chennai">Chennai</SelectItem>
+                    </>
+                  )}
+                  {filters.state === 'Tamil Nadu' && (
+                    <>
+                      <SelectItem value="Chennai">Chennai</SelectItem>
+                      <SelectItem value="Coimbatore">Coimbatore</SelectItem>
+                      <SelectItem value="Madurai">Madurai</SelectItem>
+                    </>
+                  )}
                 </SelectContent>
               </Select>
+
+              {/* Block Filter */}
+              <Select
+                value={filters.block}
+                onValueChange={(value) => setFilters({ ...filters, block: value })}
+                disabled={filters.district === 'all'}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Block" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Blocks</SelectItem>
+                  <SelectItem value="Block A">Block A</SelectItem>
+                  <SelectItem value="Block B">Block B</SelectItem>
+                  <SelectItem value="Block C">Block C</SelectItem>
+                  <SelectItem value="Block D">Block D</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Second Row - Status Filter */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
+              <div className="lg:col-start-5">
+                <Select
+                  value={filters.status}
+                  onValueChange={(value) => setFilters({ ...filters, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="Pending Verification">Pending Verification</SelectItem>
+                    <SelectItem value="Verified">Verified</SelectItem>
+                    <SelectItem value="Rejected">Rejected</SelectItem>
+                    <SelectItem value="Ready for Migration">Ready for Migration</SelectItem>
+                    <SelectItem value="Migrated">Migrated</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -146,9 +229,9 @@ const OFRMonitoring = () => {
           </p>
         </div>
 
-        {/* OFR Entries Grid */}
+        {/* OFR Entries Grid/List */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="p-4 animate-pulse">
                 <div className="h-32 bg-muted rounded" />
@@ -156,12 +239,13 @@ const OFRMonitoring = () => {
             ))}
           </div>
         ) : filteredEntries.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
             {filteredEntries.map((entry) => (
               <OFRCard
                 key={entry.id}
                 entry={entry}
                 onViewDetails={handleViewDetails}
+                viewMode={viewMode}
               />
             ))}
           </div>
