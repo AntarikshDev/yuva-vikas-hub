@@ -60,14 +60,14 @@ const OFRMonitoring = () => {
 
   return (
     <MainLayout role="director">
-      <div className="space-y-6">
+      <div className="space-y-4 lg:space-y-6 p-4 lg:p-6 max-w-full overflow-x-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">OFR Monitoring</h1>
-            <p className="text-muted-foreground">Monitor and track On Field Registration entries nationwide</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">OFR Monitoring</h1>
+            <p className="text-sm text-muted-foreground">Monitor and track On Field Registration entries nationwide</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <div className="flex items-center gap-1 border rounded-lg p-1">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -86,9 +86,12 @@ const OFRMonitoring = () => {
                 <List className="h-4 w-4" />
               </Button>
             </div>
-            <Button>
+            <Button className="hidden sm:flex">
               <Download className="h-4 w-4 mr-2" />
               Export
+            </Button>
+            <Button size="icon" className="sm:hidden">
+              <Download className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -99,9 +102,9 @@ const OFRMonitoring = () => {
         {/* Filters */}
         <Card>
           <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="flex flex-col lg:flex-row gap-3">
               {/* Search */}
-              <div className="lg:col-span-2">
+              <div className="flex-1 min-w-[200px]">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -114,24 +117,26 @@ const OFRMonitoring = () => {
               </div>
 
               {/* Date Range */}
-              <DateRangePicker
-                dateRange={
-                  filters.dateRange[0] && filters.dateRange[1]
-                    ? { from: filters.dateRange[0], to: filters.dateRange[1] }
-                    : undefined
-                }
-                onDateRangeChange={(range) => 
-                  setFilters({ ...filters, dateRange: range ? [range.from || null, range.to || null] : [null, null] })
-                }
-              />
+              <div className="w-full lg:w-[180px]">
+                <DateRangePicker
+                  dateRange={
+                    filters.dateRange[0] && filters.dateRange[1]
+                      ? { from: filters.dateRange[0], to: filters.dateRange[1] }
+                      : undefined
+                  }
+                  onDateRangeChange={(range) => 
+                    setFilters({ ...filters, dateRange: range ? [range.from || null, range.to || null] : [null, null] })
+                  }
+                />
+              </div>
 
               {/* State Filter */}
               <Select
                 value={filters.state}
                 onValueChange={(value) => setFilters({ ...filters, state: value, district: 'all', block: 'all' })}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select State" />
+                <SelectTrigger className="w-full lg:w-[140px]">
+                  <SelectValue placeholder="State" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All States</SelectItem>
@@ -150,8 +155,8 @@ const OFRMonitoring = () => {
                 onValueChange={(value) => setFilters({ ...filters, district: value, block: 'all' })}
                 disabled={filters.state === 'all'}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select District" />
+                <SelectTrigger className="w-full lg:w-[140px]">
+                  <SelectValue placeholder="District" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Districts</SelectItem>
@@ -185,8 +190,8 @@ const OFRMonitoring = () => {
                 onValueChange={(value) => setFilters({ ...filters, block: value })}
                 disabled={filters.district === 'all'}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Block" />
+                <SelectTrigger className="w-full lg:w-[120px]">
+                  <SelectValue placeholder="Block" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Blocks</SelectItem>
@@ -196,28 +201,24 @@ const OFRMonitoring = () => {
                   <SelectItem value="Block D">Block D</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
 
-            {/* Second Row - Status Filter */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-4">
-              <div className="lg:col-start-5">
-                <Select
-                  value={filters.status}
-                  onValueChange={(value) => setFilters({ ...filters, status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Pending Verification">Pending Verification</SelectItem>
-                    <SelectItem value="Verified">Verified</SelectItem>
-                    <SelectItem value="Rejected">Rejected</SelectItem>
-                    <SelectItem value="Ready for Migration">Ready for Migration</SelectItem>
-                    <SelectItem value="Migrated">Migrated</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Status Filter */}
+              <Select
+                value={filters.status}
+                onValueChange={(value) => setFilters({ ...filters, status: value })}
+              >
+                <SelectTrigger className="w-full lg:w-[160px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="Pending Verification">Pending</SelectItem>
+                  <SelectItem value="Verified">Verified</SelectItem>
+                  <SelectItem value="Rejected">Rejected</SelectItem>
+                  <SelectItem value="Ready for Migration">Ready</SelectItem>
+                  <SelectItem value="Migrated">Migrated</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -231,7 +232,7 @@ const OFRMonitoring = () => {
 
         {/* OFR Entries Grid/List */}
         {isLoading ? (
-          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4' : 'space-y-3 lg:space-y-4'}>
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="p-4 animate-pulse">
                 <div className="h-32 bg-muted rounded" />
@@ -239,7 +240,7 @@ const OFRMonitoring = () => {
             ))}
           </div>
         ) : filteredEntries.length > 0 ? (
-          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
+          <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4' : 'space-y-3 lg:space-y-4'}>
             {filteredEntries.map((entry) => (
               <OFRCard
                 key={entry.id}
@@ -250,7 +251,7 @@ const OFRMonitoring = () => {
             ))}
           </div>
         ) : (
-          <Card className="p-12">
+          <Card className="p-8 lg:p-12">
             <div className="text-center">
               <Filter className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No entries found</h3>

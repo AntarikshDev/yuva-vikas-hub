@@ -68,18 +68,18 @@ export const OFRStatisticsBar: React.FC<OFRStatisticsBarProps> = ({ statistics }
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 lg:gap-4">
       {stats.map((stat, index) => {
         const Icon = stat.icon;
         return (
-          <Card key={index} className="p-4">
+          <Card key={index} className="p-3 lg:p-4">
             <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground mb-1 truncate">{stat.label}</p>
+                <p className="text-xl lg:text-2xl font-bold text-foreground truncate">{stat.value}</p>
               </div>
-              <div className={`${stat.bgColor} ${stat.color} p-2 rounded-lg`}>
-                <Icon className="h-4 w-4" />
+              <div className={`${stat.bgColor} ${stat.color} p-1.5 lg:p-2 rounded-lg flex-shrink-0 ml-2`}>
+                <Icon className="h-3 w-3 lg:h-4 lg:w-4" />
               </div>
             </div>
           </Card>
