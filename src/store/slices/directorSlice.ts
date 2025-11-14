@@ -69,6 +69,7 @@ interface ConversionFunnel {
   mobilisations: number;
   counselling: number;
   enrollments: number;
+  trainingCompletion: number;
   placements: number;
   retention: number;
 }
@@ -334,6 +335,7 @@ export const fetchMobilisationData = createAsyncThunk(
           mobilisations: 52000,
           counselling: 48500,
           enrollments: 45632,
+          trainingCompletion: 42150,
           placements: 35780,
           retention: 30480,
         },
