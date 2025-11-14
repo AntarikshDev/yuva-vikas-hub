@@ -8,6 +8,7 @@ interface ConversionFunnelProps {
     mobilisations: number;
     counselling: number;
     enrollments: number;
+    trainingCompletion: number;
     placements: number;
     retention: number;
   } | undefined;
@@ -23,6 +24,7 @@ export const ConversionFunnel: React.FC<ConversionFunnelProps> = ({ funnel, isLo
     { name: 'Mobilisations', value: funnel.mobilisations, color: 'bg-blue-500' },
     { name: 'Counselling', value: funnel.counselling, color: 'bg-indigo-500' },
     { name: 'Enrollments', value: funnel.enrollments, color: 'bg-purple-500' },
+    { name: 'Training Completion', value: funnel.trainingCompletion, color: 'bg-violet-500' },
     { name: 'Placements', value: funnel.placements, color: 'bg-pink-500' },
     { name: 'Retention', value: funnel.retention, color: 'bg-rose-500' },
   ];
