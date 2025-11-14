@@ -1,6 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { useAppSelector } from '@/hooks/useAppSelector';
+import { useAppDispatch } from '@/hooks/useAppSelector';
+import { fetchMobilisationData } from '@/store/slices/directorSlice';
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import {
@@ -48,10 +50,16 @@ interface ActivityDetail {
 }
 
 const ActivitiesMonitoring = () => {
-  const { mobilisationData } = useAppSelector((state) => state.director);
+  const dispatch = useAppDispatch();
+  const { mobilisationData, isLoading } = useAppSelector((state) => state.director);
   const activities: ActivityDetail[] = mobilisationData?.activities.recentActivities || [];
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+
+  // Fetch mobilisation data on mount
+  useEffect(() => {
+    dispatch(fetchMobilisationData({}));
+  }, [dispatch]);
   const [selectedState, setSelectedState] = useState<string>('all');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('all');
   const [selectedBlock, setSelectedBlock] = useState<string>('all');
