@@ -130,7 +130,9 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
         <div className="space-y-1 text-xs min-w-[160px]">
           <div className="flex justify-between gap-3">
             <span className="text-muted-foreground whitespace-nowrap">WO Date:</span>
-            <span className="font-medium">{format(new Date(wo.workOrderDate), 'dd MMM yyyy')}</span>
+            <span className="font-medium">
+              {wo.workOrderDate ? format(new Date(wo.workOrderDate), 'dd MMM yyyy') : 'N/A'}
+            </span>
           </div>
           <div className="flex justify-between gap-3">
             <span className="text-muted-foreground whitespace-nowrap">Setup:</span>
