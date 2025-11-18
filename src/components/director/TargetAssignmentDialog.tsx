@@ -69,10 +69,8 @@ const targetAssignmentSchema = z.object({
   minority: z.number().min(0, 'Must be 0 or greater').max(5000),
   districts: z.array(z.string()).min(1, 'At least one district is required'),
   roleAssignments: z.array(z.object({
-    state: z.string(),
-    role: z.string(),
-    quantity: z.number().min(1),
-    monthlySalary: z.number(),
+    role: z.string().min(1, 'Role is required'),
+    employeeIds: z.array(z.string()).min(1, 'At least one employee is required'),
   })).min(1, 'At least one role assignment is required'),
   fixedBudget: z.number().min(0, 'Fixed budget must be 0 or greater'),
   variableBudget: z.number().min(0, 'Variable budget must be 0 or greater'),
@@ -119,13 +117,56 @@ const stateDistrictData = {
 };
 
 const organizationRoles = [
-  { id: 'mobiliser', name: 'Mobiliser', monthlySalary: 25000 },
-  { id: 'counsellor', name: 'Counsellor', monthlySalary: 30000 },
-  { id: 'center_manager', name: 'Center Manager', monthlySalary: 45000 },
-  { id: 'trainer', name: 'Trainer', monthlySalary: 40000 },
-  { id: 'placement_coordinator', name: 'Placement Coordinator', monthlySalary: 35000 },
-  { id: 'data_entry_operator', name: 'Data Entry Operator', monthlySalary: 20000 },
-  { id: 'cluster_manager', name: 'Cluster Manager', monthlySalary: 60000 },
+  { id: 'mobiliser', name: 'Mobiliser' },
+  { id: 'mobiliser_manager', name: 'Mobiliser Manager' },
+  { id: 'counsellor', name: 'Counsellor' },
+  { id: 'center_manager', name: 'Center Manager' },
+  { id: 'trainer', name: 'Trainer' },
+  { id: 'placement_coordinator', name: 'Placement Coordinator' },
+  { id: 'data_entry_operator', name: 'Data Entry Operator' },
+  { id: 'cluster_manager', name: 'Cluster Manager' },
+];
+
+// Mock employee data - will be fetched from HR portal in future
+const mockEmployees = [
+  // Mobilisers
+  { id: 'emp-001', name: 'Rahul Verma', role: 'mobiliser', state: 'Maharashtra', monthlySalary: 24000 },
+  { id: 'emp-002', name: 'Priya Singh', role: 'mobiliser', state: 'Maharashtra', monthlySalary: 25000 },
+  { id: 'emp-003', name: 'Amit Kumar', role: 'mobiliser', state: 'Karnataka', monthlySalary: 23000 },
+  { id: 'emp-004', name: 'Sneha Patil', role: 'mobiliser', state: 'Tamil Nadu', monthlySalary: 26000 },
+  { id: 'emp-005', name: 'Rajesh Sharma', role: 'mobiliser', state: 'Uttar Pradesh', monthlySalary: 22000 },
+  
+  // Mobiliser Managers
+  { id: 'emp-006', name: 'Vikram Desai', role: 'mobiliser_manager', state: 'Maharashtra', monthlySalary: 38000 },
+  { id: 'emp-007', name: 'Anjali Reddy', role: 'mobiliser_manager', state: 'Karnataka', monthlySalary: 35000 },
+  { id: 'emp-008', name: 'Suresh Nair', role: 'mobiliser_manager', state: 'Tamil Nadu', monthlySalary: 37000 },
+  
+  // Counsellors
+  { id: 'emp-009', name: 'Meera Joshi', role: 'counsellor', state: 'Maharashtra', monthlySalary: 30000 },
+  { id: 'emp-010', name: 'Karan Mehta', role: 'counsellor', state: 'Karnataka', monthlySalary: 32000 },
+  { id: 'emp-011', name: 'Pooja Iyer', role: 'counsellor', state: 'Tamil Nadu', monthlySalary: 29000 },
+  
+  // Center Managers
+  { id: 'emp-012', name: 'Anil Gupta', role: 'center_manager', state: 'Maharashtra', monthlySalary: 45000 },
+  { id: 'emp-013', name: 'Divya Rao', role: 'center_manager', state: 'Karnataka', monthlySalary: 47000 },
+  { id: 'emp-014', name: 'Sanjay Mishra', role: 'center_manager', state: 'Uttar Pradesh', monthlySalary: 43000 },
+  
+  // Trainers
+  { id: 'emp-015', name: 'Ravi Krishnan', role: 'trainer', state: 'Maharashtra', monthlySalary: 40000 },
+  { id: 'emp-016', name: 'Lakshmi Nair', role: 'trainer', state: 'Karnataka', monthlySalary: 42000 },
+  { id: 'emp-017', name: 'Arjun Shetty', role: 'trainer', state: 'Tamil Nadu', monthlySalary: 39000 },
+  
+  // Placement Coordinators
+  { id: 'emp-018', name: 'Neha Agarwal', role: 'placement_coordinator', state: 'Maharashtra', monthlySalary: 35000 },
+  { id: 'emp-019', name: 'Rohit Kapoor', role: 'placement_coordinator', state: 'Karnataka', monthlySalary: 36000 },
+  
+  // Data Entry Operators
+  { id: 'emp-020', name: 'Manish Tiwari', role: 'data_entry_operator', state: 'Maharashtra', monthlySalary: 20000 },
+  { id: 'emp-021', name: 'Kavita Yadav', role: 'data_entry_operator', state: 'Karnataka', monthlySalary: 21000 },
+  
+  // Cluster Managers
+  { id: 'emp-022', name: 'Sunil Pandey', role: 'cluster_manager', state: 'Maharashtra', monthlySalary: 60000 },
+  { id: 'emp-023', name: 'Deepa Kulkarni', role: 'cluster_manager', state: 'Karnataka', monthlySalary: 62000 },
 ];
 
 export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentDialogProps) {
@@ -133,9 +174,8 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
-  const [selectedRoleState, setSelectedRoleState] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState<string>('');
-  const [roleQuantity, setRoleQuantity] = useState<number>(1);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(targetAssignmentSchema),
@@ -163,11 +203,14 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
   const expectedProfit = totalBudget * 0.15; // 15% profit margin
   const categoryTotal = watchedValues.st + watchedValues.sc + watchedValues.obc + watchedValues.general + watchedValues.minority;
   
-  // Calculate total manpower and monthly salary cost
-  const totalManpower = watchedValues.roleAssignments.reduce((sum, assignment) => sum + assignment.quantity, 0);
-  const monthlySalaryCost = watchedValues.roleAssignments.reduce((sum, assignment) => 
-    sum + (assignment.quantity * assignment.monthlySalary), 0
+  // Calculate total manpower and monthly salary cost from selected employees
+  const totalManpower = watchedValues.roleAssignments.reduce((sum, assignment) => 
+    sum + assignment.employeeIds.length, 0
   );
+  const monthlySalaryCost = watchedValues.roleAssignments.reduce((sum, assignment) => {
+    const employees = mockEmployees.filter(emp => assignment.employeeIds.includes(emp.id));
+    return sum + employees.reduce((empSum, emp) => empSum + emp.monthlySalary, 0);
+  }, 0);
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
@@ -195,12 +238,10 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
           minority: data.minority,
         },
         districts: data.districts,
-        roleAssignments: data.roleAssignments as Array<{
-          state: string;
-          role: string;
-          quantity: number;
-          monthlySalary: number;
-        }>,
+        roleAssignments: data.roleAssignments.map(a => ({
+          role: a.role!,
+          employeeIds: a.employeeIds!
+        })),
         fixedBudget: data.fixedBudget,
         variableBudget: data.variableBudget,
       })).unwrap();
@@ -255,8 +296,8 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
   };
 
   const addRoleAssignment = () => {
-    if (!selectedRoleState || !selectedRole || roleQuantity < 1) {
-      toast.error('Please select state, role and quantity');
+    if (!selectedRole || selectedEmployees.length === 0) {
+      toast.error('Please select role and at least one employee');
       return;
     }
 
@@ -265,17 +306,19 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
 
     const current = form.getValues('roleAssignments');
     
-    // Check if this state-role combination already exists
+    // Check if this role already exists
     const existingIndex = current.findIndex(
-      assignment => assignment.state === selectedRoleState && assignment.role === selectedRole
+      assignment => assignment.role === selectedRole
     );
 
     if (existingIndex >= 0) {
-      // Update existing assignment
+      // Merge employees into existing assignment
       const updated = [...current];
+      const existingEmployeeIds = updated[existingIndex].employeeIds;
+      const newEmployeeIds = [...new Set([...existingEmployeeIds, ...selectedEmployees])];
       updated[existingIndex] = {
         ...updated[existingIndex],
-        quantity: updated[existingIndex].quantity + roleQuantity
+        employeeIds: newEmployeeIds
       };
       form.setValue('roleAssignments', updated);
     } else {
@@ -283,33 +326,53 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
       form.setValue('roleAssignments', [
         ...current,
         {
-          state: selectedRoleState,
           role: selectedRole,
-          quantity: roleQuantity,
-          monthlySalary: role.monthlySalary,
+          employeeIds: selectedEmployees,
         }
       ]);
     }
 
     setSelectedRole('');
-    setRoleQuantity(1);
-    toast.success('Role assignment added');
+    setSelectedEmployees([]);
+    toast.success('Employees assigned to role');
   };
 
-  const removeRoleAssignment = (index: number) => {
+  const removeEmployeeFromRole = (roleId: string, employeeId: string) => {
     const current = form.getValues('roleAssignments');
-    form.setValue('roleAssignments', current.filter((_, i) => i !== index));
+    const updated = current.map(assignment => {
+      if (assignment.role === roleId) {
+        return {
+          ...assignment,
+          employeeIds: assignment.employeeIds.filter(id => id !== employeeId)
+        };
+      }
+      return assignment;
+    }).filter(assignment => assignment.employeeIds.length > 0); // Remove role if no employees left
+    
+    form.setValue('roleAssignments', updated);
   };
 
-  const getRoleAssignmentsByState = () => {
-    const grouped: Record<string, typeof watchedValues.roleAssignments> = {};
-    watchedValues.roleAssignments.forEach((assignment) => {
-      if (!grouped[assignment.state]) {
-        grouped[assignment.state] = [];
-      }
-      grouped[assignment.state].push(assignment);
+  const getAvailableEmployeesForRole = (roleId: string) => {
+    // Get states from selected districts
+    const selectedStates = new Set<string>();
+    watchedValues.districts.forEach((districtWithState) => {
+      const [state] = districtWithState.split('|');
+      selectedStates.add(state);
     });
-    return grouped;
+
+    // Get already assigned employee IDs for this role
+    const assignedEmployeeIds = new Set<string>();
+    const currentRoleAssignment = watchedValues.roleAssignments.find(a => a.role === roleId);
+    if (currentRoleAssignment) {
+      currentRoleAssignment.employeeIds.forEach(id => assignedEmployeeIds.add(id));
+    }
+
+    // Filter employees by role and state, exclude already assigned
+    return mockEmployees.filter(emp => 
+      emp.role === roleId && 
+      selectedStates.has(emp.state) &&
+      !assignedEmployeeIds.has(emp.id)
+    );
   };
 
   return (
@@ -841,107 +904,133 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
               render={() => (
                 <FormItem>
                   <FormLabel>Role Assignments</FormLabel>
-                  <FormDescription>Assign roles and manpower by state (salary data from HR portal)</FormDescription>
+                  <FormDescription>
+                    Select employees for each role. Employee salaries are fetched from HR portal. 
+                    Only employees from selected states are shown.
+                  </FormDescription>
                   
                   <div className="space-y-4">
-                    {/* Role Selection */}
-                    <div className="grid grid-cols-4 gap-3">
-                      <Select 
-                        value={selectedRoleState} 
-                        onValueChange={(value) => {
-                          setSelectedRoleState(value);
-                          setSelectedRole('');
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select State" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.keys(stateDistrictData).map((state) => (
-                            <SelectItem key={state} value={state}>
-                              {state}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    {/* Role and Employee Selection */}
+                    <div className="space-y-3">
+                      <div className="flex gap-3">
+                        <Select 
+                          value={selectedRole} 
+                          onValueChange={(value) => {
+                            setSelectedRole(value);
+                            setSelectedEmployees([]);
+                          }}
+                        >
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Select Role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {organizationRoles.map((role) => (
+                              <SelectItem key={role.id} value={role.id}>
+                                {role.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
 
-                      <Select 
-                        value={selectedRole} 
-                        onValueChange={setSelectedRole}
-                        disabled={!selectedRoleState}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {organizationRoles.map((role) => (
-                            <SelectItem key={role.id} value={role.id}>
-                              {role.name} (₹{(role.monthlySalary / 1000).toFixed(0)}k/mo)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        <Button 
+                          type="button" 
+                          onClick={addRoleAssignment}
+                          disabled={!selectedRole || selectedEmployees.length === 0}
+                          variant="outline"
+                        >
+                          Assign Employees
+                        </Button>
+                      </div>
 
-                      <Input
-                        type="number"
-                        placeholder="Qty"
-                        min={1}
-                        value={roleQuantity}
-                        onChange={(e) => setRoleQuantity(parseInt(e.target.value) || 1)}
-                        disabled={!selectedRole}
-                      />
-
-                      <Button 
-                        type="button" 
-                        onClick={addRoleAssignment}
-                        disabled={!selectedRoleState || !selectedRole || roleQuantity < 1}
-                        variant="outline"
-                      >
-                        Add
-                      </Button>
+                      {/* Employee Multi-Select */}
+                      {selectedRole && (
+                        <div className="space-y-2">
+                          <FormLabel className="text-sm text-muted-foreground">
+                            Select Employees (from selected states)
+                          </FormLabel>
+                          <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto bg-background">
+                            {getAvailableEmployeesForRole(selectedRole).length === 0 ? (
+                              <p className="text-sm text-muted-foreground text-center py-2">
+                                No available employees for this role in selected states
+                              </p>
+                            ) : (
+                              getAvailableEmployeesForRole(selectedRole).map((emp) => (
+                                <label
+                                  key={emp.id}
+                                  className="flex items-center gap-3 p-2 rounded hover:bg-accent cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedEmployees.includes(emp.id)}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        setSelectedEmployees([...selectedEmployees, emp.id]);
+                                      } else {
+                                        setSelectedEmployees(selectedEmployees.filter(id => id !== emp.id));
+                                      }
+                                    }}
+                                    className="w-4 h-4"
+                                  />
+                                  <div className="flex-1 flex items-center justify-between">
+                                    <div>
+                                      <span className="text-sm font-medium">{emp.name}</span>
+                                      <span className="text-xs text-muted-foreground ml-2">({emp.state})</span>
+                                    </div>
+                                    <span className="text-sm text-muted-foreground">
+                                      ₹{(emp.monthlySalary / 1000).toFixed(0)}k/mo
+                                    </span>
+                                  </div>
+                                </label>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Selected Role Assignments Grouped by State */}
+                    {/* Selected Role Assignments Grouped by Role */}
                     {watchedValues.roleAssignments.length > 0 && (
                       <div className="border rounded-lg p-4 space-y-3 max-h-64 overflow-y-auto bg-muted/30">
                         <div className="flex justify-between items-center text-sm font-medium text-muted-foreground mb-2">
-                          <span>Assigned Roles ({totalManpower} total)</span>
-                          <span>Monthly Cost: ₹{(monthlySalaryCost / 100000).toFixed(2)}L</span>
+                          <span>Assigned Employees ({totalManpower} total)</span>
+                          <span>Monthly Salary Cost: ₹{(monthlySalaryCost / 100000).toFixed(2)}L</span>
                         </div>
-                        {Object.entries(getRoleAssignmentsByState()).map(([state, assignments]) => (
-                          <div key={state} className="space-y-2">
-                            <div className="text-sm font-semibold text-foreground">{state}</div>
-                            <div className="space-y-1.5 pl-3">
-                              {assignments.map((assignment, index) => {
-                                const roleData = organizationRoles.find(r => r.id === assignment.role);
-                                const assignmentIndex = watchedValues.roleAssignments.findIndex(
-                                  a => a.state === assignment.state && a.role === assignment.role
-                                );
-                                return (
+                        {watchedValues.roleAssignments.map((assignment, roleIndex) => {
+                          const roleData = organizationRoles.find(r => r.id === assignment.role);
+                          const assignedEmployees = mockEmployees.filter(emp => 
+                            assignment.employeeIds.includes(emp.id)
+                          );
+                          return (
+                            <div key={roleIndex} className="space-y-2">
+                              <div className="text-sm font-semibold text-foreground">
+                                {roleData?.name} ({assignedEmployees.length})
+                              </div>
+                              <div className="space-y-1.5 pl-3">
+                                {assignedEmployees.map((emp) => (
                                   <div 
-                                    key={assignmentIndex}
+                                    key={emp.id}
                                     className="flex items-center justify-between p-2 rounded bg-background border"
                                   >
                                     <div className="flex items-center gap-3 flex-1">
-                                      <Badge variant="secondary">{assignment.quantity}x</Badge>
-                                      <span className="text-sm font-medium">{roleData?.name}</span>
+                                      <Badge variant="outline" className="text-xs">{emp.state}</Badge>
+                                      <span className="text-sm font-medium">{emp.name}</span>
                                       <span className="text-xs text-muted-foreground">
-                                        ₹{((assignment.quantity * assignment.monthlySalary) / 1000).toFixed(0)}k/mo
+                                        ₹{(emp.monthlySalary / 1000).toFixed(0)}k/mo
                                       </span>
                                     </div>
                                     <button
                                       type="button"
-                                      onClick={() => removeRoleAssignment(assignmentIndex)}
+                                      onClick={() => removeEmployeeFromRole(assignment.role, emp.id)}
                                       className="ml-2 hover:text-destructive"
                                     >
                                       ×
                                     </button>
                                   </div>
-                                );
-                              })}
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
