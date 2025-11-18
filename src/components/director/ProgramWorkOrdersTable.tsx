@@ -134,15 +134,21 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
           </div>
           <div className="flex justify-between gap-3">
             <span className="text-muted-foreground whitespace-nowrap">Setup:</span>
-            <span className="font-medium">{format(new Date(wo.centreSetupDate), 'dd MMM yyyy')}</span>
+            <span className="font-medium">
+              {wo.centreSetupDate ? format(new Date(wo.centreSetupDate), 'dd MMM yyyy') : 'Pending'}
+            </span>
           </div>
           <div className="flex justify-between gap-3">
             <span className="text-muted-foreground whitespace-nowrap">Mob. Start:</span>
-            <span className="font-medium">{format(new Date(wo.mobilisationStartDate), 'dd MMM yyyy')}</span>
+            <span className="font-medium">
+              {wo.mobilisationStartDate ? format(new Date(wo.mobilisationStartDate), 'dd MMM yyyy') : 'Pending'}
+            </span>
           </div>
           <div className="flex justify-between gap-3">
             <span className="text-muted-foreground whitespace-nowrap">Batch Inc:</span>
-            <span className="font-medium">{format(new Date(wo.batchIncorporationDate), 'dd MMM yyyy')}</span>
+            <span className="font-medium">
+              {wo.batchIncorporationDate ? format(new Date(wo.batchIncorporationDate), 'dd MMM yyyy') : 'Pending'}
+            </span>
           </div>
         </div>
       ),
