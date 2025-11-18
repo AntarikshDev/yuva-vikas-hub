@@ -21,10 +21,17 @@ import {
   AlertCircle,
   Users,
   Download,
+  Edit,
+  Wallet,
+  TrendingDown as TrendingDownIcon,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { WorkOrder } from '@/store/slices/directorSlice';
+import { WorkOrder, PaymentCycle } from '@/store/slices/directorSlice';
 import { cn } from '@/lib/utils';
+import { PaymentUpdateDialog } from './PaymentUpdateDialog';
+import { useAppDispatch } from '@/hooks/useAppSelector';
+import { updatePaymentCycle } from '@/store/slices/directorSlice';
+import { toast } from '@/hooks/use-toast';
 
 interface PaymentTrackingDialogProps {
   open: boolean;
@@ -38,6 +45,22 @@ export const PaymentTrackingDialog: React.FC<PaymentTrackingDialogProps> = ({
   workOrder,
 }) => {
   const [activeTab, setActiveTab] = useState('cycles');
+  const [paymentUpdateOpen, setPaymentUpdateOpen] = useState(false);
+  const [selectedCycle, setSelectedCycle] = useState<PaymentCycle | null>(null);
+  const dispatch = useAppDispatch();
+
+  const handleUpdatePayment = (workOrderId: string, cycleNumber: number, data: any) => {
+    dispatch(updatePaymentCycle({ workOrderId, cycleNumber, data }));
+    toast({
+      title: 'Payment Updated',
+      description: `Cycle #${cycleNumber} has been updated successfully.`,
+    });
+  };
+
+  const handleEditPayment = (cycle: PaymentCycle) => {
+    setSelectedCycle(cycle);
+    setPaymentUpdateOpen(true);
+  };
 
   if (!workOrder) return null;
 
@@ -283,6 +306,17 @@ export const PaymentTrackingDialog: React.FC<PaymentTrackingDialogProps> = ({
                         <div className="text-sm text-muted-foreground">
                           {cycle.percentage}% of total
                         </div>
+                        {(cycle.status === 'Pending' || cycle.status === 'Delayed') && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="mt-2"
+                            onClick={() => handleEditPayment(cycle)}
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Update
+                          </Button>
+                        )}
                       </div>
                     </div>
 
@@ -481,6 +515,15 @@ export const PaymentTrackingDialog: React.FC<PaymentTrackingDialogProps> = ({
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Payment Update Dialog */}
+        <PaymentUpdateDialog
+          open={paymentUpdateOpen}
+          onOpenChange={setPaymentUpdateOpen}
+          cycle={selectedCycle}
+          workOrderId={workOrder.id}
+          onUpdate={handleUpdatePayment}
+        />
       </DialogContent>
     </Dialog>
   );
