@@ -1,122 +1,136 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
-import { useAppSelector } from '@/hooks/useAppSelector';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '@/store';
-import { 
-  fetchNationalKPIs, 
-  fetchTargetTracking, 
-  fetchStatePerformance,
-  fetchCompliance,
-  setFilters
-} from '@/store/slices/directorSlice';
-import { NationalKPICards } from '@/components/director/NationalKPICards';
-import { TargetTrackingSection } from '@/components/director/TargetTrackingSection';
-import { StateHeatmap } from '@/components/director/StateHeatmap';
-import { CompliancePanel } from '@/components/director/CompliancePanel';
-import { BatchLaunchAlerts } from '@/components/director/BatchLaunchAlerts';
-import { AIInsightsPanel } from '@/components/director/AIInsightsPanel';
-import { Button } from '@/components/ui/button';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Bell } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { ExportDialog } from '@/components/director/ExportDialog';
-import { KPIAlertDialog } from '@/components/director/KPIAlertDialog';
-import { DateRange } from 'react-day-picker';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { Users, GraduationCap, Briefcase, TrendingUp } from 'lucide-react';
 
 const DirectorDashboard = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { nationalKPIs, targetTracking, statePerformance, compliance, filters, isLoading } = useAppSelector(
-    (state) => state.director
-  );
+  const navigate = useNavigate();
 
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
-
-  useEffect(() => {
-    dispatch(fetchNationalKPIs());
-    dispatch(fetchTargetTracking());
-    dispatch(fetchStatePerformance());
-    dispatch(fetchCompliance());
-  }, [dispatch, filters]);
+  const dashboardSections = [
+    {
+      title: 'Mobilisation',
+      description: 'Track candidate mobilisation, targets, and work orders',
+      icon: Users,
+      path: '/director/mobilisation',
+      color: 'from-blue-500 to-blue-600',
+      stats: { active: 12, total: 15 }
+    },
+    {
+      title: 'Training',
+      description: 'Monitor training batches, curriculum, and trainer performance',
+      icon: GraduationCap,
+      path: '/director/training',
+      color: 'from-green-500 to-green-600',
+      stats: { active: 8, total: 10 }
+    },
+    {
+      title: 'Placements',
+      description: 'Oversee placement activities, company partnerships, and success rates',
+      icon: Briefcase,
+      path: '/director/placements',
+      color: 'from-purple-500 to-purple-600',
+      stats: { active: 5, total: 8 }
+    },
+    {
+      title: 'Post Placements',
+      description: 'Track retention, welfare, and post-placement support',
+      icon: TrendingUp,
+      path: '/director/post-placements',
+      color: 'from-orange-500 to-orange-600',
+      stats: { active: 6, total: 7 }
+    }
+  ];
 
   return (
     <MainLayout role="director">
       <div className="space-y-6">
-        {/* Header with Filters */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Director Dashboard</h1>
-            <p className="text-muted-foreground">National-level overview and performance metrics</p>
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
-            <DateRangePicker
-              dateRange={filters.dateRange[0] && filters.dateRange[1] ? { from: new Date(filters.dateRange[0]), to: new Date(filters.dateRange[1]) } : undefined}
-              onDateRangeChange={(range) => dispatch(setFilters({ dateRange: [range?.from?.toISOString() || null, range?.to?.toISOString() || null] }))}
-            />
-            
-            <Select value={filters.state} onValueChange={(value) => dispatch(setFilters({ state: value }))}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All States" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All States</SelectItem>
-                <SelectItem value="maharashtra">Maharashtra</SelectItem>
-                <SelectItem value="karnataka">Karnataka</SelectItem>
-                <SelectItem value="tamil-nadu">Tamil Nadu</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={filters.program} onValueChange={(value) => dispatch(setFilters({ program: value }))}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="All Programs" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Programs</SelectItem>
-                <SelectItem value="retail">Retail Management</SelectItem>
-                <SelectItem value="healthcare">Healthcare Assistant</SelectItem>
-                <SelectItem value="hospitality">Hospitality Services</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button onClick={() => setExportDialogOpen(true)} variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-
-            <Button onClick={() => setAlertDialogOpen(true)} variant="outline">
-              <Bell className="mr-2 h-4 w-4" />
-              Set Alerts
-            </Button>
-          </div>
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Director Dashboard</h1>
+          <p className="text-muted-foreground mt-2">
+            Select an operations module to monitor and manage
+          </p>
         </div>
 
-        {/* Section 1: Overview Metrics */}
-        <NationalKPICards kpis={nationalKPIs} isLoading={isLoading} />
+        {/* 4-Tile Launcher Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+          {dashboardSections.map((section) => {
+            const Icon = section.icon;
+            return (
+              <Card
+                key={section.path}
+                className="cursor-pointer transition-all hover:shadow-lg hover:scale-105 border-2 hover:border-primary"
+                onClick={() => navigate(section.path)}
+              >
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1 flex-1">
+                      <CardTitle className="text-2xl flex items-center gap-3">
+                        <div className={`p-3 rounded-lg bg-gradient-to-br ${section.color} text-white`}>
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        {section.title}
+                      </CardTitle>
+                      <CardDescription className="text-base">
+                        {section.description}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-6 text-sm">
+                    <div className="flex flex-col">
+                      <span className="text-2xl font-bold text-foreground">
+                        {section.stats.active}
+                      </span>
+                      <span className="text-muted-foreground">Active</span>
+                    </div>
+                    <div className="h-12 w-px bg-border" />
+                    <div className="flex flex-col">
+                      <span className="text-2xl font-bold text-muted-foreground">
+                        {section.stats.total}
+                      </span>
+                      <span className="text-muted-foreground">Total</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-        {/* Section 2: Target Tracking & Achievements */}
-        <TargetTrackingSection targetTracking={targetTracking} isLoading={isLoading} />
-
-        {/* Section 3: Program Health */}
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Program Health</h2>
-          <StateHeatmap statePerformance={statePerformance} isLoading={isLoading} />
+        {/* Quick Stats Overview */}
+        <Card>
+          <CardHeader>
+            <CardTitle>National Overview</CardTitle>
+            <CardDescription>Key metrics across all operations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-4">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Total Candidates</p>
+                <p className="text-2xl font-bold">15,234</p>
+                <p className="text-xs text-green-600">+12% from last month</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Active Centers</p>
+                <p className="text-2xl font-bold">42</p>
+                <p className="text-xs text-blue-600">Across 8 states</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Placement Rate</p>
+                <p className="text-2xl font-bold">78%</p>
+                <p className="text-xs text-green-600">+5% from target</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Total Budget</p>
+                <p className="text-2xl font-bold">₹28.1Cr</p>
+                <p className="text-xs text-muted-foreground">Across all programs</p>
+              </div>
+            </div>
+          </CardContent>
         </Card>
-
-        {/* Section 4: Compliance & Alerts */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <CompliancePanel compliance={compliance} isLoading={isLoading} />
-          <BatchLaunchAlerts batches={compliance?.upcomingBatches || []} isLoading={isLoading} />
-        </div>
-
-        {/* Section 5: AI & Insights */}
-        <AIInsightsPanel />
-
-        {/* Dialogs */}
-        <ExportDialog open={exportDialogOpen} onOpenChange={setExportDialogOpen} />
-        <KPIAlertDialog open={alertDialogOpen} onOpenChange={setAlertDialogOpen} />
       </div>
     </MainLayout>
   );

@@ -43,6 +43,7 @@ import MobilisationMonitoring from "./pages/state-admin/MobilisationMonitoring";
 
 // Director Routes
 import DirectorDashboard from "./pages/director/Dashboard";
+import MobilisationDashboard from "./pages/director/MobilisationDashboard";
 import DirectorMobilisationMonitoring from "./pages/director/MobilisationMonitoring";
 import DirectorActivitiesMonitoring from "./pages/director/ActivitiesMonitoring";
 import DirectorOFRMonitoring from "./pages/director/OFRMonitoring";
@@ -207,6 +208,7 @@ const App = () => {
             
             {/* Director Routes */}
             <Route path="/director/dashboard" element={<DirectorDashboard />} />
+            <Route path="/director/mobilisation" element={<MobilisationDashboard />} />
             <Route path="/director/mobilisation-monitoring" element={<DirectorMobilisationMonitoring />} />
             <Route path="/director/activities-monitoring" element={<DirectorActivitiesMonitoring />} />
             <Route path="/director/ofr-monitoring" element={<DirectorOFRMonitoring />} />

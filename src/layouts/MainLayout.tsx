@@ -479,29 +479,39 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
   if (role === 'director') {
     return [
       {
-        label: 'National Overview',
+        label: 'Main',
         items: [
           { name: 'Dashboard', path: '/director/dashboard', icon: Home },
+        ]
+      },
+      {
+        label: 'Operations',
+        items: [
           { 
-            name: 'Mobilisation Monitoring', 
-            path: '/director/mobilisation-monitoring', 
-            icon: TrendingUp,
+            name: 'Mobilisation', 
+            path: '/director/mobilisation', 
+            icon: Users,
             subItems: [
+              { name: 'Mobilisation Monitoring', path: '/director/mobilisation-monitoring', icon: TrendingUp },
               { name: 'Activities Monitoring', path: '/director/activities-monitoring', icon: Calendar },
               { name: 'OFR Monitoring', path: '/director/ofr-monitoring', icon: FileText },
             ]
           },
-          { name: 'State Performance', path: '/director/state-performance', icon: Map },
-          { name: 'Program Health', path: '/director/program-health', icon: ({ className }) => <span className={className || ''}>🎯</span> },
-        ]
-      },
-      {
-        label: 'Management',
-        items: [
-          { name: 'Target Assignment', path: '/director/targets', icon: ({ className }) => <span className={className || ''}>🎯</span> },
-          { name: 'National Heads', path: '/director/national-heads', icon: Users },
-          { name: 'Compliance & Alerts', path: '/director/compliance', icon: AlertCircle },
-          { name: 'Reports & Analytics', path: '/director/reports', icon: BarChart },
+          { 
+            name: 'Training', 
+            path: '/director/training', 
+            icon: BookOpen,
+          },
+          { 
+            name: 'Placements', 
+            path: '/director/placements', 
+            icon: Briefcase,
+          },
+          { 
+            name: 'Post Placements', 
+            path: '/director/post-placements', 
+            icon: TrendingUp,
+          },
         ]
       },
       {
