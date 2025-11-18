@@ -9,6 +9,7 @@ import { Search, ArrowUpDown, Eye, Download, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { WorkOrder } from '@/store/slices/directorSlice';
 import { PaymentTrackingDialog } from './PaymentTrackingDialog';
+import { WorkOrderDetailsDialog } from './WorkOrderDetailsDialog';
 
 interface ProgramWorkOrdersTableProps {
   programName: string;
@@ -28,6 +29,7 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
   const [sortField, setSortField] = useState<SortField>('workOrderDate');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
 
   const handleSort = (field: SortField) => {
@@ -260,7 +262,10 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onViewDetails?.(wo)}
+            onClick={() => {
+              setSelectedWorkOrder(wo);
+              setDetailsDialogOpen(true);
+            }}
             className="gap-2"
           >
             <Eye className="h-4 w-4" />
@@ -318,6 +323,12 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
         <PaymentTrackingDialog
           open={paymentDialogOpen}
           onOpenChange={setPaymentDialogOpen}
+          workOrder={selectedWorkOrder}
+        />
+
+        <WorkOrderDetailsDialog
+          open={detailsDialogOpen}
+          onOpenChange={setDetailsDialogOpen}
           workOrder={selectedWorkOrder}
         />
       </CardContent>
