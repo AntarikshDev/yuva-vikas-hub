@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { TargetAssignmentDialog } from '@/components/director/TargetAssignmentDialog';
 
 const MobilisationDashboard = () => {
   const dispatch = useAppDispatch();
@@ -164,7 +165,12 @@ const MobilisationDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* TODO: Add Target Assignment Dialog */}
+        {/* Target Assignment Dialog */}
+        <TargetAssignmentDialog 
+          open={targetDialogOpen} 
+          onOpenChange={setTargetDialogOpen} 
+        />
+        
         {/* TODO: Add Program Work Orders Table */}
         {/* TODO: Add Payment Tracking Component */}
       </div>
