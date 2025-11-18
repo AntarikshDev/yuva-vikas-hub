@@ -246,7 +246,12 @@ interface TargetAssignmentForm {
   placementDateRange: [string, string];
   categoryTarget: CategoryTarget;
   districts: string[];
-  manpower: number;
+  roleAssignments: Array<{
+    state: string;
+    role: string;
+    quantity: number;
+    monthlySalary: number;
+  }>;
   fixedBudget: number;
   variableBudget: number;
 }
@@ -2352,7 +2357,7 @@ export const createTargetAssignment = createAsyncThunk(
       placementDeadline: formData.placementDateRange[1],
       categoryTarget: formData.categoryTarget,
       districts: formData.districts,
-      manpowerRequired: formData.manpower,
+      manpowerRequired: formData.roleAssignments.reduce((sum, assignment) => sum + assignment.quantity, 0),
       manpowerCurrent: 0,
       fixedBudget: formData.fixedBudget,
       variableBudget: formData.variableBudget,

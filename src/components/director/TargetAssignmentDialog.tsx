@@ -68,7 +68,12 @@ const targetAssignmentSchema = z.object({
   general: z.number().min(0, 'Must be 0 or greater').max(5000),
   minority: z.number().min(0, 'Must be 0 or greater').max(5000),
   districts: z.array(z.string()).min(1, 'At least one district is required'),
-  manpower: z.number().min(1, 'Manpower must be at least 1').max(1000, 'Manpower must be at most 1,000'),
+  roleAssignments: z.array(z.object({
+    state: z.string(),
+    role: z.string(),
+    quantity: z.number().min(1),
+    monthlySalary: z.number(),
+  })).min(1, 'At least one role assignment is required'),
   fixedBudget: z.number().min(0, 'Fixed budget must be 0 or greater'),
   variableBudget: z.number().min(0, 'Variable budget must be 0 or greater'),
 }).refine((data) => data.enrolmentDeadline > data.enrolmentStartDate, {
@@ -113,11 +118,24 @@ const stateDistrictData = {
   'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri', 'Darjeeling'],
 };
 
+const organizationRoles = [
+  { id: 'mobiliser', name: 'Mobiliser', monthlySalary: 25000 },
+  { id: 'counsellor', name: 'Counsellor', monthlySalary: 30000 },
+  { id: 'center_manager', name: 'Center Manager', monthlySalary: 45000 },
+  { id: 'trainer', name: 'Trainer', monthlySalary: 40000 },
+  { id: 'placement_coordinator', name: 'Placement Coordinator', monthlySalary: 35000 },
+  { id: 'data_entry_operator', name: 'Data Entry Operator', monthlySalary: 20000 },
+  { id: 'cluster_manager', name: 'Cluster Manager', monthlySalary: 60000 },
+];
+
 export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentDialogProps) {
   const dispatch = useAppDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedState, setSelectedState] = useState<string>('');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedRoleState, setSelectedRoleState] = useState<string>('');
+  const [selectedRole, setSelectedRole] = useState<string>('');
+  const [roleQuantity, setRoleQuantity] = useState<number>(1);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(targetAssignmentSchema),
@@ -134,7 +152,7 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
       general: 0,
       minority: 0,
       districts: [],
-      manpower: 0,
+      roleAssignments: [],
       fixedBudget: 0,
       variableBudget: 0,
     },
@@ -144,6 +162,12 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
   const totalBudget = watchedValues.fixedBudget + watchedValues.variableBudget;
   const expectedProfit = totalBudget * 0.15; // 15% profit margin
   const categoryTotal = watchedValues.st + watchedValues.sc + watchedValues.obc + watchedValues.general + watchedValues.minority;
+  
+  // Calculate total manpower and monthly salary cost
+  const totalManpower = watchedValues.roleAssignments.reduce((sum, assignment) => sum + assignment.quantity, 0);
+  const monthlySalaryCost = watchedValues.roleAssignments.reduce((sum, assignment) => 
+    sum + (assignment.quantity * assignment.monthlySalary), 0
+  );
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
@@ -171,7 +195,12 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
           minority: data.minority,
         },
         districts: data.districts,
-        manpower: data.manpower,
+        roleAssignments: data.roleAssignments as Array<{
+          state: string;
+          role: string;
+          quantity: number;
+          monthlySalary: number;
+        }>,
         fixedBudget: data.fixedBudget,
         variableBudget: data.variableBudget,
       })).unwrap();
@@ -221,6 +250,64 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
         grouped[state] = [];
       }
       grouped[state].push(district);
+    });
+    return grouped;
+  };
+
+  const addRoleAssignment = () => {
+    if (!selectedRoleState || !selectedRole || roleQuantity < 1) {
+      toast.error('Please select state, role and quantity');
+      return;
+    }
+
+    const role = organizationRoles.find(r => r.id === selectedRole);
+    if (!role) return;
+
+    const current = form.getValues('roleAssignments');
+    
+    // Check if this state-role combination already exists
+    const existingIndex = current.findIndex(
+      assignment => assignment.state === selectedRoleState && assignment.role === selectedRole
+    );
+
+    if (existingIndex >= 0) {
+      // Update existing assignment
+      const updated = [...current];
+      updated[existingIndex] = {
+        ...updated[existingIndex],
+        quantity: updated[existingIndex].quantity + roleQuantity
+      };
+      form.setValue('roleAssignments', updated);
+    } else {
+      // Add new assignment
+      form.setValue('roleAssignments', [
+        ...current,
+        {
+          state: selectedRoleState,
+          role: selectedRole,
+          quantity: roleQuantity,
+          monthlySalary: role.monthlySalary,
+        }
+      ]);
+    }
+
+    setSelectedRole('');
+    setRoleQuantity(1);
+    toast.success('Role assignment added');
+  };
+
+  const removeRoleAssignment = (index: number) => {
+    const current = form.getValues('roleAssignments');
+    form.setValue('roleAssignments', current.filter((_, i) => i !== index));
+  };
+
+  const getRoleAssignmentsByState = () => {
+    const grouped: Record<string, typeof watchedValues.roleAssignments> = {};
+    watchedValues.roleAssignments.forEach((assignment) => {
+      if (!grouped[assignment.state]) {
+        grouped[assignment.state] = [];
+      }
+      grouped[assignment.state].push(assignment);
     });
     return grouped;
   };
@@ -747,26 +834,124 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
               )}
             />
 
-            {/* Manpower & Budget */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <FormField
-                control={form.control}
-                name="manpower"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Manpower Required</FormLabel>
-                    <FormControl>
+            {/* Role Assignments */}
+            <FormField
+              control={form.control}
+              name="roleAssignments"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Role Assignments</FormLabel>
+                  <FormDescription>Assign roles and manpower by state (salary data from HR portal)</FormDescription>
+                  
+                  <div className="space-y-4">
+                    {/* Role Selection */}
+                    <div className="grid grid-cols-4 gap-3">
+                      <Select 
+                        value={selectedRoleState} 
+                        onValueChange={(value) => {
+                          setSelectedRoleState(value);
+                          setSelectedRole('');
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select State" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(stateDistrictData).map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <Select 
+                        value={selectedRole} 
+                        onValueChange={setSelectedRole}
+                        disabled={!selectedRoleState}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organizationRoles.map((role) => (
+                            <SelectItem key={role.id} value={role.id}>
+                              {role.name} (₹{(role.monthlySalary / 1000).toFixed(0)}k/mo)
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
                       <Input
                         type="number"
-                        placeholder="15"
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        placeholder="Qty"
+                        min={1}
+                        value={roleQuantity}
+                        onChange={(e) => setRoleQuantity(parseInt(e.target.value) || 1)}
+                        disabled={!selectedRole}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
+                      <Button 
+                        type="button" 
+                        onClick={addRoleAssignment}
+                        disabled={!selectedRoleState || !selectedRole || roleQuantity < 1}
+                        variant="outline"
+                      >
+                        Add
+                      </Button>
+                    </div>
+
+                    {/* Selected Role Assignments Grouped by State */}
+                    {watchedValues.roleAssignments.length > 0 && (
+                      <div className="border rounded-lg p-4 space-y-3 max-h-64 overflow-y-auto bg-muted/30">
+                        <div className="flex justify-between items-center text-sm font-medium text-muted-foreground mb-2">
+                          <span>Assigned Roles ({totalManpower} total)</span>
+                          <span>Monthly Cost: ₹{(monthlySalaryCost / 100000).toFixed(2)}L</span>
+                        </div>
+                        {Object.entries(getRoleAssignmentsByState()).map(([state, assignments]) => (
+                          <div key={state} className="space-y-2">
+                            <div className="text-sm font-semibold text-foreground">{state}</div>
+                            <div className="space-y-1.5 pl-3">
+                              {assignments.map((assignment, index) => {
+                                const roleData = organizationRoles.find(r => r.id === assignment.role);
+                                const assignmentIndex = watchedValues.roleAssignments.findIndex(
+                                  a => a.state === assignment.state && a.role === assignment.role
+                                );
+                                return (
+                                  <div 
+                                    key={assignmentIndex}
+                                    className="flex items-center justify-between p-2 rounded bg-background border"
+                                  >
+                                    <div className="flex items-center gap-3 flex-1">
+                                      <Badge variant="secondary">{assignment.quantity}x</Badge>
+                                      <span className="text-sm font-medium">{roleData?.name}</span>
+                                      <span className="text-xs text-muted-foreground">
+                                        ₹{((assignment.quantity * assignment.monthlySalary) / 1000).toFixed(0)}k/mo
+                                      </span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeRoleAssignment(assignmentIndex)}
+                                      className="ml-2 hover:text-destructive"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Budget */}
+            <div className="grid gap-4 md:grid-cols-2">
 
               <FormField
                 control={form.control}
