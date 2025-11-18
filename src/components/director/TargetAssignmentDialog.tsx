@@ -367,10 +367,10 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
       currentRoleAssignment.employeeIds.forEach(id => assignedEmployeeIds.add(id));
     }
 
-    // Filter employees by role and state, exclude already assigned
+    // Filter employees by role. If districts are selected, also filter by state
     return mockEmployees.filter(emp => 
       emp.role === roleId && 
-      selectedStates.has(emp.state) &&
+      (selectedStates.size === 0 || selectedStates.has(emp.state)) &&
       !assignedEmployeeIds.has(emp.id)
     );
   };
@@ -946,12 +946,12 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
                       {selectedRole && (
                         <div className="space-y-2">
                           <FormLabel className="text-sm text-muted-foreground">
-                            Select Employees (from selected states)
+                            Select Employees {watchedValues.districts.length > 0 ? '(from selected states)' : '(select districts to filter by state)'}
                           </FormLabel>
                           <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto bg-background">
                             {getAvailableEmployeesForRole(selectedRole).length === 0 ? (
                               <p className="text-sm text-muted-foreground text-center py-2">
-                                No available employees for this role in selected states
+                                No available employees for this role
                               </p>
                             ) : (
                               getAvailableEmployeesForRole(selectedRole).map((emp) => (
