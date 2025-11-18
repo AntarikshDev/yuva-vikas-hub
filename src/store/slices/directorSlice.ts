@@ -2385,6 +2385,44 @@ const directorSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    updatePaymentCycle: (state, action: PayloadAction<{
+      workOrderId: string;
+      cycleNumber: number;
+      data: {
+        status: 'Pending' | 'Received' | 'Delayed';
+        receivedDate?: Date;
+        receivedAmount: number;
+        notes?: string;
+        transactionId?: string;
+      }
+    }>) => {
+      const { workOrderId, cycleNumber, data } = action.payload;
+      const workOrder = state.workOrders.find((wo) => wo.id === workOrderId);
+      
+      if (workOrder) {
+        const cycleIndex = workOrder.paymentCycles.findIndex(
+          (cycle) => cycle.cycleNumber === cycleNumber
+        );
+        
+        if (cycleIndex !== -1) {
+          // Update the payment cycle
+          workOrder.paymentCycles[cycleIndex] = {
+            ...workOrder.paymentCycles[cycleIndex],
+            status: data.status,
+            receivedDate: data.receivedDate?.toISOString(),
+          };
+          
+          // Recalculate till date profit if payment is received
+          if (data.status === 'Received') {
+            const totalReceived = workOrder.paymentCycles
+              .filter((c) => c.status === 'Received')
+              .reduce((sum, c) => sum + c.amount, 0);
+            
+            workOrder.tillDateProfit = totalReceived - workOrder.costIncurred;
+          }
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -2511,7 +2549,7 @@ const directorSlice = createSlice({
   },
 });
 
-export const { setFilters, clearError } = directorSlice.actions;
+export const { setFilters, clearError, updatePaymentCycle } = directorSlice.actions;
 export default directorSlice.reducer;
 
 // Export types
