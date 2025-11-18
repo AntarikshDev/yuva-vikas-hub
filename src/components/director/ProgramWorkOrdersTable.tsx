@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Search, ArrowUpDown, Eye, Download, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { WorkOrder } from '@/store/slices/directorSlice';
@@ -152,14 +151,13 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
       cell: (wo) => {
         const percentage = getProgressPercentage(wo.districtsActive, wo.districtsAssigned);
         return (
-          <div className="space-y-2 min-w-[180px]">
-            <div className="flex items-center justify-between text-sm">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm">
               <span className={getProgressColor(percentage)}>
                 {wo.districtsActive} / {wo.districtsAssigned}
               </span>
-              <span className="text-xs text-muted-foreground">{percentage.toFixed(0)}%</span>
+              <span className="text-xs text-muted-foreground">({percentage.toFixed(0)}%)</span>
             </div>
-            <Progress value={percentage} className="h-2" />
             <div className="text-xs text-muted-foreground">
               {wo.districts.slice(0, 2).join(', ')}
               {wo.districts.length > 2 && ` +${wo.districts.length - 2}`}
@@ -174,14 +172,11 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
       cell: (wo) => {
         const percentage = getProgressPercentage(wo.manpowerCurrent, wo.manpowerRequired);
         return (
-          <div className="space-y-2 min-w-[140px]">
-            <div className="flex items-center justify-between text-sm">
-              <span className={getProgressColor(percentage)}>
-                {wo.manpowerCurrent} / {wo.manpowerRequired}
-              </span>
-              <span className="text-xs text-muted-foreground">{percentage.toFixed(0)}%</span>
-            </div>
-            <Progress value={percentage} className="h-2" />
+          <div className="flex items-center gap-2 text-sm">
+            <span className={getProgressColor(percentage)}>
+              {wo.manpowerCurrent} / {wo.manpowerRequired}
+            </span>
+            <span className="text-xs text-muted-foreground">({percentage.toFixed(0)}%)</span>
           </div>
         );
       },
@@ -202,14 +197,11 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
       cell: (wo) => {
         const percentage = getProgressPercentage(wo.enrolmentAchieved, wo.enrolmentTarget);
         return (
-          <div className="space-y-2 min-w-[160px]">
-            <div className="flex items-center justify-between text-sm">
-              <span className={getProgressColor(percentage)}>
-                {wo.enrolmentAchieved} / {wo.enrolmentTarget}
-              </span>
-              <span className="text-xs text-muted-foreground">{percentage.toFixed(0)}%</span>
-            </div>
-            <Progress value={percentage} className="h-2" />
+          <div className="flex items-center gap-2 text-sm">
+            <span className={getProgressColor(percentage)}>
+              {wo.enrolmentAchieved} / {wo.enrolmentTarget}
+            </span>
+            <span className="text-xs text-muted-foreground">({percentage.toFixed(0)}%)</span>
           </div>
         );
       },
@@ -230,11 +222,11 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
       cell: (wo) => {
         const percentage = getProgressPercentage(wo.costIncurred, wo.totalBudget);
         return (
-          <div className="space-y-2 min-w-[180px]">
-            <div className="flex items-center justify-between text-sm">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm">
               <span>₹{(wo.costIncurred / 100000).toFixed(2)}L / ₹{(wo.totalBudget / 100000).toFixed(2)}L</span>
+              <span className="text-xs text-muted-foreground">({percentage.toFixed(0)}%)</span>
             </div>
-            <Progress value={percentage} className="h-2" />
             <div className="text-xs text-muted-foreground">
               Fixed: ₹{(wo.fixedBudget / 100000).toFixed(2)}L | Variable: ₹{(wo.variableBudget / 100000).toFixed(2)}L
             </div>
