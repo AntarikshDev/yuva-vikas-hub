@@ -35,32 +35,6 @@ const MobilisationDashboard = () => {
     // TODO: Open Work Order Details Dialog
   };
 
-  if (selectedProgram && selectedProgramData) {
-    return (
-      <MainLayout role="director">
-        <div className="space-y-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedProgram(null)}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Overview
-            </Button>
-          </div>
-
-          <ProgramWorkOrdersTable
-            programName={selectedProgramData.name}
-            workOrders={selectedProgramWorkOrders}
-            onViewDetails={handleViewDetails}
-          />
-        </div>
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout role="director">
       <div className="space-y-6">
@@ -137,8 +111,10 @@ const MobilisationDashboard = () => {
               programs.map((program) => (
                 <Card
                   key={program.id}
-                  className="cursor-pointer transition-all hover:shadow-lg hover:border-primary"
-                  onClick={() => setSelectedProgram(program.name)}
+                  className={`cursor-pointer transition-all hover:shadow-lg hover:border-primary ${
+                    selectedProgram === program.name ? 'border-primary shadow-lg' : ''
+                  }`}
+                  onClick={() => setSelectedProgram(selectedProgram === program.name ? null : program.name)}
                 >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">{program.name}</CardTitle>
@@ -162,6 +138,17 @@ const MobilisationDashboard = () => {
             )}
           </div>
         </div>
+
+        {/* Work Orders Table - Shows when program is selected */}
+        {selectedProgram && selectedProgramData && (
+          <div className="animate-in fade-in-50 duration-200">
+            <ProgramWorkOrdersTable
+              programName={selectedProgramData.name}
+              workOrders={selectedProgramWorkOrders}
+              onViewDetails={handleViewDetails}
+            />
+          </div>
+        )}
 
         {/* Quick Stats */}
         <Card>
