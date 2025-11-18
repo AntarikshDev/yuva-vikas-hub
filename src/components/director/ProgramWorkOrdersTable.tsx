@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Search, ArrowUpDown, Eye, Download } from 'lucide-react';
+import { Search, ArrowUpDown, Eye, Download, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { WorkOrder } from '@/store/slices/directorSlice';
+import { PaymentTrackingDialog } from './PaymentTrackingDialog';
 
 interface ProgramWorkOrdersTableProps {
   programName: string;
@@ -26,6 +27,8 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('workOrderDate');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -245,11 +248,23 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => {
+              setSelectedWorkOrder(wo);
+              setPaymentDialogOpen(true);
+            }}
+            className="gap-2"
+          >
+            <DollarSign className="h-4 w-4" />
+            Payments
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onViewDetails?.(wo)}
             className="gap-2"
           >
             <Eye className="h-4 w-4" />
-            View
+            Details
           </Button>
         </div>
       ),
@@ -298,6 +313,12 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
               </p>
             </div>
           }
+        />
+
+        <PaymentTrackingDialog
+          open={paymentDialogOpen}
+          onOpenChange={setPaymentDialogOpen}
+          workOrder={selectedWorkOrder}
         />
       </CardContent>
     </Card>
