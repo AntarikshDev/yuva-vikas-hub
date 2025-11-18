@@ -127,11 +127,23 @@ export const ProgramWorkOrdersTable: React.FC<ProgramWorkOrdersTableProps> = ({
       id: 'dates',
       header: 'Key Dates',
       cell: (wo) => (
-        <div className="space-y-1 text-xs">
-          <div><span className="text-muted-foreground">WO Date:</span> {format(new Date(wo.workOrderDate), 'dd MMM yyyy')}</div>
-          <div><span className="text-muted-foreground">Setup:</span> {format(new Date(wo.centreSetupDate), 'dd MMM yyyy')}</div>
-          <div><span className="text-muted-foreground">Mob. Start:</span> {format(new Date(wo.mobilisationStartDate), 'dd MMM yyyy')}</div>
-          <div><span className="text-muted-foreground">Batch Inc:</span> {format(new Date(wo.batchIncorporationDate), 'dd MMM yyyy')}</div>
+        <div className="space-y-1 text-xs min-w-[160px]">
+          <div className="flex justify-between gap-3">
+            <span className="text-muted-foreground whitespace-nowrap">WO Date:</span>
+            <span className="font-medium">{format(new Date(wo.workOrderDate), 'dd MMM yyyy')}</span>
+          </div>
+          <div className="flex justify-between gap-3">
+            <span className="text-muted-foreground whitespace-nowrap">Setup:</span>
+            <span className="font-medium">{format(new Date(wo.centreSetupDate), 'dd MMM yyyy')}</span>
+          </div>
+          <div className="flex justify-between gap-3">
+            <span className="text-muted-foreground whitespace-nowrap">Mob. Start:</span>
+            <span className="font-medium">{format(new Date(wo.mobilisationStartDate), 'dd MMM yyyy')}</span>
+          </div>
+          <div className="flex justify-between gap-3">
+            <span className="text-muted-foreground whitespace-nowrap">Batch Inc:</span>
+            <span className="font-medium">{format(new Date(wo.batchIncorporationDate), 'dd MMM yyyy')}</span>
+          </div>
         </div>
       ),
     },
