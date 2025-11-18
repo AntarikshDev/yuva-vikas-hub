@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppSelector';
-import { fetchPrograms, fetchWorkOrders } from '@/store/slices/directorSlice';
+import { fetchPrograms, fetchWorkOrders, WorkOrder } from '@/store/slices/directorSlice';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, DollarSign, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { TargetAssignmentDialog } from '@/components/director/TargetAssignmentDialog';
+import { ProgramWorkOrdersTable } from '@/components/director/ProgramWorkOrdersTable';
 
 const MobilisationDashboard = () => {
   const dispatch = useAppDispatch();
   const { programs, workOrders, isLoading } = useAppSelector((state) => state.director);
   const [targetDialogOpen, setTargetDialogOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchPrograms());
@@ -24,6 +26,40 @@ const MobilisationDashboard = () => {
   const totalGrossProfit = workOrders
     .filter(wo => wo.status === 'Completed' && wo.grossProfit)
     .reduce((sum, wo) => sum + (wo.grossProfit || 0), 0);
+
+  const selectedProgramData = programs.find(p => p.name === selectedProgram);
+  const selectedProgramWorkOrders = workOrders.filter(wo => wo.programName === selectedProgram);
+
+  const handleViewDetails = (workOrder: WorkOrder) => {
+    console.log('View work order details:', workOrder);
+    // TODO: Open Work Order Details Dialog
+  };
+
+  if (selectedProgram && selectedProgramData) {
+    return (
+      <MainLayout role="director">
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedProgram(null)}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Overview
+            </Button>
+          </div>
+
+          <ProgramWorkOrdersTable
+            programName={selectedProgramData.name}
+            workOrders={selectedProgramWorkOrders}
+            onViewDetails={handleViewDetails}
+          />
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout role="director">
@@ -102,10 +138,7 @@ const MobilisationDashboard = () => {
                 <Card
                   key={program.id}
                   className="cursor-pointer transition-all hover:shadow-lg hover:border-primary"
-                  onClick={() => {
-                    // Navigate to program work orders table
-                    console.log('View work orders for', program.name);
-                  }}
+                  onClick={() => setSelectedProgram(program.name)}
                 >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">{program.name}</CardTitle>
