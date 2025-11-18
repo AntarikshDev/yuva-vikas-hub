@@ -157,6 +157,100 @@ interface CentreHealth {
   leaveDropoutSummary: LeaveDropoutSummary[];
 }
 
+// New interfaces for Work Orders and Programs
+interface Program {
+  id: string;
+  name: string;
+  code: string;
+  workOrderCount: number;
+  activeWorkOrders: number;
+  totalEnrolment: number;
+  totalPlacement: number;
+  totalBudget: number;
+  profitMargin: number;
+}
+
+interface PaymentCycle {
+  cycleNumber: number;
+  amount: number;
+  expectedDate: string;
+  receivedDate?: string;
+  status: 'Pending' | 'Received' | 'Delayed';
+  percentage: number;
+}
+
+interface CategoryTarget {
+  st: number;
+  sc: number;
+  obc: number;
+  general: number;
+  minority: number;
+}
+
+interface WorkOrder {
+  id: string;
+  workOrderNo: string;
+  workOrderDate: string;
+  programId: string;
+  programName: string;
+  businessHead: string;
+  businessHeadId: string;
+  cycle: number;
+  
+  // Targets
+  enrolmentTarget: number;
+  enrolmentStartDate: string;
+  enrolmentDeadline: string;
+  placementTarget: number;
+  placementStartDate: string;
+  placementDeadline: string;
+  categoryTarget: CategoryTarget;
+  
+  // Locations
+  districts: string[];
+  
+  // Manpower & Budget
+  manpowerRequired: number;
+  manpowerCurrent: number;
+  fixedBudget: number;
+  variableBudget: number;
+  totalBudget: number;
+  
+  // Progress
+  centreSetupDate?: string;
+  mobilisationStartDate?: string;
+  batchIncorporationDate?: string;
+  districtsAssigned: number;
+  districtsActive: number;
+  enrolmentAchieved: number;
+  placementAchieved: number;
+  costIncurred: number;
+  
+  // Financial
+  paymentCycles: PaymentCycle[];
+  expectedProfit: number;
+  tillDateProfit: number;
+  grossProfit?: number;
+  
+  status: 'Planning' | 'Active' | 'Completed' | 'On Hold';
+}
+
+interface TargetAssignmentForm {
+  programName: string;
+  workOrderNo: string;
+  businessHead: string;
+  cycle: number;
+  enrolmentTarget: number;
+  enrolmentDateRange: [string, string];
+  placementTarget: number;
+  placementDateRange: [string, string];
+  categoryTarget: CategoryTarget;
+  districts: string[];
+  manpower: number;
+  fixedBudget: number;
+  variableBudget: number;
+}
+
 interface OFREntry {
   id: string;
   candidateId: string;
@@ -249,6 +343,12 @@ interface DirectorState {
     entries: OFREntry[];
     statistics: OFRStatistics;
   } | null;
+  
+  // New fields for Work Orders & Programs
+  programs: Program[];
+  workOrders: WorkOrder[];
+  selectedProgram: Program | null;
+  
   filters: {
     dateRange: [string | null, string | null];
     state: string;
@@ -268,6 +368,12 @@ const initialState: DirectorState = {
   compliance: null,
   mobilisationData: null,
   ofrData: null,
+  
+  // Initialize new fields
+  programs: [],
+  workOrders: [],
+  selectedProgram: null,
+  
   filters: {
     dateRange: [null, null],
     state: 'all',
@@ -1132,6 +1238,170 @@ export const assignNationalTargets = createAsyncThunk(
   }
 );
 
+// Mock data generators (moved before thunks for reference)
+const generateMockPrograms = (): Program[] => [
+  {
+    id: 'ddugky',
+    name: 'DDUGKY',
+    code: 'DDUGKY',
+    workOrderCount: 5,
+    activeWorkOrders: 3,
+    totalEnrolment: 2500,
+    totalPlacement: 1890,
+    totalBudget: 12500000,
+    profitMargin: 18.5
+  },
+  {
+    id: 'upsdm',
+    name: 'UPSDM',
+    code: 'UPSDM',
+    workOrderCount: 2,
+    activeWorkOrders: 2,
+    totalEnrolment: 800,
+    totalPlacement: 620,
+    totalBudget: 4800000,
+    profitMargin: 15.2
+  },
+  {
+    id: 'jsdms',
+    name: 'JSDMS',
+    code: 'JSDMS',
+    workOrderCount: 2,
+    activeWorkOrders: 1,
+    totalEnrolment: 600,
+    totalPlacement: 480,
+    totalBudget: 3600000,
+    profitMargin: 16.8
+  },
+  {
+    id: 'osda',
+    name: 'OSDA',
+    code: 'OSDA',
+    workOrderCount: 2,
+    activeWorkOrders: 2,
+    totalEnrolment: 750,
+    totalPlacement: 590,
+    totalBudget: 4200000,
+    profitMargin: 17.3
+  },
+  {
+    id: 'wdc',
+    name: 'WDC',
+    code: 'WDC',
+    workOrderCount: 2,
+    activeWorkOrders: 1,
+    totalEnrolment: 500,
+    totalPlacement: 380,
+    totalBudget: 3000000,
+    profitMargin: 14.5
+  }
+];
+
+const generateMockWorkOrders = (): WorkOrder[] => [
+  {
+    id: 'wo-001',
+    workOrderNo: 'DDUGKY/2024/001',
+    workOrderDate: '2024-01-15',
+    programId: 'ddugky',
+    programName: 'DDUGKY',
+    businessHead: 'Rajesh Kumar',
+    businessHeadId: 'bh-001',
+    cycle: 1,
+    enrolmentTarget: 500,
+    enrolmentStartDate: '2024-02-01',
+    enrolmentDeadline: '2024-05-31',
+    placementTarget: 400,
+    placementStartDate: '2024-06-01',
+    placementDeadline: '2024-08-31',
+    categoryTarget: { st: 50, sc: 100, obc: 150, general: 150, minority: 50 },
+    districts: ['Mumbai', 'Pune', 'Nagpur'],
+    manpowerRequired: 15,
+    manpowerCurrent: 12,
+    fixedBudget: 2000000,
+    variableBudget: 500000,
+    totalBudget: 2500000,
+    centreSetupDate: '2024-01-25',
+    mobilisationStartDate: '2024-02-01',
+    batchIncorporationDate: '2024-03-15',
+    districtsAssigned: 3,
+    districtsActive: 3,
+    enrolmentAchieved: 420,
+    placementAchieved: 320,
+    costIncurred: 1850000,
+    paymentCycles: [
+      { cycleNumber: 1, amount: 625000, expectedDate: '2024-03-31', receivedDate: '2024-04-05', status: 'Received', percentage: 25 },
+      { cycleNumber: 2, amount: 625000, expectedDate: '2024-06-30', status: 'Pending', percentage: 25 },
+      { cycleNumber: 3, amount: 625000, expectedDate: '2024-09-30', status: 'Pending', percentage: 25 },
+      { cycleNumber: 4, amount: 625000, expectedDate: '2024-12-31', status: 'Pending', percentage: 25 }
+    ],
+    expectedProfit: 462500,
+    tillDateProfit: 105000,
+    status: 'Active'
+  }
+];
+
+// Async thunks for fetching programs and work orders
+export const fetchPrograms = createAsyncThunk(
+  'director/fetchPrograms',
+  async () => {
+    // Simulate API call with delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return generateMockPrograms();
+  }
+);
+
+export const fetchWorkOrders = createAsyncThunk(
+  'director/fetchWorkOrders',
+  async (programId?: string) => {
+    // Simulate API call with delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const allWorkOrders = generateMockWorkOrders();
+    return programId ? allWorkOrders.filter(wo => wo.programId === programId) : allWorkOrders;
+  }
+);
+
+export const createTargetAssignment = createAsyncThunk(
+  'director/createTargetAssignment',
+  async (formData: TargetAssignmentForm) => {
+    // Simulate API call with delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const newWorkOrder: WorkOrder = {
+      id: `wo-${Date.now()}`,
+      workOrderNo: formData.workOrderNo,
+      workOrderDate: new Date().toISOString().split('T')[0],
+      programId: formData.programName.toLowerCase(),
+      programName: formData.programName,
+      businessHead: formData.businessHead,
+      businessHeadId: `bh-${Date.now()}`,
+      cycle: formData.cycle,
+      enrolmentTarget: formData.enrolmentTarget,
+      enrolmentStartDate: formData.enrolmentDateRange[0],
+      enrolmentDeadline: formData.enrolmentDateRange[1],
+      placementTarget: formData.placementTarget,
+      placementStartDate: formData.placementDateRange[0],
+      placementDeadline: formData.placementDateRange[1],
+      categoryTarget: formData.categoryTarget,
+      districts: formData.districts,
+      manpowerRequired: formData.manpower,
+      manpowerCurrent: 0,
+      fixedBudget: formData.fixedBudget,
+      variableBudget: formData.variableBudget,
+      totalBudget: formData.fixedBudget + formData.variableBudget,
+      districtsAssigned: formData.districts.length,
+      districtsActive: 0,
+      enrolmentAchieved: 0,
+      placementAchieved: 0,
+      costIncurred: 0,
+      paymentCycles: [],
+      expectedProfit: (formData.fixedBudget + formData.variableBudget) * 0.15,
+      tillDateProfit: 0,
+      status: 'Planning'
+    };
+    return newWorkOrder;
+  }
+);
+
 // Director slice
 const directorSlice = createSlice({
   name: 'director',
@@ -1229,6 +1499,42 @@ const directorSlice = createSlice({
       .addCase(assignNationalTargets.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      // Handle programs
+      .addCase(fetchPrograms.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchPrograms.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.programs = action.payload;
+      })
+      .addCase(fetchPrograms.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to fetch programs';
+      })
+      // Handle work orders
+      .addCase(fetchWorkOrders.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchWorkOrders.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.workOrders = action.payload;
+      })
+      .addCase(fetchWorkOrders.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to fetch work orders';
+      })
+      // Handle target assignment
+      .addCase(createTargetAssignment.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(createTargetAssignment.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.workOrders.push(action.payload);
+      })
+      .addCase(createTargetAssignment.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Failed to create target assignment';
       });
   },
 });
@@ -1237,4 +1543,4 @@ export const { setFilters, clearError } = directorSlice.actions;
 export default directorSlice.reducer;
 
 // Export types
-export type { OFREntry, OFRStatistics };
+export type { OFREntry, OFRStatistics, Program, WorkOrder, TargetAssignmentForm, CategoryTarget, PaymentCycle };
