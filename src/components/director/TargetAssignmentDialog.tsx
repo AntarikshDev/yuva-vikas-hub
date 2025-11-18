@@ -36,7 +36,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Checkbox } from '@/components/ui/checkbox';
 import { CalendarIcon, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -106,14 +105,19 @@ const businessHeads = [
 
 const cycles = Array.from({ length: 5 }, (_, i) => ({ value: i + 1, label: `Cycle ${i + 1}` }));
 
-const districts = [
-  'Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad', 'Solapur', 'Kolhapur', 'Thane',
-  'Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Chennai', 'Coimbatore', 'Madurai', 'Salem',
-];
+const stateDistrictData = {
+  'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Nashik', 'Aurangabad', 'Solapur', 'Kolhapur', 'Thane'],
+  'Karnataka': ['Bangalore', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum', 'Gulbarga'],
+  'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli', 'Tirunelveli'],
+  'Uttar Pradesh': ['Lucknow', 'Kanpur', 'Agra', 'Varanasi', 'Meerut', 'Allahabad'],
+  'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Asansol', 'Siliguri', 'Darjeeling'],
+};
 
 export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentDialogProps) {
   const dispatch = useAppDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedState, setSelectedState] = useState<string>('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(targetAssignmentSchema),
@@ -186,13 +190,39 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
     }
   };
 
-  const toggleDistrict = (district: string) => {
-    const current = form.getValues('districts');
-    if (current.includes(district)) {
-      form.setValue('districts', current.filter((d) => d !== district));
-    } else {
-      form.setValue('districts', [...current, district]);
+  const addDistrict = () => {
+    if (!selectedState || !selectedDistrict) {
+      toast.error('Please select both state and district');
+      return;
     }
+    
+    const current = form.getValues('districts');
+    const districtWithState = `${selectedState}|${selectedDistrict}`;
+    
+    if (current.includes(districtWithState)) {
+      toast.error('District already added');
+      return;
+    }
+    
+    form.setValue('districts', [...current, districtWithState]);
+    setSelectedDistrict('');
+  };
+
+  const removeDistrict = (districtWithState: string) => {
+    const current = form.getValues('districts');
+    form.setValue('districts', current.filter((d) => d !== districtWithState));
+  };
+
+  const getDistrictsByState = () => {
+    const grouped: Record<string, string[]> = {};
+    watchedValues.districts.forEach((districtWithState) => {
+      const [state, district] = districtWithState.split('|');
+      if (!grouped[state]) {
+        grouped[state] = [];
+      }
+      grouped[state].push(district);
+    });
+    return grouped;
   };
 
   return (
@@ -632,23 +662,85 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
               render={() => (
                 <FormItem>
                   <FormLabel>Districts</FormLabel>
-                  <FormDescription>Select districts for this work order</FormDescription>
-                  <div className="border rounded-lg p-4 grid grid-cols-2 md:grid-cols-4 gap-3 max-h-48 overflow-y-auto">
-                    {districts.map((district) => (
-                      <div key={district} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={district}
-                          checked={watchedValues.districts.includes(district)}
-                          onCheckedChange={() => toggleDistrict(district)}
-                        />
-                        <label
-                          htmlFor={district}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        >
-                          {district}
-                        </label>
+                  <FormDescription>Select state and district to add to work order</FormDescription>
+                  
+                  <div className="space-y-4">
+                    {/* State and District Selection */}
+                    <div className="flex gap-3">
+                      <Select value={selectedState} onValueChange={(value) => {
+                        setSelectedState(value);
+                        setSelectedDistrict('');
+                      }}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select State" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.keys(stateDistrictData).map((state) => (
+                            <SelectItem key={state} value={state}>
+                              {state}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <Select 
+                        value={selectedDistrict} 
+                        onValueChange={setSelectedDistrict}
+                        disabled={!selectedState}
+                      >
+                        <SelectTrigger className="flex-1">
+                          <SelectValue placeholder="Select District" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {selectedState && stateDistrictData[selectedState as keyof typeof stateDistrictData].map((district) => (
+                            <SelectItem key={district} value={district}>
+                              {district}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <Button 
+                        type="button" 
+                        onClick={addDistrict}
+                        disabled={!selectedState || !selectedDistrict}
+                        variant="outline"
+                      >
+                        Add
+                      </Button>
+                    </div>
+
+                    {/* Selected Districts Grouped by State */}
+                    {watchedValues.districts.length > 0 && (
+                      <div className="border rounded-lg p-4 space-y-3 max-h-64 overflow-y-auto bg-muted/30">
+                        <div className="text-sm font-medium text-muted-foreground mb-2">
+                          Selected Districts ({watchedValues.districts.length})
+                        </div>
+                        {Object.entries(getDistrictsByState()).map(([state, districts]) => (
+                          <div key={state} className="space-y-2">
+                            <div className="text-sm font-semibold text-foreground">{state}</div>
+                            <div className="flex flex-wrap gap-2 pl-3">
+                              {districts.map((district) => (
+                                <Badge 
+                                  key={`${state}|${district}`}
+                                  variant="secondary"
+                                  className="flex items-center gap-1"
+                                >
+                                  {district}
+                                  <button
+                                    type="button"
+                                    onClick={() => removeDistrict(`${state}|${district}`)}
+                                    className="ml-1 hover:text-destructive"
+                                  >
+                                    ×
+                                  </button>
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
