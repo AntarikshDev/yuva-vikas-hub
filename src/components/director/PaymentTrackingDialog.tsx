@@ -28,6 +28,13 @@ import {
 import { format } from 'date-fns';
 import { WorkOrder, PaymentCycle } from '@/store/slices/directorSlice';
 import { cn } from '@/lib/utils';
+
+const formatSafeDate = (value: Date | string | undefined, pattern: string, fallback = 'N/A') => {
+  if (!value) return fallback;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return fallback;
+  return format(date, pattern);
+};
 import { PaymentUpdateDialog } from './PaymentUpdateDialog';
 import { useAppDispatch } from '@/hooks/useAppSelector';
 import { updatePaymentCycle } from '@/store/slices/directorSlice';
@@ -287,12 +294,12 @@ export const PaymentTrackingDialog: React.FC<PaymentTrackingDialogProps> = ({
                           <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              Expected: {format(new Date(cycle.expectedDate), 'dd MMM yyyy')}
+                              Expected: {formatSafeDate(cycle.expectedDate, 'dd MMM yyyy')}
                             </div>
                             {cycle.receivedDate && (
                               <div className="flex items-center gap-1">
                                 <CheckCircle2 className="h-3 w-3 text-green-600" />
-                                Received: {format(new Date(cycle.receivedDate), 'dd MMM yyyy')}
+                                Received: {formatSafeDate(cycle.receivedDate, 'dd MMM yyyy')}
                               </div>
                             )}
                           </div>

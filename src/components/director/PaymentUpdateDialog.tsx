@@ -28,6 +28,13 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PaymentCycle } from '@/store/slices/directorSlice';
 
+const formatSafeDate = (value: Date | string | undefined, pattern: string, fallback = 'N/A') => {
+  if (!value) return fallback;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return fallback;
+  return format(date, pattern);
+};
+
 const paymentUpdateSchema = z.object({
   status: z.enum(['Pending', 'Received', 'Delayed']),
   receivedDate: z.date().optional(),
@@ -89,7 +96,7 @@ export const PaymentUpdateDialog: React.FC<PaymentUpdateDialogProps> = ({
           <DialogTitle>Update Payment - Cycle #{cycle.cycleNumber}</DialogTitle>
           <DialogDescription>
             Expected Amount: ₹{(cycle.amount / 100000).toFixed(2)}L | 
-            Expected Date: {format(new Date(cycle.expectedDate), 'dd MMM yyyy')}
+            Expected Date: {formatSafeDate(cycle.expectedDate, 'dd MMM yyyy')}
           </DialogDescription>
         </DialogHeader>
 
@@ -125,7 +132,7 @@ export const PaymentUpdateDialog: React.FC<PaymentUpdateDialogProps> = ({
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {receivedDate ? format(receivedDate, 'PPP') : 'Pick a date'}
+                      {formatSafeDate(receivedDate, 'PPP', 'Pick a date')}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
