@@ -1,153 +1,138 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
-import { fetchNHMobilisation, fetchMobiliserLeaderboard, fetchNHFunnel, setFilters } from '@/store/slices/nationalHeadSlice';
-import { Button } from '@/components/ui/button';
-import { Download, Bell, Target } from 'lucide-react';
-import { NHClusterPerformanceTable } from '@/components/national-head/NHClusterPerformanceTable';
-import { NHMobiliserLeaderboard } from '@/components/national-head/NHMobiliserLeaderboard';
-import { NHMobilisationFunnel } from '@/components/national-head/NHMobilisationFunnel';
-import { NHTargetVsAchieved } from '@/components/national-head/NHTargetVsAchieved';
-import { EnhancedStatCard } from '@/components/dashboard/EnhancedStatCard';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { Target as TargetIcon, TrendingUp, Users, Filter } from 'lucide-react';
+import { fetchNHMobilisation, setSelectedKPI, toggleProgram, toggleWorkOrder } from '@/store/slices/nationalHeadSlice';
+import { MobilisationKPICard } from '@/components/national-head/MobilisationKPICard';
+import { ProgramWorkOrderFilter } from '@/components/national-head/ProgramWorkOrderFilter';
+import { MobilisationPerformanceTable } from '@/components/national-head/MobilisationPerformanceTable';
 
 const NationalHeadMobilisationMonitoring = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const { mobilisation, funnel, statePerformance, filters, isLoading } = useAppSelector((state) => state.nationalHead);
+  const { mobilisation, selectedKPI, selectedPrograms, selectedWorkOrders, isLoading } = useAppSelector((state) => state.nationalHead);
 
   useEffect(() => {
-    dispatch(fetchNHMobilisation(filters));
-    dispatch(fetchMobiliserLeaderboard(filters));
-    dispatch(fetchNHFunnel(filters));
-  }, [dispatch, filters]);
+    dispatch(fetchNHMobilisation({ programs: selectedPrograms, workOrders: selectedWorkOrders }));
+  }, [dispatch, selectedPrograms, selectedWorkOrders]);
 
-  const handleClusterDrillDown = (clusterId: string) => {
-    navigate(`/cluster/${clusterId}/dashboard`);
+  // Filter projects based on selected programs and work orders
+  const filteredProjects = useMemo(() => {
+    if (!mobilisation?.projects) return [];
+    return mobilisation.projects.filter(project => 
+      (selectedPrograms.length === 0 || selectedPrograms.includes(project.program)) &&
+      (selectedWorkOrders.length === 0 || selectedWorkOrders.includes(project.workOrder))
+    );
+  }, [mobilisation?.projects, selectedPrograms, selectedWorkOrders]);
+
+  // Calculate KPI metrics
+  const kpiMetrics = useMemo(() => {
+    const totalTarget = filteredProjects.reduce((sum, p) => sum + p.totalTarget, 0);
+    const totalAchieved = filteredProjects.reduce((sum, p) => sum + p.totalAchieved, 0);
+    const totalCost = filteredProjects.reduce((sum, p) => sum + (p.teamBreakdown.mobilisers.reduce((s, m) => s + (m.cost || 0), 0)), 0);
+    const avgCostPerCandidate = totalAchieved > 0 ? Math.round(totalCost / totalAchieved) : 0;
+
+    return {
+      mobilisation_team: [
+        { label: 'Team', target: 20, achieved: 25 },
+        { label: 'District', target: 20, achieved: 25 },
+        { label: 'Block', target: 120, achieved: 125 },
+      ],
+      enrolment_target: [
+        { label: 'Target', target: totalTarget, achieved: totalAchieved },
+        { label: 'Achieved', target: totalTarget, achieved: totalAchieved },
+      ],
+      mobilisation_cost: [
+        { label: 'Total Cost', target: 250, achieved: 200 },
+        { label: 'Cost/Candidate', target: avgCostPerCandidate, achieved: avgCostPerCandidate },
+      ],
+      training_completion: [
+        { label: 'Enrolled', target: 200, achieved: 150 },
+        { label: 'Training', target: 200, achieved: 150 },
+      ],
+      conversion_pe: [
+        { label: 'P/E Ratio', target: 100, achieved: 75 },
+      ],
+      conversion_rp: [
+        { label: 'R/P Ratio', target: 100, achieved: 80 },
+      ],
+    };
+  }, [filteredProjects]);
+
+  const handleProgramToggle = (program: string) => {
+    dispatch(toggleProgram(program));
   };
 
-  const handleClusterExport = (clusterId: string) => {
-    toast({
-      title: 'Export Started',
-      description: `Exporting data for cluster ${clusterId}...`,
-    });
+  const handleWorkOrderToggle = (workOrder: string) => {
+    dispatch(toggleWorkOrder(workOrder));
   };
 
-  const handleSendMessage = (id: string) => {
-    toast({
-      title: 'Message Dialog',
-      description: 'Message functionality will open here',
-    });
+  const handleKPIClick = (kpiType: typeof selectedKPI) => {
+    dispatch(setSelectedKPI(kpiType));
   };
-
-  const handleMobiliserProfile = (mobiliserId: string) => {
-    navigate(`/mobiliser/${mobiliserId}/profile`);
-  };
-
-  const handleCall = (mobiliserId: string) => {
-    toast({
-      title: 'Call Initiated',
-      description: `Calling mobiliser ${mobiliserId}...`,
-    });
-  };
-
-  const kpiData = mobilisation?.topKPIs;
-  const conversionRate = kpiData ? ((kpiData.achieved / kpiData.assignedTarget) * 100).toFixed(2) : '0';
 
   return (
     <MainLayout role="national-head">
       <div className="space-y-6">
-        {/* Header with Filters */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Mobilisation Monitoring</h1>
-            <p className="text-muted-foreground">Track mobilisation performance across states and clusters</p>
-          </div>
-          
-          <div className="flex flex-wrap gap-3">
-            <DateRangePicker
-              dateRange={filters.dateRange[0] && filters.dateRange[1] ? { from: new Date(filters.dateRange[0]), to: new Date(filters.dateRange[1]) } : undefined}
-              onDateRangeChange={(range) => dispatch(setFilters({ dateRange: [range?.from?.toISOString() || null, range?.to?.toISOString() || null] }))}
-            />
-            <Button variant="outline">
-              <Target className="mr-2 h-4 w-4" />
-              Assign Targets
-            </Button>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-            <Button variant="outline">
-              <Bell className="mr-2 h-4 w-4" />
-              Send Notification
-            </Button>
-          </div>
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Mobilisation Monitoring</h1>
+          <p className="text-muted-foreground">Track mobilisation performance across programs and work orders</p>
         </div>
 
-        {/* KPIs Section */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <EnhancedStatCard
-            title="State Target"
-            value={kpiData?.assignedTarget.toLocaleString() || '0'}
-            icon={<TargetIcon className="h-5 w-5" />}
-            trend={{ value: 100, isPositive: true }}
+        {/* Program and Work Order Filters */}
+        <ProgramWorkOrderFilter
+          selectedPrograms={selectedPrograms}
+          selectedWorkOrders={selectedWorkOrders}
+          onProgramToggle={handleProgramToggle}
+          onWorkOrderToggle={handleWorkOrderToggle}
+        />
+
+        {/* KPI Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <MobilisationKPICard
+            title="Mobilisation Team"
+            metrics={kpiMetrics.mobilisation_team}
+            isSelected={selectedKPI === 'mobilisation_team'}
+            onClick={() => handleKPIClick('mobilisation_team')}
           />
-          <EnhancedStatCard
-            title="Achieved"
-            value={kpiData?.achieved.toLocaleString() || '0'}
-            icon={<TrendingUp className="h-5 w-5" />}
-            trend={{ value: Number(conversionRate), isPositive: true }}
+          <MobilisationKPICard
+            title="Enrolment Target"
+            metrics={kpiMetrics.enrolment_target}
+            isSelected={selectedKPI === 'enrolment_target'}
+            onClick={() => handleKPIClick('enrolment_target')}
           />
-          <EnhancedStatCard
-            title="Active Clusters"
-            value={kpiData?.activeClusters.toString() || '0'}
-            icon={<Users className="h-5 w-5" />}
+          <MobilisationKPICard
+            title="Mobilisation Cost"
+            metrics={kpiMetrics.mobilisation_cost}
+            isSelected={selectedKPI === 'mobilisation_cost'}
+            onClick={() => handleKPIClick('mobilisation_cost')}
           />
-          <EnhancedStatCard
-            title="Conversion Rate"
-            value={`${conversionRate}%`}
-            icon={<Filter className="h-5 w-5" />}
-            trend={{ value: Number(conversionRate), isPositive: Number(conversionRate) > 70 }}
+          <MobilisationKPICard
+            title="Training Completion"
+            metrics={kpiMetrics.training_completion}
+            isSelected={selectedKPI === 'training_completion'}
+            onClick={() => handleKPIClick('training_completion')}
+          />
+          <MobilisationKPICard
+            title="Conversion Ratio (P/E)"
+            metrics={kpiMetrics.conversion_pe}
+            isSelected={selectedKPI === 'conversion_pe'}
+            onClick={() => handleKPIClick('conversion_pe')}
+          />
+          <MobilisationKPICard
+            title="Conversion Ratio (R/P)"
+            metrics={kpiMetrics.conversion_rp}
+            isSelected={selectedKPI === 'conversion_rp'}
+            onClick={() => handleKPIClick('conversion_rp')}
           />
         </div>
 
-        {/* Mobilisation Funnel */}
-        <NHMobilisationFunnel funnel={funnel} isLoading={isLoading} />
-
-        {/* Target vs Achieved */}
-        <NHTargetVsAchieved 
-          weeklyTrend={[
-            { week: 'W1', target: 3000, achieved: kpiData?.achieved ? Math.floor(kpiData.achieved * 0.2) : 0 },
-            { week: 'W2', target: 3000, achieved: kpiData?.achieved ? Math.floor(kpiData.achieved * 0.22) : 0 },
-            { week: 'W3', target: 3000, achieved: kpiData?.achieved ? Math.floor(kpiData.achieved * 0.28) : 0 },
-            { week: 'W4', target: 3000, achieved: kpiData?.achieved ? Math.floor(kpiData.achieved * 0.3) : 0 },
-          ]} 
-          topStates={statePerformance} 
-          isLoading={isLoading} 
-        />
-
-        {/* Cluster Performance Table */}
-        <NHClusterPerformanceTable
-          clusters={mobilisation?.clusters || []}
+        {/* Dynamic Performance Table */}
+        <MobilisationPerformanceTable
+          projects={filteredProjects}
+          selectedKPI={selectedKPI}
           isLoading={isLoading}
-          onDrillDown={handleClusterDrillDown}
-          onExport={handleClusterExport}
-          onSendMessage={handleSendMessage}
-        />
-
-        {/* Mobiliser Leaderboard */}
-        <NHMobiliserLeaderboard
-          mobilisers={mobilisation?.mobiliserLeaderboard || []}
-          isLoading={isLoading}
-          onViewProfile={handleMobiliserProfile}
-          onSendMessage={handleSendMessage}
-          onCall={handleCall}
         />
       </div>
     </MainLayout>
