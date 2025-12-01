@@ -95,6 +95,34 @@ interface CostEfficiency {
   byCluster: Array<{ cluster: string; cost: number; avgCost: number }>;
 }
 
+interface MobiliserData {
+  name: string;
+  target: number;
+  achieved: Record<string, number>;
+  ytd: number;
+  cost?: number;
+  costPerCandidate?: number;
+}
+
+interface TeamBreakdown {
+  mobilisers: MobiliserData[];
+  mobiliserManagers: { count: number; target: number };
+  centreManagers: { count: number; target: number };
+  operationManagers: { count: number; target: number };
+}
+
+interface ProjectPerformance {
+  projectId: string;
+  projectName: string;
+  program: string;
+  workOrder: string;
+  manpowerPercent: number;
+  teamBreakdown: TeamBreakdown;
+  totalTarget: number;
+  totalAchieved: number;
+  monthlyData: Record<string, { target: number; achieved: number; percent: number }>;
+}
+
 interface MobilisationData {
   topKPIs: {
     assignedTarget: number;
@@ -105,6 +133,7 @@ interface MobilisationData {
   clusters: Cluster[];
   funnel: Funnel;
   mobiliserLeaderboard: Mobiliser[];
+  projects: ProjectPerformance[];
 }
 
 interface NationalHeadState {
@@ -120,6 +149,9 @@ interface NationalHeadState {
   pendingDocuments: PendingDocument[];
   activityMetrics: ActivityMetrics | null;
   costEfficiency: CostEfficiency | null;
+  selectedKPI: 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 'training_completion' | 'conversion_pe' | 'conversion_rp';
+  selectedPrograms: string[];
+  selectedWorkOrders: string[];
   filters: {
     dateRange: [string | null, string | null];
     states: string[];
@@ -145,6 +177,9 @@ const initialState: NationalHeadState = {
   pendingDocuments: [],
   activityMetrics: null,
   costEfficiency: null,
+  selectedKPI: 'mobilisation_team',
+  selectedPrograms: ['DDUGKY'],
+  selectedWorkOrders: ['W/O:UP'],
   filters: {
     dateRange: [null, null],
     states: [],
@@ -379,6 +414,54 @@ export const fetchNHMobilisation = createAsyncThunk(
           { mobiliserId: '106', name: 'Deepak Nair', cluster: 'Mumbai Metro', state: 'Maharashtra', ofrCount: 95, convertRate: 0.35, costPerCandidate: 400, rank: 6 },
           { mobiliserId: '107', name: 'Anjali Mehta', cluster: 'Bangalore Urban', state: 'Karnataka', ofrCount: 88, convertRate: 0.40, costPerCandidate: 360, rank: 7 },
         ],
+        projects: [
+          {
+            projectId: 'ddugky-5',
+            projectName: 'DDUGKY 5',
+            program: 'DDUGKY',
+            workOrder: 'W/O:UP',
+            manpowerPercent: 70,
+            teamBreakdown: {
+              mobilisers: [
+                { name: 'Ramesh', target: 100, achieved: { total: 90, april: 60, may: 400, june: 0 }, ytd: 90, cost: 45000, costPerCandidate: 500 },
+                { name: 'Suresh', target: 100, achieved: { total: 80, april: 40, may: 400, june: 0 }, ytd: 80, cost: 40000, costPerCandidate: 500 },
+              ],
+              mobiliserManagers: { count: 3, target: 5 },
+              centreManagers: { count: 1, target: 2 },
+              operationManagers: { count: 1, target: 1 },
+            },
+            totalTarget: 250,
+            totalAchieved: 170,
+            monthlyData: {
+              april: { target: 100, achieved: 100, percent: 100 },
+              may: { target: 100, achieved: 800, percent: 800 },
+              june: { target: 50, achieved: 0, percent: 0 },
+            },
+          },
+          {
+            projectId: 'ddugky-6',
+            projectName: 'DDUGKY 6',
+            program: 'DDUGKY',
+            workOrder: 'W/O:MP',
+            manpowerPercent: 85,
+            teamBreakdown: {
+              mobilisers: [
+                { name: 'Vijay', target: 120, achieved: { total: 110, april: 70, may: 450, june: 0 }, ytd: 110, cost: 55000, costPerCandidate: 500 },
+                { name: 'Ajay', target: 110, achieved: { total: 100, april: 50, may: 420, june: 0 }, ytd: 100, cost: 50000, costPerCandidate: 500 },
+              ],
+              mobiliserManagers: { count: 4, target: 5 },
+              centreManagers: { count: 2, target: 2 },
+              operationManagers: { count: 1, target: 1 },
+            },
+            totalTarget: 300,
+            totalAchieved: 210,
+            monthlyData: {
+              april: { target: 120, achieved: 120, percent: 100 },
+              may: { target: 120, achieved: 870, percent: 725 },
+              june: { target: 60, achieved: 0, percent: 0 },
+            },
+          },
+        ],
       };
     }
   }
@@ -490,6 +573,25 @@ const nationalHeadSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    setSelectedKPI: (state, action: PayloadAction<NationalHeadState['selectedKPI']>) => {
+      state.selectedKPI = action.payload;
+    },
+    toggleProgram: (state, action: PayloadAction<string>) => {
+      const program = action.payload;
+      if (state.selectedPrograms.includes(program)) {
+        state.selectedPrograms = state.selectedPrograms.filter(p => p !== program);
+      } else {
+        state.selectedPrograms.push(program);
+      }
+    },
+    toggleWorkOrder: (state, action: PayloadAction<string>) => {
+      const workOrder = action.payload;
+      if (state.selectedWorkOrders.includes(workOrder)) {
+        state.selectedWorkOrders = state.selectedWorkOrders.filter(wo => wo !== workOrder);
+      } else {
+        state.selectedWorkOrders.push(workOrder);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -641,5 +743,5 @@ const nationalHeadSlice = createSlice({
   },
 });
 
-export const { setFilters, clearError } = nationalHeadSlice.actions;
+export const { setFilters, clearError, setSelectedKPI, toggleProgram, toggleWorkOrder } = nationalHeadSlice.actions;
 export default nationalHeadSlice.reducer;
