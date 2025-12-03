@@ -620,6 +620,11 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
             icon: FileText 
           },
           { 
+            name: 'Non Interested Candidates', 
+            path: '/counsellor/not-interested', 
+            icon: ({ className }) => <span className={className || ''}>🚫</span>
+          },
+          { 
             name: 'Candidate Management', 
             path: '/counsellor/candidates', 
             icon: Users 
