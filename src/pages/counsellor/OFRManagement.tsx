@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/layouts/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Search, RefreshCw, Download, Phone, Eye, Edit2, Users, FileText, MapPin } from "lucide-react";
+import { Search, RefreshCw, Download, Phone, Eye, Edit2, Users, FileText, MapPin, Pencil, Save, X, Loader2 } from "lucide-react";
 
 // Mock data
 const mockDistricts = [
@@ -104,7 +104,87 @@ export default function OFRManagement() {
   const [newStatus, setNewStatus] = useState("");
   const [mobilizers, setMobilizers] = useState(initialMobilizers);
   const [updatedCandidates, setUpdatedCandidates] = useState<any[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editFormData, setEditFormData] = useState<any>({});
   const { toast } = useToast();
+
+  // Reset edit form when candidate changes
+  useEffect(() => {
+    if (selectedCandidate) {
+      setEditFormData({
+        name: selectedCandidate.name || '',
+        fatherName: selectedCandidate.fatherName || '',
+        mobile: selectedCandidate.mobile || '',
+        email: selectedCandidate.email || '',
+        bloodGroup: selectedCandidate.bloodGroup || '',
+        motherTongue: selectedCandidate.motherTongue || '',
+        religion: selectedCandidate.religion || '',
+        community: selectedCandidate.community || '',
+        motherName: selectedCandidate.motherName || '',
+        guardiansName: selectedCandidate.guardiansName || '',
+        maritalStatus: selectedCandidate.maritalStatus || '',
+        annualIncome: selectedCandidate.annualIncome || '',
+        address: selectedCandidate.address || '',
+        district: selectedCandidate.district || '',
+      });
+      setIsEditing(false);
+    }
+  }, [selectedCandidate]);
+
+  const handleFieldChange = (field: string, value: string) => {
+    setEditFormData((prev: any) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Update the pulled candidates with edited data
+      const updatedPulledCandidates = pulledCandidates.map(c =>
+        c.id === selectedCandidate.id ? { ...c, ...editFormData } : c
+      );
+      setPulledCandidates(updatedPulledCandidates);
+      
+      // Update selectedCandidate
+      setSelectedCandidate({ ...selectedCandidate, ...editFormData });
+      
+      toast({
+        title: "Changes Saved",
+        description: "Candidate details have been updated successfully.",
+      });
+      setIsEditing(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditFormData({
+      name: selectedCandidate.name || '',
+      fatherName: selectedCandidate.fatherName || '',
+      mobile: selectedCandidate.mobile || '',
+      email: selectedCandidate.email || '',
+      bloodGroup: selectedCandidate.bloodGroup || '',
+      motherTongue: selectedCandidate.motherTongue || '',
+      religion: selectedCandidate.religion || '',
+      community: selectedCandidate.community || '',
+      motherName: selectedCandidate.motherName || '',
+      guardiansName: selectedCandidate.guardiansName || '',
+      maritalStatus: selectedCandidate.maritalStatus || '',
+      annualIncome: selectedCandidate.annualIncome || '',
+      address: selectedCandidate.address || '',
+      district: selectedCandidate.district || '',
+    });
+    setIsEditing(false);
+  };
 
   const filteredMobilizers = mobilizers.filter(mobilizer => {
     const matchesDistrict = !selectedDistrict || mobilizer.district === selectedDistrict;
@@ -320,6 +400,7 @@ export default function OFRManagement() {
           <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Pulled Candidate OFRs</DialogTitle>
+              <DialogDescription>Review and process candidate applications</DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4">
@@ -375,104 +456,241 @@ export default function OFRManagement() {
         {/* Candidate Details Dialog */}
         <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Candidate Details & Verification</DialogTitle>
+            <DialogHeader className="flex flex-row items-center justify-between pr-8">
+              <div>
+                <DialogTitle>Candidate Details & Verification</DialogTitle>
+                <DialogDescription>View and edit candidate information</DialogDescription>
+              </div>
+              {!isEditing ? (
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="gap-2">
+                  <Pencil className="h-4 w-4" />
+                  Edit
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={handleCancelEdit} className="gap-1">
+                    <X className="h-4 w-4" />
+                    Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSaveChanges} disabled={isSaving} className="gap-1">
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              )}
             </DialogHeader>
             
             {selectedCandidate && (
-              <div className="space-y-6">
+              <div className="space-y-6 mt-2">
                 {/* Basic Information */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Basic Information</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Basic Information</CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Full Name</Label>
-                      <p className="text-sm">{selectedCandidate.name}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Full Name</Label>
+                      {isEditing ? (
+                        <Input value={editFormData.name} onChange={(e) => handleFieldChange('name', e.target.value)} />
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.name}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Father's Name</Label>
-                      <p className="text-sm">{selectedCandidate.fatherName}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Father's Name</Label>
+                      {isEditing ? (
+                        <Input value={editFormData.fatherName} onChange={(e) => handleFieldChange('fatherName', e.target.value)} />
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.fatherName}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Mobile</Label>
-                      <p className="text-sm">{selectedCandidate.mobile}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Mobile</Label>
+                      {isEditing ? (
+                        <Input type="tel" value={editFormData.mobile} onChange={(e) => handleFieldChange('mobile', e.target.value)} />
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.mobile}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Email</Label>
-                      <p className="text-sm">{selectedCandidate.email}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Email</Label>
+                      {isEditing ? (
+                        <Input type="email" value={editFormData.email} onChange={(e) => handleFieldChange('email', e.target.value)} />
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.email}</p>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">District</Label>
+                      {isEditing ? (
+                        <Select value={editFormData.district} onValueChange={(value) => handleFieldChange('district', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {mockDistricts.map((district) => (
+                              <SelectItem key={district} value={district}>{district}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.district}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Personal Details */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Personal Details</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Personal Details</CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Blood Group</Label>
-                      <p className="text-sm">{selectedCandidate.bloodGroup}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Blood Group</Label>
+                      {isEditing ? (
+                        <Select value={editFormData.bloodGroup} onValueChange={(value) => handleFieldChange('bloodGroup', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["O+", "A+", "B+", "AB+", "O-", "A-", "B-", "AB-"].map((bg) => (
+                              <SelectItem key={bg} value={bg}>{bg}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.bloodGroup}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Mother Tongue</Label>
-                      <p className="text-sm">{selectedCandidate.motherTongue}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Mother Tongue</Label>
+                      {isEditing ? (
+                        <Select value={editFormData.motherTongue} onValueChange={(value) => handleFieldChange('motherTongue', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["Hindi", "Marathi", "Gujarati", "English", "Tamil", "Telugu", "Bengali"].map((lang) => (
+                              <SelectItem key={lang} value={lang}>{lang}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.motherTongue}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Religion</Label>
-                      <p className="text-sm">{selectedCandidate.religion}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Religion</Label>
+                      {isEditing ? (
+                        <Select value={editFormData.religion} onValueChange={(value) => handleFieldChange('religion', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["Hindu", "Muslim", "Christian", "Buddhist", "Sikh", "Jain", "Other"].map((rel) => (
+                              <SelectItem key={rel} value={rel}>{rel}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.religion}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Community</Label>
-                      <p className="text-sm">{selectedCandidate.community}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Community</Label>
+                      {isEditing ? (
+                        <Select value={editFormData.community} onValueChange={(value) => handleFieldChange('community', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["General", "OBC", "SC", "ST", "EWS"].map((comm) => (
+                              <SelectItem key={comm} value={comm}>{comm}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.community}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Family Details */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Family Details</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Family Details</CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium">Mother's Name</Label>
-                      <p className="text-sm">{selectedCandidate.motherName}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Mother's Name</Label>
+                      {isEditing ? (
+                        <Input value={editFormData.motherName} onChange={(e) => handleFieldChange('motherName', e.target.value)} />
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.motherName}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Guardian's Name</Label>
-                      <p className="text-sm">{selectedCandidate.guardiansName}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Guardian's Name</Label>
+                      {isEditing ? (
+                        <Input value={editFormData.guardiansName} onChange={(e) => handleFieldChange('guardiansName', e.target.value)} />
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.guardiansName}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Marital Status</Label>
-                      <p className="text-sm">{selectedCandidate.maritalStatus}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Marital Status</Label>
+                      {isEditing ? (
+                        <Select value={editFormData.maritalStatus} onValueChange={(value) => handleFieldChange('maritalStatus', value)}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {["Single", "Married", "Divorced", "Widowed"].map((status) => (
+                              <SelectItem key={status} value={status}>{status}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.maritalStatus}</p>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Annual Income</Label>
-                      <p className="text-sm">₹{selectedCandidate.annualIncome}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Annual Income</Label>
+                      {isEditing ? (
+                        <Input value={editFormData.annualIncome} onChange={(e) => handleFieldChange('annualIncome', e.target.value)} />
+                      ) : (
+                        <p className="font-medium">₹{selectedCandidate.annualIncome}</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Address */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Address</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Address</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm">{selectedCandidate.address}</p>
+                    <div className="space-y-1">
+                      <Label className="text-sm text-muted-foreground">Full Address</Label>
+                      {isEditing ? (
+                        <Textarea value={editFormData.address} onChange={(e) => handleFieldChange('address', e.target.value)} rows={2} />
+                      ) : (
+                        <p className="font-medium">{selectedCandidate.address}</p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
 
                 {/* Counselling Notes & Status Update */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Counselling & Status Update</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Counselling & Status Update</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div>
+                    <div className="space-y-1">
                       <Label htmlFor="notes">Counselling Notes</Label>
                       <Textarea
                         id="notes"
@@ -483,7 +701,7 @@ export default function OFRManagement() {
                       />
                     </div>
                     
-                    <div>
+                    <div className="space-y-1">
                       <Label htmlFor="status">Update Status</Label>
                       <Select value={newStatus} onValueChange={setNewStatus}>
                         <SelectTrigger>
