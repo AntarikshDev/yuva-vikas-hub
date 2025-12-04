@@ -214,187 +214,196 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                       ))}
                     </TableRow>
 
-                    {/* Expanded Team Breakdown */}
+                    {/* Expanded Team Breakdown - Manpower Progress Row */}
                     {isExpanded && (
-                      <TableRow>
-                        <TableCell colSpan={columns.length + 1} className="bg-muted/30 p-0">
-                          <div className="p-4 space-y-4">
-                            {/* Manpower Progress */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">Mobiliser Manpower</span>
-                                <span className="font-semibold">{project.manpowerPercent}%</span>
-                              </div>
-                              <Progress value={project.manpowerPercent} className="h-2" />
+                      <TableRow className="bg-muted/30">
+                        <TableCell></TableCell>
+                        <TableCell colSpan={columns.length} className="py-3">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">Mobiliser Manpower</span>
+                              <span className="font-semibold">{project.manpowerPercent}%</span>
                             </div>
-
-                            {/* Team Breakdown Table */}
-                            <Table>
-                              <TableBody>
-                                {/* Mobilisers */}
-                                <TableRow 
-                                  className="cursor-pointer hover:bg-muted/30"
-                                  onClick={() => toggleRole(project.projectId, 'mobiliser')}
-                                >
-                                  <TableCell className="w-12">
-                                    {isRoleExpanded(project.projectId, 'mobiliser') ? (
-                                      <ChevronDown className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronRight className="h-4 w-4" />
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="font-semibold">Mobiliser</TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                </TableRow>
-                                {isRoleExpanded(project.projectId, 'mobiliser') && project.teamBreakdown.mobilisers.map((mobiliser) => (
-                                  <TableRow key={mobiliser.name} className="bg-muted/10">
-                                    <TableCell></TableCell>
-                                    <TableCell className="pl-8">{mobiliser.name}</TableCell>
-                                    <TableCell>{mobiliser.achieved.total}</TableCell>
-                                    <TableCell>{mobiliser.target}</TableCell>
-                                    <TableCell>{mobiliser.achieved.april || 60}</TableCell>
-                                    <TableCell>{mobiliser.achieved.may || 400}</TableCell>
-                                    <TableCell>{mobiliser.achieved.june || 0}</TableCell>
-                                  </TableRow>
-                                ))}
-
-                                {/* Mobiliser Manager */}
-                                <TableRow 
-                                  className="cursor-pointer hover:bg-muted/30"
-                                  onClick={() => toggleRole(project.projectId, 'mobiliser-manager')}
-                                >
-                                  <TableCell className="w-12">
-                                    {isRoleExpanded(project.projectId, 'mobiliser-manager') ? (
-                                      <ChevronDown className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronRight className="h-4 w-4" />
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="font-semibold">
-                                    Mobiliser Manager ({project.teamBreakdown.mobiliserManagers.count}/{project.teamBreakdown.mobiliserManagers.target})
-                                  </TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                </TableRow>
-                                {isRoleExpanded(project.projectId, 'mobiliser-manager') && (
-                                  <>
-                                    <TableRow className="bg-muted/10">
-                                      <TableCell></TableCell>
-                                      <TableCell className="pl-8">Rajesh Kumar</TableCell>
-                                      <TableCell>1</TableCell>
-                                      <TableCell>1</TableCell>
-                                      <TableCell>-</TableCell>
-                                      <TableCell>-</TableCell>
-                                      <TableCell>-</TableCell>
-                                    </TableRow>
-                                    <TableRow className="bg-muted/10">
-                                      <TableCell></TableCell>
-                                      <TableCell className="pl-8">Priya Sharma</TableCell>
-                                      <TableCell>1</TableCell>
-                                      <TableCell>1</TableCell>
-                                      <TableCell>-</TableCell>
-                                      <TableCell>-</TableCell>
-                                      <TableCell>-</TableCell>
-                                    </TableRow>
-                                    <TableRow className="bg-muted/10">
-                                      <TableCell></TableCell>
-                                      <TableCell className="pl-8">Amit Verma</TableCell>
-                                      <TableCell>1</TableCell>
-                                      <TableCell>1</TableCell>
-                                      <TableCell>-</TableCell>
-                                      <TableCell>-</TableCell>
-                                      <TableCell>-</TableCell>
-                                    </TableRow>
-                                  </>
-                                )}
-
-                                {/* Centre Manager */}
-                                <TableRow 
-                                  className="cursor-pointer hover:bg-muted/30"
-                                  onClick={() => toggleRole(project.projectId, 'centre-manager')}
-                                >
-                                  <TableCell className="w-12">
-                                    {isRoleExpanded(project.projectId, 'centre-manager') ? (
-                                      <ChevronDown className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronRight className="h-4 w-4" />
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="font-semibold">
-                                    Centre Manager ({project.teamBreakdown.centreManagers.count}/{project.teamBreakdown.centreManagers.target})
-                                  </TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                </TableRow>
-                                {isRoleExpanded(project.projectId, 'centre-manager') && (
-                                  <TableRow className="bg-muted/10">
-                                    <TableCell></TableCell>
-                                    <TableCell className="pl-8">Deepak Singh</TableCell>
-                                    <TableCell>1</TableCell>
-                                    <TableCell>2</TableCell>
-                                    <TableCell>-</TableCell>
-                                    <TableCell>-</TableCell>
-                                    <TableCell>-</TableCell>
-                                  </TableRow>
-                                )}
-
-                                {/* Operation Manager */}
-                                <TableRow 
-                                  className="cursor-pointer hover:bg-muted/30"
-                                  onClick={() => toggleRole(project.projectId, 'operation-manager')}
-                                >
-                                  <TableCell className="w-12">
-                                    {isRoleExpanded(project.projectId, 'operation-manager') ? (
-                                      <ChevronDown className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronRight className="h-4 w-4" />
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="font-semibold">
-                                    Operation Manager ({project.teamBreakdown.operationManagers.count}/{project.teamBreakdown.operationManagers.target})
-                                  </TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                  <TableCell></TableCell>
-                                </TableRow>
-                                {isRoleExpanded(project.projectId, 'operation-manager') && (
-                                  <TableRow className="bg-muted/10">
-                                    <TableCell></TableCell>
-                                    <TableCell className="pl-8">Vikram Malhotra</TableCell>
-                                    <TableCell>1</TableCell>
-                                    <TableCell>1</TableCell>
-                                    <TableCell>-</TableCell>
-                                    <TableCell>-</TableCell>
-                                    <TableCell>-</TableCell>
-                                  </TableRow>
-                                )}
-
-                                {/* Total */}
-                                <TableRow className="font-bold bg-muted/50">
-                                  <TableCell></TableCell>
-                                  <TableCell>Total Target/Manpower</TableCell>
-                                  <TableCell>{project.totalAchieved}</TableCell>
-                                  <TableCell>{project.totalTarget}</TableCell>
-                                  <TableCell>{project.monthlyData.april?.achieved || 0}</TableCell>
-                                  <TableCell>{project.monthlyData.may?.achieved || 0}</TableCell>
-                                  <TableCell>{project.monthlyData.june?.achieved || 0}</TableCell>
-                                </TableRow>
-                              </TableBody>
-                            </Table>
+                            <Progress value={project.manpowerPercent} className="h-2" />
                           </div>
                         </TableCell>
+                      </TableRow>
+                    )}
+
+                    {/* Mobilisers Header */}
+                    {isExpanded && (
+                      <TableRow 
+                        className="cursor-pointer hover:bg-muted/30 bg-muted/20"
+                        onClick={(e) => { e.stopPropagation(); toggleRole(project.projectId, 'mobiliser'); }}
+                      >
+                        <TableCell></TableCell>
+                        <TableCell className="font-semibold">
+                          <div className="flex items-center gap-2">
+                            {isRoleExpanded(project.projectId, 'mobiliser') ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            Mobiliser
+                          </div>
+                        </TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    )}
+                    {isExpanded && isRoleExpanded(project.projectId, 'mobiliser') && project.teamBreakdown.mobilisers.map((mobiliser) => (
+                      <TableRow key={mobiliser.name} className="bg-muted/10">
+                        <TableCell></TableCell>
+                        <TableCell className="pl-10">{mobiliser.name}</TableCell>
+                        <TableCell>{mobiliser.achieved.total}</TableCell>
+                        <TableCell>{mobiliser.target}</TableCell>
+                        <TableCell>{mobiliser.achieved.april || 60}</TableCell>
+                        <TableCell>{mobiliser.achieved.may || 400}</TableCell>
+                        <TableCell>{mobiliser.achieved.june || 0}</TableCell>
+                      </TableRow>
+                    ))}
+
+                    {/* Mobiliser Manager Header */}
+                    {isExpanded && (
+                      <TableRow 
+                        className="cursor-pointer hover:bg-muted/30 bg-muted/20"
+                        onClick={(e) => { e.stopPropagation(); toggleRole(project.projectId, 'mobiliser-manager'); }}
+                      >
+                        <TableCell></TableCell>
+                        <TableCell className="font-semibold">
+                          <div className="flex items-center gap-2">
+                            {isRoleExpanded(project.projectId, 'mobiliser-manager') ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            Mobiliser Manager ({project.teamBreakdown.mobiliserManagers.count}/{project.teamBreakdown.mobiliserManagers.target})
+                          </div>
+                        </TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    )}
+                    {isExpanded && isRoleExpanded(project.projectId, 'mobiliser-manager') && (
+                      <>
+                        <TableRow className="bg-muted/10">
+                          <TableCell></TableCell>
+                          <TableCell className="pl-10">Rajesh Kumar</TableCell>
+                          <TableCell>1</TableCell>
+                          <TableCell>1</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                        </TableRow>
+                        <TableRow className="bg-muted/10">
+                          <TableCell></TableCell>
+                          <TableCell className="pl-10">Priya Sharma</TableCell>
+                          <TableCell>1</TableCell>
+                          <TableCell>1</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                        </TableRow>
+                        <TableRow className="bg-muted/10">
+                          <TableCell></TableCell>
+                          <TableCell className="pl-10">Amit Verma</TableCell>
+                          <TableCell>1</TableCell>
+                          <TableCell>1</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                          <TableCell>-</TableCell>
+                        </TableRow>
+                      </>
+                    )}
+
+                    {/* Centre Manager Header */}
+                    {isExpanded && (
+                      <TableRow 
+                        className="cursor-pointer hover:bg-muted/30 bg-muted/20"
+                        onClick={(e) => { e.stopPropagation(); toggleRole(project.projectId, 'centre-manager'); }}
+                      >
+                        <TableCell></TableCell>
+                        <TableCell className="font-semibold">
+                          <div className="flex items-center gap-2">
+                            {isRoleExpanded(project.projectId, 'centre-manager') ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            Centre Manager ({project.teamBreakdown.centreManagers.count}/{project.teamBreakdown.centreManagers.target})
+                          </div>
+                        </TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    )}
+                    {isExpanded && isRoleExpanded(project.projectId, 'centre-manager') && (
+                      <TableRow className="bg-muted/10">
+                        <TableCell></TableCell>
+                        <TableCell className="pl-10">Deepak Singh</TableCell>
+                        <TableCell>1</TableCell>
+                        <TableCell>2</TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>-</TableCell>
+                      </TableRow>
+                    )}
+
+                    {/* Operation Manager Header */}
+                    {isExpanded && (
+                      <TableRow 
+                        className="cursor-pointer hover:bg-muted/30 bg-muted/20"
+                        onClick={(e) => { e.stopPropagation(); toggleRole(project.projectId, 'operation-manager'); }}
+                      >
+                        <TableCell></TableCell>
+                        <TableCell className="font-semibold">
+                          <div className="flex items-center gap-2">
+                            {isRoleExpanded(project.projectId, 'operation-manager') ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            Operation Manager ({project.teamBreakdown.operationManagers.count}/{project.teamBreakdown.operationManagers.target})
+                          </div>
+                        </TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    )}
+                    {isExpanded && isRoleExpanded(project.projectId, 'operation-manager') && (
+                      <TableRow className="bg-muted/10">
+                        <TableCell></TableCell>
+                        <TableCell className="pl-10">Vikram Malhotra</TableCell>
+                        <TableCell>1</TableCell>
+                        <TableCell>1</TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>-</TableCell>
+                        <TableCell>-</TableCell>
+                      </TableRow>
+                    )}
+
+                    {/* Total Row */}
+                    {isExpanded && (
+                      <TableRow className="font-bold bg-muted/50">
+                        <TableCell></TableCell>
+                        <TableCell>Total Target/Manpower</TableCell>
+                        <TableCell>{project.totalAchieved}</TableCell>
+                        <TableCell>{project.totalTarget}</TableCell>
+                        <TableCell>{project.monthlyData.april?.achieved || 0}</TableCell>
+                        <TableCell>{project.monthlyData.may?.achieved || 0}</TableCell>
+                        <TableCell>{project.monthlyData.june?.achieved || 0}</TableCell>
                       </TableRow>
                     )}
                   </React.Fragment>
