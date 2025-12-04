@@ -250,7 +250,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
   }
   return <Card>
       <CardHeader>
-        <CardTitle>Project Performance</CardTitle>
+        <CardTitle>Mobilisation Manpower Analysis (Approved Vs Actual)</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
