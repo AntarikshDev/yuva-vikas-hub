@@ -62,9 +62,10 @@ const KPI_COLUMNS: Record<KPIType, { label: string; key: string }[]> = {
   ],
   mobilisation_cost: [
     { label: 'Project Name', key: 'projectName' },
-    { label: 'Team Targeted', key: 'teamTargeted' },
-    { label: 'Total Cost/Budget', key: 'totalCost' },
-    { label: 'Cost/Candidate', key: 'costPerCandidate' },
+    { label: 'Target Cost/Candidate', key: 'targetCostPerCandidate' },
+    { label: 'Actual Cost/Candidate', key: 'actualCostPerCandidate' },
+    { label: 'Budget Allotted', key: 'budgetAllotted' },
+    { label: 'Budget Consumed', key: 'budgetConsumed' },
   ],
   training_completion: [
     { label: 'Project Name', key: 'projectName' },
@@ -149,10 +150,14 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
         return project.monthlyData.june?.achieved || 0;
       case 'ytd':
         return project.totalAchieved;
-      case 'totalCost':
-        return `₹${(project.totalTarget * 5000).toLocaleString()}`;
-      case 'costPerCandidate':
+      case 'targetCostPerCandidate':
         return `₹5,000`;
+      case 'actualCostPerCandidate':
+        return `₹4,800`;
+      case 'budgetAllotted':
+        return `₹${(project.totalTarget * 5000).toLocaleString()}`;
+      case 'budgetConsumed':
+        return `₹${(project.totalAchieved * 4800).toLocaleString()}`;
       case 'month':
         return project.monthlyData.june?.achieved || 0;
       case 'dateRange':
