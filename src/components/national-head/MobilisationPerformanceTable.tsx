@@ -69,10 +69,12 @@ const KPI_COLUMNS: Record<KPIType, { label: string; key: string }[]> = {
   ],
   training_completion: [
     { label: 'Project Name', key: 'projectName' },
-    { label: 'Team Targeted', key: 'teamTargeted' },
-    { label: 'Month ↓', key: 'month' },
+    { label: 'Actual Enrolment', key: 'actualEnrolment' },
+    { label: 'Candidates in Training', key: 'candidatesInTraining' },
+    { label: 'April', key: 'aprilManpower' },
+    { label: 'May', key: 'mayManpower' },
+    { label: 'June', key: 'juneManpower' },
     { label: 'YTD', key: 'ytd' },
-    { label: 'Date Range', key: 'dateRange' },
   ],
   conversion_pe: [
     { label: 'Project Name', key: 'projectName' },
@@ -158,10 +160,12 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
         return `₹${(project.totalTarget * 5000).toLocaleString()}`;
       case 'budgetConsumed':
         return `₹${(project.totalAchieved * 4800).toLocaleString()}`;
+      case 'actualEnrolment':
+        return project.totalAchieved;
+      case 'candidatesInTraining':
+        return Math.round(project.totalAchieved * 0.85);
       case 'month':
         return project.monthlyData.june?.achieved || 0;
-      case 'dateRange':
-        return '01-Jun to 30-Jun';
       default:
         return '-';
     }
