@@ -230,36 +230,32 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
                             {/* Team Breakdown Table */}
                             <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Role</TableHead>
-                                  <TableHead>Count/Target</TableHead>
-                                  <TableHead>April</TableHead>
-                                  <TableHead>May</TableHead>
-                                  <TableHead>June</TableHead>
-                                </TableRow>
-                              </TableHeader>
                               <TableBody>
                                 {/* Mobilisers */}
                                 <TableRow 
                                   className="cursor-pointer hover:bg-muted/30"
                                   onClick={() => toggleRole(project.projectId, 'mobiliser')}
                                 >
-                                  <TableCell className="font-semibold" colSpan={5}>
-                                    <div className="flex items-center gap-2">
-                                      {isRoleExpanded(project.projectId, 'mobiliser') ? (
-                                        <ChevronDown className="h-4 w-4" />
-                                      ) : (
-                                        <ChevronRight className="h-4 w-4" />
-                                      )}
-                                      Mobiliser
-                                    </div>
+                                  <TableCell className="w-12">
+                                    {isRoleExpanded(project.projectId, 'mobiliser') ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
                                   </TableCell>
+                                  <TableCell className="font-semibold">Mobiliser</TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
                                 </TableRow>
                                 {isRoleExpanded(project.projectId, 'mobiliser') && project.teamBreakdown.mobilisers.map((mobiliser) => (
                                   <TableRow key={mobiliser.name} className="bg-muted/10">
+                                    <TableCell></TableCell>
                                     <TableCell className="pl-8">{mobiliser.name}</TableCell>
-                                    <TableCell>{mobiliser.achieved.total}/{mobiliser.target}</TableCell>
+                                    <TableCell>{mobiliser.achieved.total}</TableCell>
+                                    <TableCell>{mobiliser.target}</TableCell>
                                     <TableCell>{mobiliser.achieved.april || 60}</TableCell>
                                     <TableCell>{mobiliser.achieved.may || 400}</TableCell>
                                     <TableCell>{mobiliser.achieved.june || 0}</TableCell>
@@ -271,36 +267,47 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                                   className="cursor-pointer hover:bg-muted/30"
                                   onClick={() => toggleRole(project.projectId, 'mobiliser-manager')}
                                 >
-                                  <TableCell className="font-semibold" colSpan={5}>
-                                    <div className="flex items-center gap-2">
-                                      {isRoleExpanded(project.projectId, 'mobiliser-manager') ? (
-                                        <ChevronDown className="h-4 w-4" />
-                                      ) : (
-                                        <ChevronRight className="h-4 w-4" />
-                                      )}
-                                      Mobiliser Manager ({project.teamBreakdown.mobiliserManagers.count}/{project.teamBreakdown.mobiliserManagers.target})
-                                    </div>
+                                  <TableCell className="w-12">
+                                    {isRoleExpanded(project.projectId, 'mobiliser-manager') ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
                                   </TableCell>
+                                  <TableCell className="font-semibold">
+                                    Mobiliser Manager ({project.teamBreakdown.mobiliserManagers.count}/{project.teamBreakdown.mobiliserManagers.target})
+                                  </TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
                                 </TableRow>
                                 {isRoleExpanded(project.projectId, 'mobiliser-manager') && (
                                   <>
                                     <TableRow className="bg-muted/10">
+                                      <TableCell></TableCell>
                                       <TableCell className="pl-8">Rajesh Kumar</TableCell>
-                                      <TableCell>1/1</TableCell>
+                                      <TableCell>1</TableCell>
+                                      <TableCell>1</TableCell>
                                       <TableCell>-</TableCell>
                                       <TableCell>-</TableCell>
                                       <TableCell>-</TableCell>
                                     </TableRow>
                                     <TableRow className="bg-muted/10">
+                                      <TableCell></TableCell>
                                       <TableCell className="pl-8">Priya Sharma</TableCell>
-                                      <TableCell>1/1</TableCell>
+                                      <TableCell>1</TableCell>
+                                      <TableCell>1</TableCell>
                                       <TableCell>-</TableCell>
                                       <TableCell>-</TableCell>
                                       <TableCell>-</TableCell>
                                     </TableRow>
                                     <TableRow className="bg-muted/10">
+                                      <TableCell></TableCell>
                                       <TableCell className="pl-8">Amit Verma</TableCell>
-                                      <TableCell>1/1</TableCell>
+                                      <TableCell>1</TableCell>
+                                      <TableCell>1</TableCell>
                                       <TableCell>-</TableCell>
                                       <TableCell>-</TableCell>
                                       <TableCell>-</TableCell>
@@ -313,21 +320,28 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                                   className="cursor-pointer hover:bg-muted/30"
                                   onClick={() => toggleRole(project.projectId, 'centre-manager')}
                                 >
-                                  <TableCell className="font-semibold" colSpan={5}>
-                                    <div className="flex items-center gap-2">
-                                      {isRoleExpanded(project.projectId, 'centre-manager') ? (
-                                        <ChevronDown className="h-4 w-4" />
-                                      ) : (
-                                        <ChevronRight className="h-4 w-4" />
-                                      )}
-                                      Centre Manager ({project.teamBreakdown.centreManagers.count}/{project.teamBreakdown.centreManagers.target})
-                                    </div>
+                                  <TableCell className="w-12">
+                                    {isRoleExpanded(project.projectId, 'centre-manager') ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
                                   </TableCell>
+                                  <TableCell className="font-semibold">
+                                    Centre Manager ({project.teamBreakdown.centreManagers.count}/{project.teamBreakdown.centreManagers.target})
+                                  </TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
                                 </TableRow>
                                 {isRoleExpanded(project.projectId, 'centre-manager') && (
                                   <TableRow className="bg-muted/10">
+                                    <TableCell></TableCell>
                                     <TableCell className="pl-8">Deepak Singh</TableCell>
-                                    <TableCell>1/2</TableCell>
+                                    <TableCell>1</TableCell>
+                                    <TableCell>2</TableCell>
                                     <TableCell>-</TableCell>
                                     <TableCell>-</TableCell>
                                     <TableCell>-</TableCell>
@@ -339,21 +353,28 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                                   className="cursor-pointer hover:bg-muted/30"
                                   onClick={() => toggleRole(project.projectId, 'operation-manager')}
                                 >
-                                  <TableCell className="font-semibold" colSpan={5}>
-                                    <div className="flex items-center gap-2">
-                                      {isRoleExpanded(project.projectId, 'operation-manager') ? (
-                                        <ChevronDown className="h-4 w-4" />
-                                      ) : (
-                                        <ChevronRight className="h-4 w-4" />
-                                      )}
-                                      Operation Manager ({project.teamBreakdown.operationManagers.count}/{project.teamBreakdown.operationManagers.target})
-                                    </div>
+                                  <TableCell className="w-12">
+                                    {isRoleExpanded(project.projectId, 'operation-manager') ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
                                   </TableCell>
+                                  <TableCell className="font-semibold">
+                                    Operation Manager ({project.teamBreakdown.operationManagers.count}/{project.teamBreakdown.operationManagers.target})
+                                  </TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
+                                  <TableCell></TableCell>
                                 </TableRow>
                                 {isRoleExpanded(project.projectId, 'operation-manager') && (
                                   <TableRow className="bg-muted/10">
+                                    <TableCell></TableCell>
                                     <TableCell className="pl-8">Vikram Malhotra</TableCell>
-                                    <TableCell>1/1</TableCell>
+                                    <TableCell>1</TableCell>
+                                    <TableCell>1</TableCell>
                                     <TableCell>-</TableCell>
                                     <TableCell>-</TableCell>
                                     <TableCell>-</TableCell>
@@ -362,8 +383,10 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
                                 {/* Total */}
                                 <TableRow className="font-bold bg-muted/50">
+                                  <TableCell></TableCell>
                                   <TableCell>Total Target/Manpower</TableCell>
-                                  <TableCell>{project.totalAchieved}/{project.totalTarget}</TableCell>
+                                  <TableCell>{project.totalAchieved}</TableCell>
+                                  <TableCell>{project.totalTarget}</TableCell>
                                   <TableCell>{project.monthlyData.april?.achieved || 0}</TableCell>
                                   <TableCell>{project.monthlyData.may?.achieved || 0}</TableCell>
                                   <TableCell>{project.monthlyData.june?.achieved || 0}</TableCell>
