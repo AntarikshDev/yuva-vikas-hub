@@ -10,12 +10,42 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Search, RefreshCw, Download, Phone, Eye, Edit2, Users, FileText, MapPin, Pencil, Save, X, Loader2 } from "lucide-react";
+import { Search, RefreshCw, Download, Phone, Eye, Edit2, Users, FileText, MapPin, Pencil, Save, X, Loader2, MessageSquare, Clock } from "lucide-react";
 
 // Mock data
 const mockDistricts = [
   "Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad", "Solapur", "Amravati", "Kolhapur"
 ];
+
+// Generate followup notes for a candidate
+const generateFollowupNotes = (candidateId: number) => {
+  const noteStatuses = ["Pending", "InProgress", "Completed"];
+  const noteTexts = [
+    "Called but not picked",
+    "Left voicemail, waiting for callback",
+    "Spoke briefly, asked to call back later",
+    "Follow-up completed, candidate interested"
+  ];
+  
+  const numNotes = Math.floor(Math.random() * 5); // 0 to 4 notes
+  const notes = [];
+  
+  for (let i = 0; i < numNotes; i++) {
+    const baseDate = new Date();
+    baseDate.setDate(baseDate.getDate() - (numNotes - i));
+    
+    notes.push({
+      note_id: `note-${candidateId}-${i}`,
+      candidate_id: candidateId,
+      notes: noteTexts[Math.min(i, noteTexts.length - 1)],
+      status: noteStatuses[Math.min(i, noteStatuses.length - 1)],
+      created_at: baseDate.toISOString(),
+      updated_at: baseDate.toISOString()
+    });
+  }
+  
+  return notes;
+};
 
 // Generate comprehensive candidate data for all mobilizers
 const generateCandidates = () => {
@@ -44,9 +74,10 @@ const generateCandidates = () => {
       const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
       const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
       const fatherName = fatherNames[Math.floor(Math.random() * fatherNames.length)];
+      const candidateId = id++;
       
       candidates.push({
-        id: id++,
+        id: candidateId,
         name: `${firstName} ${lastName}`,
         fatherName: `${fatherName} ${lastName}`,
         mobile: `987654${String(3210 + i).padStart(4, '0')}`,
@@ -63,7 +94,8 @@ const generateCandidates = () => {
         maritalStatus: Math.random() > 0.8 ? "Married" : "Single",
         spouseName: Math.random() > 0.8 ? `Spouse ${lastName}` : "",
         annualIncome: `${Math.floor(Math.random() * 300000 + 150000).toLocaleString()}`,
-        address: `Plot ${Math.floor(Math.random() * 500 + 100)}, Sector ${Math.floor(Math.random() * 20 + 1)}, ${districts[Math.floor(Math.random() * districts.length)]}`
+        address: `Plot ${Math.floor(Math.random() * 500 + 100)}, Sector ${Math.floor(Math.random() * 20 + 1)}, ${districts[Math.floor(Math.random() * districts.length)]}`,
+        followup_notes: generateFollowupNotes(candidateId)
       });
     }
   });
@@ -666,6 +698,53 @@ export default function OFRManagement() {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Followups Card */}
+                {selectedCandidate.followup_notes && selectedCandidate.followup_notes.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <MessageSquare className="h-4 w-4" />
+                        Followups ({selectedCandidate.followup_notes.length})
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {selectedCandidate.followup_notes.map((followup: any, index: number) => {
+                          const isLastOfFour = selectedCandidate.followup_notes.length === 4 && index === 3;
+                          const followupLabel = isLastOfFour ? "Final Call" : `Followup ${index + 1}`;
+                          
+                          const getStatusBadgeColor = (status: string) => {
+                            switch (status) {
+                              case "Completed": return "bg-green-100 text-green-800";
+                              case "InProgress": return "bg-blue-100 text-blue-800";
+                              case "Pending": return "bg-yellow-100 text-yellow-800";
+                              default: return "bg-gray-100 text-gray-800";
+                            }
+                          };
+                          
+                          return (
+                            <div key={followup.note_id} className="border rounded-lg p-3 bg-muted/30">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className={`font-medium text-sm ${isLastOfFour ? 'text-primary' : ''}`}>
+                                  {followupLabel}
+                                </span>
+                                <Badge className={getStatusBadgeColor(followup.status)}>
+                                  {followup.status}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-2">{followup.notes}</p>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {new Date(followup.created_at).toLocaleString()}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Address */}
                 <Card>
