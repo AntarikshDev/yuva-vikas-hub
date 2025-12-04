@@ -1,12 +1,17 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Progress } from '@/components/ui/progress';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
 
-export type KPIType = 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 
-                      'training_completion' | 'conversion_pe' | 'conversion_rp';
+export type KPIType =
+  | "mobilisation_team"
+  | "enrolment_target"
+  | "mobilisation_cost"
+  | "training_completion"
+  | "conversion_pe"
+  | "conversion_rp";
 
 interface MobiliserData {
   name: string;
@@ -44,50 +49,50 @@ interface MobilisationPerformanceTableProps {
 
 const KPI_COLUMNS: Record<KPIType, { label: string; key: string }[]> = {
   mobilisation_team: [
-    { label: 'Project Name', key: 'projectName' },
-    { label: 'Actual Team', key: 'actualTeam' },
-    { label: 'Required Team', key: 'requiredTeam' },
-    { label: 'April', key: 'aprilManpower' },
-    { label: 'May', key: 'mayManpower' },
-    { label: 'June', key: 'juneManpower' },
+    { label: "Project Name", key: "projectName" },
+    { label: "Actual Team", key: "actualTeam" },
+    { label: "Required Team", key: "requiredTeam" },
+    { label: "April", key: "aprilManpower" },
+    { label: "May", key: "mayManpower" },
+    { label: "June", key: "juneManpower" },
   ],
   enrolment_target: [
-    { label: 'Project Name', key: 'projectName' },
-    { label: 'Actual Team', key: 'actualTeam' },
-    { label: 'Target', key: 'requiredTeam' },
-    { label: 'April', key: 'aprilManpower' },
-    { label: 'May', key: 'mayManpower' },
-    { label: 'June', key: 'juneManpower' },
-    { label: 'YTD', key: 'ytd' },
+    { label: "Project Name", key: "projectName" },
+    { label: "Actual Team", key: "actualTeam" },
+    { label: "Target", key: "requiredTeam" },
+    { label: "April", key: "aprilManpower" },
+    { label: "May", key: "mayManpower" },
+    { label: "June", key: "juneManpower" },
+    { label: "YTD", key: "ytd" },
   ],
   mobilisation_cost: [
-    { label: 'Project Name', key: 'projectName' },
-    { label: 'Target Cost/Candidate', key: 'targetCostPerCandidate' },
-    { label: 'Actual Cost/Candidate', key: 'actualCostPerCandidate' },
-    { label: 'Budget Allotted', key: 'budgetAllotted' },
-    { label: 'Budget Consumed', key: 'budgetConsumed' },
+    { label: "Project Name", key: "projectName" },
+    { label: "Target Cost/Candidate", key: "targetCostPerCandidate" },
+    { label: "Actual Cost/Candidate", key: "actualCostPerCandidate" },
+    { label: "Budget Allotted", key: "budgetAllotted" },
+    { label: "Budget Consumed", key: "budgetConsumed" },
   ],
   training_completion: [
-    { label: 'Project Name', key: 'projectName' },
-    { label: 'Actual Enrolment', key: 'actualEnrolment' },
-    { label: 'Candidates in Training', key: 'candidatesInTraining' },
-    { label: 'April', key: 'aprilManpower' },
-    { label: 'May', key: 'mayManpower' },
-    { label: 'June', key: 'juneManpower' },
-    { label: 'YTD', key: 'ytd' },
+    { label: "Project Name", key: "projectName" },
+    { label: "Actual Enrolment", key: "actualEnrolment" },
+    { label: "Candidates in Training", key: "candidatesInTraining" },
+    { label: "April", key: "aprilManpower" },
+    { label: "May", key: "mayManpower" },
+    { label: "June", key: "juneManpower" },
+    { label: "YTD", key: "ytd" },
   ],
   conversion_pe: [
-    { label: 'Project Name', key: 'projectName' },
-    { label: 'Team Targeted', key: 'teamTargeted' },
-    { label: 'Month', key: 'month' },
-    { label: 'YTD', key: 'ytd' },
-    { label: 'Date Range', key: 'dateRange' },
+    { label: "Project Name", key: "projectName" },
+    { label: "Team Targeted", key: "teamTargeted" },
+    { label: "Month", key: "month" },
+    { label: "YTD", key: "ytd" },
+    { label: "Date Range", key: "dateRange" },
   ],
   conversion_rp: [
-    { label: 'Project Name', key: 'projectName' },
-    { label: 'Team Targeted', key: 'teamTargeted' },
-    { label: 'Total Cost', key: 'totalCost' },
-    { label: 'Cost/Candidate', key: 'costPerCandidate' },
+    { label: "Project Name", key: "projectName" },
+    { label: "Team Targeted", key: "teamTargeted" },
+    { label: "Total Cost", key: "totalCost" },
+    { label: "Cost/Candidate", key: "costPerCandidate" },
   ],
 };
 
@@ -97,7 +102,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
   isLoading,
 }) => {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set(['mobiliser'])); // Default mobiliser expanded
+  const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set(["mobiliser"])); // Default mobiliser expanded
 
   const toggleRow = (projectId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -128,46 +133,46 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
   const renderCellValue = (project: ProjectPerformance, columnKey: string) => {
     switch (columnKey) {
-      case 'projectName':
+      case "projectName":
         return project.projectName;
-      case 'actualTeam':
+      case "actualTeam":
         return project.totalAchieved;
-      case 'requiredTeam':
+      case "requiredTeam":
         return project.totalTarget;
-      case 'teamTarget':
+      case "teamTarget":
         return `${project.totalAchieved}/${project.totalTarget}`;
-      case 'teamTargeted':
+      case "teamTargeted":
         return project.totalTarget;
-      case 'aprilManpower':
+      case "aprilManpower":
         return project.monthlyData.april?.achieved || 0;
-      case 'mayManpower':
+      case "mayManpower":
         return project.monthlyData.may?.achieved || 0;
-      case 'juneManpower':
+      case "juneManpower":
         return project.monthlyData.june?.achieved || 0;
-      case 'april':
+      case "april":
         return project.monthlyData.april?.achieved || 0;
-      case 'may':
+      case "may":
         return `${project.monthlyData.may?.percent || 0}%`;
-      case 'june':
+      case "june":
         return project.monthlyData.june?.achieved || 0;
-      case 'ytd':
+      case "ytd":
         return project.totalAchieved;
-      case 'targetCostPerCandidate':
+      case "targetCostPerCandidate":
         return `₹5,000`;
-      case 'actualCostPerCandidate':
+      case "actualCostPerCandidate":
         return `₹4,800`;
-      case 'budgetAllotted':
+      case "budgetAllotted":
         return `₹${(project.totalTarget * 5000).toLocaleString()}`;
-      case 'budgetConsumed':
+      case "budgetConsumed":
         return `₹${(project.totalAchieved * 4800).toLocaleString()}`;
-      case 'actualEnrolment':
+      case "actualEnrolment":
         return project.totalAchieved;
-      case 'candidatesInTraining':
+      case "candidatesInTraining":
         return Math.round(project.totalAchieved * 0.85);
-      case 'month':
+      case "month":
         return project.monthlyData.june?.achieved || 0;
       default:
-        return '-';
+        return "-";
     }
   };
 
@@ -208,16 +213,9 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                 return (
                   <React.Fragment key={project.projectId}>
                     {/* Main Project Row */}
-                    <TableRow 
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => toggleRow(project.projectId)}
-                    >
+                    <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => toggleRow(project.projectId)}>
                       <TableCell>
-                        {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
-                        ) : (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
+                        {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </TableCell>
                       {columns.map((col) => (
                         <TableCell key={col.key} className="font-medium">
@@ -244,14 +242,17 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
                     {/* Mobilisers Header */}
                     {isExpanded && (
-                      <TableRow 
+                      <TableRow
                         className="cursor-pointer hover:bg-muted/30 bg-muted/20"
-                        onClick={(e) => { e.stopPropagation(); toggleRole(project.projectId, 'mobiliser'); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleRole(project.projectId, "mobiliser");
+                        }}
                       >
                         <TableCell></TableCell>
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
-                            {isRoleExpanded(project.projectId, 'mobiliser') ? (
+                            {isRoleExpanded(project.projectId, "mobiliser") ? (
                               <ChevronDown className="h-4 w-4" />
                             ) : (
                               <ChevronRight className="h-4 w-4" />
@@ -266,33 +267,39 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         <TableCell></TableCell>
                       </TableRow>
                     )}
-                    {isExpanded && isRoleExpanded(project.projectId, 'mobiliser') && project.teamBreakdown.mobilisers.map((mobiliser) => (
-                      <TableRow key={mobiliser.name} className="bg-muted/10">
-                        <TableCell></TableCell>
-                        <TableCell className="pl-10">{mobiliser.name}</TableCell>
-                        <TableCell>{mobiliser.achieved.total}</TableCell>
-                        <TableCell>{mobiliser.target}</TableCell>
-                        <TableCell>{mobiliser.achieved.april || 60}</TableCell>
-                        <TableCell>{mobiliser.achieved.may || 400}</TableCell>
-                        <TableCell>{mobiliser.achieved.june || 0}</TableCell>
-                      </TableRow>
-                    ))}
+                    {isExpanded &&
+                      isRoleExpanded(project.projectId, "mobiliser") &&
+                      project.teamBreakdown.mobilisers.map((mobiliser) => (
+                        <TableRow key={mobiliser.name} className="bg-muted/10">
+                          <TableCell></TableCell>
+                          <TableCell className="pl-10">{mobiliser.name}</TableCell>
+                          <TableCell>{mobiliser.achieved.total}</TableCell>
+                          <TableCell>{mobiliser.target}</TableCell>
+                          <TableCell>{mobiliser.achieved.april || 90}</TableCell>
+                          <TableCell>{mobiliser.achieved.may || 95}</TableCell>
+                          <TableCell>{mobiliser.achieved.june || 100}</TableCell>
+                        </TableRow>
+                      ))}
 
                     {/* Mobiliser Manager Header */}
                     {isExpanded && (
-                      <TableRow 
+                      <TableRow
                         className="cursor-pointer hover:bg-muted/30 bg-muted/20"
-                        onClick={(e) => { e.stopPropagation(); toggleRole(project.projectId, 'mobiliser-manager'); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleRole(project.projectId, "mobiliser-manager");
+                        }}
                       >
                         <TableCell></TableCell>
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
-                            {isRoleExpanded(project.projectId, 'mobiliser-manager') ? (
+                            {isRoleExpanded(project.projectId, "mobiliser-manager") ? (
                               <ChevronDown className="h-4 w-4" />
                             ) : (
                               <ChevronRight className="h-4 w-4" />
                             )}
-                            Mobiliser Manager ({project.teamBreakdown.mobiliserManagers.count}/{project.teamBreakdown.mobiliserManagers.target})
+                            Mobiliser Manager ({project.teamBreakdown.mobiliserManagers.count}/
+                            {project.teamBreakdown.mobiliserManagers.target})
                           </div>
                         </TableCell>
                         <TableCell></TableCell>
@@ -302,7 +309,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         <TableCell></TableCell>
                       </TableRow>
                     )}
-                    {isExpanded && isRoleExpanded(project.projectId, 'mobiliser-manager') && (
+                    {isExpanded && isRoleExpanded(project.projectId, "mobiliser-manager") && (
                       <>
                         <TableRow className="bg-muted/10">
                           <TableCell></TableCell>
@@ -336,19 +343,23 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
                     {/* Centre Manager Header */}
                     {isExpanded && (
-                      <TableRow 
+                      <TableRow
                         className="cursor-pointer hover:bg-muted/30 bg-muted/20"
-                        onClick={(e) => { e.stopPropagation(); toggleRole(project.projectId, 'centre-manager'); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleRole(project.projectId, "centre-manager");
+                        }}
                       >
                         <TableCell></TableCell>
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
-                            {isRoleExpanded(project.projectId, 'centre-manager') ? (
+                            {isRoleExpanded(project.projectId, "centre-manager") ? (
                               <ChevronDown className="h-4 w-4" />
                             ) : (
                               <ChevronRight className="h-4 w-4" />
                             )}
-                            Centre Manager ({project.teamBreakdown.centreManagers.count}/{project.teamBreakdown.centreManagers.target})
+                            Centre Manager ({project.teamBreakdown.centreManagers.count}/
+                            {project.teamBreakdown.centreManagers.target})
                           </div>
                         </TableCell>
                         <TableCell></TableCell>
@@ -358,7 +369,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         <TableCell></TableCell>
                       </TableRow>
                     )}
-                    {isExpanded && isRoleExpanded(project.projectId, 'centre-manager') && (
+                    {isExpanded && isRoleExpanded(project.projectId, "centre-manager") && (
                       <TableRow className="bg-muted/10">
                         <TableCell></TableCell>
                         <TableCell className="pl-10">Deepak Singh</TableCell>
@@ -372,19 +383,23 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
                     {/* Operation Manager Header */}
                     {isExpanded && (
-                      <TableRow 
+                      <TableRow
                         className="cursor-pointer hover:bg-muted/30 bg-muted/20"
-                        onClick={(e) => { e.stopPropagation(); toggleRole(project.projectId, 'operation-manager'); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleRole(project.projectId, "operation-manager");
+                        }}
                       >
                         <TableCell></TableCell>
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
-                            {isRoleExpanded(project.projectId, 'operation-manager') ? (
+                            {isRoleExpanded(project.projectId, "operation-manager") ? (
                               <ChevronDown className="h-4 w-4" />
                             ) : (
                               <ChevronRight className="h-4 w-4" />
                             )}
-                            Operation Manager ({project.teamBreakdown.operationManagers.count}/{project.teamBreakdown.operationManagers.target})
+                            Operation Manager ({project.teamBreakdown.operationManagers.count}/
+                            {project.teamBreakdown.operationManagers.target})
                           </div>
                         </TableCell>
                         <TableCell></TableCell>
@@ -394,7 +409,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         <TableCell></TableCell>
                       </TableRow>
                     )}
-                    {isExpanded && isRoleExpanded(project.projectId, 'operation-manager') && (
+                    {isExpanded && isRoleExpanded(project.projectId, "operation-manager") && (
                       <TableRow className="bg-muted/10">
                         <TableCell></TableCell>
                         <TableCell className="pl-10">Vikram Malhotra</TableCell>
