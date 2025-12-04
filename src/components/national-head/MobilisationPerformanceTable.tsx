@@ -281,7 +281,14 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         <TableCell colSpan={columns.length} className="py-3">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">Enrolment Percentage</span>
+                              <span className="text-muted-foreground">
+                                {selectedKPI === "mobilisation_team" && "Manpower Percentage"}
+                                {selectedKPI === "enrolment_target" && "Enrolment Percentage"}
+                                {selectedKPI === "mobilisation_cost" && "Cost Overflow Percentage"}
+                                {selectedKPI === "training_completion" && "Training Completion Percentage"}
+                                {selectedKPI === "conversion_pe" && "Conversion Percentage"}
+                                {selectedKPI === "conversion_rp" && "Retention Percentage"}
+                              </span>
                               <span className="font-semibold">{project.manpowerPercent}%</span>
                             </div>
                             <Progress value={project.manpowerPercent} className="h-2" />
