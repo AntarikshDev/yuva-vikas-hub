@@ -53,8 +53,11 @@ const KPI_COLUMNS: Record<KPIType, { label: string; key: string }[]> = {
   ],
   enrolment_target: [
     { label: 'Project Name', key: 'projectName' },
-    { label: 'Team Targeted', key: 'teamTargeted' },
-    { label: 'April ↓', key: 'april' },
+    { label: 'Actual Team', key: 'actualTeam' },
+    { label: 'Target', key: 'requiredTeam' },
+    { label: 'April', key: 'aprilManpower' },
+    { label: 'May', key: 'mayManpower' },
+    { label: 'June', key: 'juneManpower' },
     { label: 'YTD', key: 'ytd' },
   ],
   mobilisation_cost: [
