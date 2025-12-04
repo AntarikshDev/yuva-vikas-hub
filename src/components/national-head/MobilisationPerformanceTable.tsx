@@ -45,10 +45,11 @@ interface MobilisationPerformanceTableProps {
 const KPI_COLUMNS: Record<KPIType, { label: string; key: string }[]> = {
   mobilisation_team: [
     { label: 'Project Name', key: 'projectName' },
-    { label: 'Team Target/Actual', key: 'teamTarget' },
-    { label: 'April', key: 'april' },
-    { label: 'May %', key: 'may' },
-    { label: 'June', key: 'june' },
+    { label: 'Actual Team', key: 'actualTeam' },
+    { label: 'Required Team', key: 'requiredTeam' },
+    { label: 'April', key: 'aprilManpower' },
+    { label: 'May', key: 'mayManpower' },
+    { label: 'June', key: 'juneManpower' },
   ],
   enrolment_target: [
     { label: 'Project Name', key: 'projectName' },
@@ -123,10 +124,20 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     switch (columnKey) {
       case 'projectName':
         return project.projectName;
+      case 'actualTeam':
+        return project.totalAchieved;
+      case 'requiredTeam':
+        return project.totalTarget;
       case 'teamTarget':
         return `${project.totalAchieved}/${project.totalTarget}`;
       case 'teamTargeted':
         return project.totalTarget;
+      case 'aprilManpower':
+        return project.monthlyData.april?.achieved || 0;
+      case 'mayManpower':
+        return project.monthlyData.may?.achieved || 0;
+      case 'juneManpower':
+        return project.monthlyData.june?.achieved || 0;
       case 'april':
         return project.monthlyData.april?.achieved || 0;
       case 'may':
