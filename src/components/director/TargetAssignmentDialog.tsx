@@ -909,6 +909,14 @@ export function TargetAssignmentDialog({ open, onOpenChange }: TargetAssignmentD
                     Only employees from selected states are shown.
                   </FormDescription>
                   
+                  <div className="mt-3">
+                    <Input 
+                      type="number" 
+                      placeholder="Enter mobiliser count"
+                      className="max-w-xs"
+                    />
+                  </div>
+                  
                   <div className="space-y-4">
                     {/* Role and Employee Selection */}
                     <div className="space-y-3">
