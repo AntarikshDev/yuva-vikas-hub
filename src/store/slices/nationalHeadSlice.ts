@@ -580,7 +580,10 @@ const nationalHeadSlice = createSlice({
     toggleProgram: (state, action: PayloadAction<string>) => {
       const program = action.payload;
       if (state.selectedPrograms.includes(program)) {
-        state.selectedPrograms = state.selectedPrograms.filter(p => p !== program);
+        // Prevent deselecting the last program - at least one must remain selected
+        if (state.selectedPrograms.length > 1) {
+          state.selectedPrograms = state.selectedPrograms.filter(p => p !== program);
+        }
       } else {
         state.selectedPrograms.push(program);
       }
