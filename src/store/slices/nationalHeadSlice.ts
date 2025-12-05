@@ -179,7 +179,7 @@ const initialState: NationalHeadState = {
   costEfficiency: null,
   selectedKPI: 'mobilisation_team',
   selectedPrograms: ['DDUGKY'],
-  selectedWorkOrders: ['W/O:UP'],
+  selectedWorkOrders: [],
   filters: {
     dateRange: [null, null],
     states: [],
