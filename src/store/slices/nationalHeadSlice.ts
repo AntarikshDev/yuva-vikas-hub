@@ -177,7 +177,7 @@ const initialState: NationalHeadState = {
   pendingDocuments: [],
   activityMetrics: null,
   costEfficiency: null,
-  selectedKPI: 'mobilisation_team',
+  selectedKPI: null,
   selectedPrograms: ['DDUGKY'],
   selectedWorkOrders: [],
   filters: {
