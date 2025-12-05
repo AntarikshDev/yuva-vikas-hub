@@ -1,31 +1,58 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { useAppSelector } from '@/hooks/useAppSelector';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
-import { fetchNHMobilisation, setSelectedKPI, toggleProgram, toggleWorkOrder } from '@/store/slices/nationalHeadSlice';
+import { 
+  fetchNHMobilisation, 
+  setSelectedKPI, 
+  toggleProgram, 
+  toggleState,
+  setKPILoading,
+  setKPITableData 
+} from '@/store/slices/nationalHeadSlice';
 import { MobilisationKPICard } from '@/components/national-head/MobilisationKPICard';
-import { ProgramWorkOrderFilter } from '@/components/national-head/ProgramWorkOrderFilter';
+import { ProgramStateFilter } from '@/components/national-head/ProgramStateFilter';
 import { MobilisationPerformanceTable } from '@/components/national-head/MobilisationPerformanceTable';
+
+// API endpoints for each KPI
+const KPI_API_ENDPOINTS = {
+  mobilisation_team: '/api/national-head/kpi/mobilisation-team',
+  enrolment_target: '/api/national-head/kpi/enrolment-target',
+  mobilisation_cost: '/api/national-head/kpi/mobilisation-cost',
+  training_completion: '/api/national-head/kpi/training-completion',
+  conversion_pe: '/api/national-head/kpi/conversion-pe',
+  conversion_rp: '/api/national-head/kpi/conversion-rp',
+} as const;
+
+type KPIType = keyof typeof KPI_API_ENDPOINTS;
 
 const NationalHeadMobilisationMonitoring = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { mobilisation, selectedKPI, selectedPrograms, selectedWorkOrders, isLoading } = useAppSelector((state) => state.nationalHead);
+  const { 
+    mobilisation, 
+    selectedKPI, 
+    selectedPrograms, 
+    selectedStates, 
+    kpiTableData,
+    isLoading,
+    isKPILoading 
+  } = useAppSelector((state) => state.nationalHead);
 
+  // Fetch initial mobilisation data
   useEffect(() => {
-    dispatch(fetchNHMobilisation({ programs: selectedPrograms, workOrders: selectedWorkOrders }));
-  }, [dispatch, selectedPrograms, selectedWorkOrders]);
+    dispatch(fetchNHMobilisation({ programs: selectedPrograms, states: selectedStates }));
+  }, [dispatch, selectedPrograms, selectedStates]);
 
-  // Filter projects based on selected programs and work orders
+  // Filter projects based on selected programs
   const filteredProjects = useMemo(() => {
     if (!mobilisation?.projects) return [];
     return mobilisation.projects.filter(project => 
-      (selectedPrograms.length === 0 || selectedPrograms.includes(project.program)) &&
-      (selectedWorkOrders.length === 0 || selectedWorkOrders.includes(project.workOrder))
+      selectedPrograms.length === 0 || selectedPrograms.includes(project.program)
     );
-  }, [mobilisation?.projects, selectedPrograms, selectedWorkOrders]);
+  }, [mobilisation?.projects, selectedPrograms]);
 
-  // Calculate KPI metrics
+  // Calculate KPI metrics for card display
   const kpiMetrics = useMemo(() => {
     const totalTarget = filteredProjects.reduce((sum, p) => sum + p.totalTarget, 0);
     const totalAchieved = filteredProjects.reduce((sum, p) => sum + p.totalAchieved, 0);
@@ -39,12 +66,12 @@ const NationalHeadMobilisationMonitoring = () => {
         { label: 'Block', target: 120, achieved: 125 },
       ],
       enrolment_target: [
-        { label: 'Target', target: totalTarget, achieved: totalAchieved },
-        { label: 'Achieved', target: totalTarget, achieved: totalAchieved },
+        { label: 'Target', target: 550, achieved: 380 },
+        { label: 'Achieved', target: 550, achieved: 380 },
       ],
       mobilisation_cost: [
         { label: 'Total Cost', target: 250, achieved: 200 },
-        { label: 'Cost/Candidate', target: avgCostPerCandidate, achieved: avgCostPerCandidate },
+        { label: 'Cost/Candidate', target: 500, achieved: 500 },
       ],
       training_completion: [
         { label: 'Enrolled', target: 200, achieved: 150 },
@@ -63,13 +90,42 @@ const NationalHeadMobilisationMonitoring = () => {
     dispatch(toggleProgram(program));
   };
 
-  const handleWorkOrderToggle = (workOrder: string) => {
-    dispatch(toggleWorkOrder(workOrder));
+  const handleStateToggle = (state: string) => {
+    dispatch(toggleState(state));
   };
 
-  const handleKPIClick = (kpiType: typeof selectedKPI) => {
+  // Handle KPI card click - calls specific API with payload
+  const handleKPIClick = useCallback(async (kpiType: KPIType) => {
     dispatch(setSelectedKPI(kpiType));
-  };
+    dispatch(setKPILoading(true));
+
+    const payload = {
+      programs: selectedPrograms,
+      states: selectedStates,
+      kpi: kpiType,
+    };
+
+    try {
+      const response = await fetch(KPI_API_ENDPOINTS[kpiType], {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        dispatch(setKPITableData(data.programs || []));
+      } else {
+        // Use mock data for now
+        dispatch(setKPITableData(getMockTableData(kpiType)));
+      }
+    } catch (error) {
+      console.log('KPI API call failed, using mock data:', error);
+      dispatch(setKPITableData(getMockTableData(kpiType)));
+    } finally {
+      dispatch(setKPILoading(false));
+    }
+  }, [dispatch, selectedPrograms, selectedStates]);
 
   return (
     <MainLayout role="national-head">
@@ -77,15 +133,15 @@ const NationalHeadMobilisationMonitoring = () => {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Mobilisation Monitoring</h1>
-          <p className="text-muted-foreground">Track mobilisation performance across programs and work orders</p>
+          <p className="text-muted-foreground">Track mobilisation performance across programs and states</p>
         </div>
 
-        {/* Program and Work Order Filters */}
-        <ProgramWorkOrderFilter
+        {/* Program and State Filters */}
+        <ProgramStateFilter
           selectedPrograms={selectedPrograms}
-          selectedWorkOrders={selectedWorkOrders}
+          selectedStates={selectedStates}
           onProgramToggle={handleProgramToggle}
-          onWorkOrderToggle={handleWorkOrderToggle}
+          onStateToggle={handleStateToggle}
         />
 
         {/* KPI Cards */}
@@ -132,11 +188,40 @@ const NationalHeadMobilisationMonitoring = () => {
         <MobilisationPerformanceTable
           projects={filteredProjects}
           selectedKPI={selectedKPI}
-          isLoading={isLoading}
+          isLoading={isLoading || isKPILoading}
         />
       </div>
     </MainLayout>
   );
 };
+
+// Mock data function for fallback
+function getMockTableData(kpiType: KPIType) {
+  return [
+    {
+      projectId: 'ddugky-5',
+      projectName: 'DDUGKY 5',
+      program: 'DDUGKY',
+      workOrder: 'W/O:UP',
+      manpowerPercent: 70,
+      teamBreakdown: {
+        mobilisers: [
+          { name: 'Ramesh', target: 100, achieved: { total: 90, april: 60, may: 400, june: 0 }, ytd: 90, cost: 45000, costPerCandidate: 500 },
+          { name: 'Suresh', target: 100, achieved: { total: 80, april: 40, may: 400, june: 0 }, ytd: 80, cost: 40000, costPerCandidate: 500 },
+        ],
+        mobiliserManagers: { count: 3, target: 5 },
+        centreManagers: { count: 1, target: 2 },
+        operationManagers: { count: 1, target: 1 },
+      },
+      totalTarget: 250,
+      totalAchieved: 170,
+      monthlyData: {
+        april: { target: 100, achieved: 100, percent: 100 },
+        may: { target: 100, achieved: 800, percent: 800 },
+        june: { target: 50, achieved: 0, percent: 0 },
+      },
+    },
+  ];
+}
 
 export default NationalHeadMobilisationMonitoring;
