@@ -136,6 +136,11 @@ interface MobilisationData {
   projects: ProjectPerformance[];
 }
 
+interface KPICardData {
+  metrics: Array<{ label: string; target: number; achieved: number }>;
+  programs: string[];
+}
+
 interface NationalHeadState {
   summary: NHSummary | null;
   assignedStates: string[];
@@ -149,9 +154,18 @@ interface NationalHeadState {
   pendingDocuments: PendingDocument[];
   activityMetrics: ActivityMetrics | null;
   costEfficiency: CostEfficiency | null;
-  selectedKPI: 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 'training_completion' | 'conversion_pe' | 'conversion_rp';
+  selectedKPI: 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 'training_completion' | 'conversion_pe' | 'conversion_rp' | null;
   selectedPrograms: string[];
-  selectedWorkOrders: string[];
+  selectedStates: string[];
+  kpiCardData: {
+    mobilisation_team: KPICardData | null;
+    enrolment_target: KPICardData | null;
+    mobilisation_cost: KPICardData | null;
+    training_completion: KPICardData | null;
+    conversion_pe: KPICardData | null;
+    conversion_rp: KPICardData | null;
+  };
+  kpiTableData: any[];
   filters: {
     dateRange: [string | null, string | null];
     states: string[];
@@ -160,6 +174,7 @@ interface NationalHeadState {
     district: string;
   };
   isLoading: boolean;
+  isKPILoading: boolean;
   error: string | null;
 }
 
@@ -179,7 +194,16 @@ const initialState: NationalHeadState = {
   costEfficiency: null,
   selectedKPI: null,
   selectedPrograms: ['DDUGKY'],
-  selectedWorkOrders: [],
+  selectedStates: [],
+  kpiCardData: {
+    mobilisation_team: null,
+    enrolment_target: null,
+    mobilisation_cost: null,
+    training_completion: null,
+    conversion_pe: null,
+    conversion_rp: null,
+  },
+  kpiTableData: [],
   filters: {
     dateRange: [null, null],
     states: [],
@@ -188,6 +212,7 @@ const initialState: NationalHeadState = {
     district: 'all',
   },
   isLoading: false,
+  isKPILoading: false,
   error: null,
 };
 
@@ -588,13 +613,22 @@ const nationalHeadSlice = createSlice({
         state.selectedPrograms.push(program);
       }
     },
-    toggleWorkOrder: (state, action: PayloadAction<string>) => {
-      const workOrder = action.payload;
-      if (state.selectedWorkOrders.includes(workOrder)) {
-        state.selectedWorkOrders = state.selectedWorkOrders.filter(wo => wo !== workOrder);
+    toggleState: (state, action: PayloadAction<string>) => {
+      const stateName = action.payload;
+      if (state.selectedStates.includes(stateName)) {
+        state.selectedStates = state.selectedStates.filter(s => s !== stateName);
       } else {
-        state.selectedWorkOrders.push(workOrder);
+        state.selectedStates.push(stateName);
       }
+    },
+    setKPITableData: (state, action: PayloadAction<any[]>) => {
+      state.kpiTableData = action.payload;
+    },
+    setKPICardData: (state, action: PayloadAction<{ kpi: keyof NationalHeadState['kpiCardData']; data: KPICardData }>) => {
+      state.kpiCardData[action.payload.kpi] = action.payload.data;
+    },
+    setKPILoading: (state, action: PayloadAction<boolean>) => {
+      state.isKPILoading = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -746,5 +780,5 @@ const nationalHeadSlice = createSlice({
   },
 });
 
-export const { setFilters, clearError, setSelectedKPI, toggleProgram, toggleWorkOrder } = nationalHeadSlice.actions;
+export const { setFilters, clearError, setSelectedKPI, toggleProgram, toggleState, setKPITableData, setKPICardData, setKPILoading } = nationalHeadSlice.actions;
 export default nationalHeadSlice.reducer;
