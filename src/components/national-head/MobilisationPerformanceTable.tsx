@@ -191,7 +191,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
   const isRoleExpanded = (projectId: string, role: string) => {
     return expandedRoles.has(`${projectId}-${role}`);
   };
-  const columns = KPI_COLUMNS[selectedKPI];
+  const columns = selectedKPI ? KPI_COLUMNS[selectedKPI] : KPI_COLUMNS['mobilisation_team'];
   const renderCellValue = (project: ProjectPerformance, columnKey: string) => {
     switch (columnKey) {
       case "projectName":
