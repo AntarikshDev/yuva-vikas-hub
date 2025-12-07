@@ -136,11 +136,6 @@ interface MobilisationData {
   projects: ProjectPerformance[];
 }
 
-interface KPICardData {
-  metrics: Array<{ label: string; target: number; achieved: number }>;
-  programs: string[];
-}
-
 interface NationalHeadState {
   summary: NHSummary | null;
   assignedStates: string[];
@@ -154,18 +149,9 @@ interface NationalHeadState {
   pendingDocuments: PendingDocument[];
   activityMetrics: ActivityMetrics | null;
   costEfficiency: CostEfficiency | null;
-  selectedKPI: 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 'training_completion' | 'conversion_pe' | 'conversion_rp' | null;
+  selectedKPI: 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 'training_completion' | 'conversion_pe' | 'conversion_rp';
   selectedPrograms: string[];
-  selectedStates: string[];
-  kpiCardData: {
-    mobilisation_team: KPICardData | null;
-    enrolment_target: KPICardData | null;
-    mobilisation_cost: KPICardData | null;
-    training_completion: KPICardData | null;
-    conversion_pe: KPICardData | null;
-    conversion_rp: KPICardData | null;
-  };
-  kpiTableData: any[];
+  selectedWorkOrders: string[];
   filters: {
     dateRange: [string | null, string | null];
     states: string[];
@@ -174,7 +160,6 @@ interface NationalHeadState {
     district: string;
   };
   isLoading: boolean;
-  isKPILoading: boolean;
   error: string | null;
 }
 
@@ -192,18 +177,9 @@ const initialState: NationalHeadState = {
   pendingDocuments: [],
   activityMetrics: null,
   costEfficiency: null,
-  selectedKPI: null,
+  selectedKPI: 'mobilisation_team',
   selectedPrograms: ['DDUGKY'],
-  selectedStates: [],
-  kpiCardData: {
-    mobilisation_team: null,
-    enrolment_target: null,
-    mobilisation_cost: null,
-    training_completion: null,
-    conversion_pe: null,
-    conversion_rp: null,
-  },
-  kpiTableData: [],
+  selectedWorkOrders: ['W/O:UP'],
   filters: {
     dateRange: [null, null],
     states: [],
@@ -212,7 +188,6 @@ const initialState: NationalHeadState = {
     district: 'all',
   },
   isLoading: false,
-  isKPILoading: false,
   error: null,
 };
 
@@ -605,30 +580,18 @@ const nationalHeadSlice = createSlice({
     toggleProgram: (state, action: PayloadAction<string>) => {
       const program = action.payload;
       if (state.selectedPrograms.includes(program)) {
-        // Prevent deselecting the last program - at least one must remain selected
-        if (state.selectedPrograms.length > 1) {
-          state.selectedPrograms = state.selectedPrograms.filter(p => p !== program);
-        }
+        state.selectedPrograms = state.selectedPrograms.filter(p => p !== program);
       } else {
         state.selectedPrograms.push(program);
       }
     },
-    toggleState: (state, action: PayloadAction<string>) => {
-      const stateName = action.payload;
-      if (state.selectedStates.includes(stateName)) {
-        state.selectedStates = state.selectedStates.filter(s => s !== stateName);
+    toggleWorkOrder: (state, action: PayloadAction<string>) => {
+      const workOrder = action.payload;
+      if (state.selectedWorkOrders.includes(workOrder)) {
+        state.selectedWorkOrders = state.selectedWorkOrders.filter(wo => wo !== workOrder);
       } else {
-        state.selectedStates.push(stateName);
+        state.selectedWorkOrders.push(workOrder);
       }
-    },
-    setKPITableData: (state, action: PayloadAction<any[]>) => {
-      state.kpiTableData = action.payload;
-    },
-    setKPICardData: (state, action: PayloadAction<{ kpi: keyof NationalHeadState['kpiCardData']; data: KPICardData }>) => {
-      state.kpiCardData[action.payload.kpi] = action.payload.data;
-    },
-    setKPILoading: (state, action: PayloadAction<boolean>) => {
-      state.isKPILoading = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -780,5 +743,5 @@ const nationalHeadSlice = createSlice({
   },
 });
 
-export const { setFilters, clearError, setSelectedKPI, toggleProgram, toggleState, setKPITableData, setKPICardData, setKPILoading } = nationalHeadSlice.actions;
+export const { setFilters, clearError, setSelectedKPI, toggleProgram, toggleWorkOrder } = nationalHeadSlice.actions;
 export default nationalHeadSlice.reducer;
