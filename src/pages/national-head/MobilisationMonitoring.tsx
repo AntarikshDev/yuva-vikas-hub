@@ -51,10 +51,12 @@ const NationalHeadMobilisationMonitoring = () => {
         { label: 'Training', target: 200, achieved: 150 },
       ],
       conversion_pe: [
-        { label: 'P/E Ratio', target: 100, achieved: 75 },
+        { label: 'Placed', target: 100, achieved: 75 },
+        { label: 'Enrolled', target: 100, achieved: 100 },
       ],
       conversion_rp: [
-        { label: 'R/P Ratio', target: 100, achieved: 80 },
+        { label: 'Retained', target: 80, achieved: 80 },
+        { label: 'Placed', target: 100, achieved: 75 },
       ],
     };
   }, [filteredProjects]);
