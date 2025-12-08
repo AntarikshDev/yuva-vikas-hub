@@ -4,7 +4,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+
 export type KPIType = "mobilisation_team" | "enrolment_target" | "mobilisation_cost" | "training_completion" | "conversion_pe" | "conversion_rp";
+
 interface MobiliserData {
   name: string;
   target: number;
@@ -13,21 +15,14 @@ interface MobiliserData {
   cost?: number;
   costPerCandidate?: number;
 }
+
 interface TeamBreakdown {
   mobilisers: MobiliserData[];
-  mobiliserManagers: {
-    count: number;
-    target: number;
-  };
-  centreManagers: {
-    count: number;
-    target: number;
-  };
-  operationManagers: {
-    count: number;
-    target: number;
-  };
+  mobiliserManagers: { count: number; target: number };
+  centreManagers: { count: number; target: number };
+  operationManagers: { count: number; target: number };
 }
+
 interface ProjectPerformance {
   projectId: string;
   projectName: string;
@@ -37,137 +32,152 @@ interface ProjectPerformance {
   teamBreakdown: TeamBreakdown;
   totalTarget: number;
   totalAchieved: number;
-  monthlyData: Record<string, {
-    target: number;
-    achieved: number;
-    percent: number;
-  }>;
+  monthlyData: Record<string, { target: number; achieved: number; percent: number }>;
 }
+
 interface MobilisationPerformanceTableProps {
   projects: ProjectPerformance[];
   selectedKPI: KPIType;
   isLoading?: boolean;
 }
-const KPI_COLUMNS: Record<KPIType, {
-  label: string;
-  key: string;
-}[]> = {
-  mobilisation_team: [{
-    label: "Project Name",
-    key: "projectName"
-  }, {
-    label: "Actual Team",
-    key: "actualTeam"
-  }, {
-    label: "Required Team",
-    key: "requiredTeam"
-  }, {
-    label: "April",
-    key: "aprilManpower"
-  }, {
-    label: "May",
-    key: "mayManpower"
-  }, {
-    label: "June",
-    key: "juneManpower"
-  }],
-  enrolment_target: [{
-    label: "Project Name",
-    key: "projectName"
-  }, {
-    label: "Actual Team",
-    key: "actualTeam"
-  }, {
-    label: "Target",
-    key: "requiredTeam"
-  }, {
-    label: "April",
-    key: "aprilManpower"
-  }, {
-    label: "May",
-    key: "mayManpower"
-  }, {
-    label: "June",
-    key: "juneManpower"
-  }, {
-    label: "YTD",
-    key: "ytd"
-  }],
-  mobilisation_cost: [{
-    label: "Project Name",
-    key: "projectName"
-  }, {
-    label: "Target Cost/Candidate",
-    key: "targetCostPerCandidate"
-  }, {
-    label: "Actual Cost/Candidate",
-    key: "actualCostPerCandidate"
-  }, {
-    label: "Budget Allotted",
-    key: "budgetAllotted"
-  }, {
-    label: "Budget Consumed",
-    key: "budgetConsumed"
-  }],
-  training_completion: [{
-    label: "Project Name",
-    key: "projectName"
-  }, {
-    label: "Actual Enrolment",
-    key: "actualEnrolment"
-  }, {
-    label: "Candidates in Training",
-    key: "candidatesInTraining"
-  }, {
-    label: "April",
-    key: "aprilManpower"
-  }, {
-    label: "May",
-    key: "mayManpower"
-  }, {
-    label: "June",
-    key: "juneManpower"
-  }, {
-    label: "YTD",
-    key: "ytd"
-  }],
-  conversion_pe: [{
-    label: "Project Name",
-    key: "projectName"
-  }, {
-    label: "Team Targeted",
-    key: "teamTargeted"
-  }, {
-    label: "Month",
-    key: "month"
-  }, {
-    label: "YTD",
-    key: "ytd"
-  }, {
-    label: "Date Range",
-    key: "dateRange"
-  }],
-  conversion_rp: [{
-    label: "Project Name",
-    key: "projectName"
-  }, {
-    label: "Team Targeted",
-    key: "teamTargeted"
-  }, {
-    label: "Total Cost",
-    key: "totalCost"
-  }, {
-    label: "Cost/Candidate",
-    key: "costPerCandidate"
-  }]
+
+// Quarter definitions (April to March financial year)
+const QUARTERS = [
+  { key: "q1", label: "Q1", months: ["Apr", "May", "Jun"] },
+  { key: "q2", label: "Q2", months: ["Jul", "Aug", "Sep"] },
+  { key: "q3", label: "Q3", months: ["Oct", "Nov", "Dec"] },
+  { key: "q4", label: "Q4", months: ["Jan", "Feb", "Mar"] },
+];
+
+const MONTH_KEYS: Record<string, string> = {
+  "Apr": "april", "May": "may", "Jun": "june",
+  "Jul": "july", "Aug": "august", "Sep": "september",
+  "Oct": "october", "Nov": "november", "Dec": "december",
+  "Jan": "january", "Feb": "february", "Mar": "march"
 };
+
+// Mock quarterly data for employees
+const getQuarterlyData = (baseValue: number, quarterKey: string) => {
+  const multipliers: Record<string, number[]> = {
+    q1: [0.28, 0.32, 0.40],
+    q2: [0.30, 0.35, 0.35],
+    q3: [0.33, 0.33, 0.34],
+    q4: [0.25, 0.35, 0.40],
+  };
+  const m = multipliers[quarterKey] || [0.33, 0.33, 0.34];
+  const quarter = QUARTERS.find(q => q.key === quarterKey);
+  if (!quarter) return { months: [], total: 0 };
+  
+  const values = m.map(mult => Math.round(baseValue * mult));
+  return {
+    months: quarter.months.map((name, i) => ({ name, value: values[i] })),
+    total: values.reduce((a, b) => a + b, 0)
+  };
+};
+
+// Quarter cell component with expandable months
+const QuarterCell: React.FC<{ 
+  quarterKey: string; 
+  baseValue: number; 
+  showData: boolean;
+  expandedQuarters: Set<string>;
+  toggleQuarter: (key: string) => void;
+}> = ({ quarterKey, baseValue, showData, expandedQuarters, toggleQuarter }) => {
+  if (!showData) {
+    return <TableCell className="text-center text-muted-foreground">-</TableCell>;
+  }
+
+  const data = getQuarterlyData(baseValue, quarterKey);
+  const isExpanded = expandedQuarters.has(quarterKey);
+
+  return (
+    <TableCell className="align-top min-w-[100px]">
+      <div className="space-y-1">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleQuarter(quarterKey);
+          }}
+          className={cn(
+            "flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-md w-full justify-center",
+            "bg-primary/10 hover:bg-primary/20 transition-colors"
+          )}
+        >
+          {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+          <span>{data.total}</span>
+        </button>
+        {isExpanded && (
+          <div className="text-xs space-y-0.5 pl-2 border-l-2 border-primary/20 ml-2">
+            {data.months.map((month) => (
+              <div key={month.name} className="flex justify-between text-muted-foreground">
+                <span>{month.name}</span>
+                <span className="font-medium text-foreground">{month.value}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </TableCell>
+  );
+};
+
+// Role-level quarter cell (for manpower KPI)
+const RoleQuarterCell: React.FC<{ 
+  quarterKey: string; 
+  actual: number;
+  target: number;
+  expandedQuarters: Set<string>;
+  toggleQuarter: (key: string) => void;
+}> = ({ quarterKey, actual, target, expandedQuarters, toggleQuarter }) => {
+  const quarter = QUARTERS.find(q => q.key === quarterKey);
+  if (!quarter) return <TableCell>-</TableCell>;
+  
+  const isExpanded = expandedQuarters.has(quarterKey);
+  const monthValues = [
+    Math.round(actual * 0.9),
+    Math.round(actual * 0.95),
+    actual
+  ];
+
+  return (
+    <TableCell className="align-top min-w-[100px]">
+      <div className="space-y-1">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleQuarter(quarterKey);
+          }}
+          className={cn(
+            "flex items-center gap-1 text-sm font-medium px-2 py-1 rounded-md w-full justify-center",
+            "bg-accent/50 hover:bg-accent transition-colors"
+          )}
+        >
+          {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+          <span>{actual}/{target}</span>
+        </button>
+        {isExpanded && (
+          <div className="text-xs space-y-0.5 pl-2 border-l-2 border-accent ml-2">
+            {quarter.months.map((month, i) => (
+              <div key={month} className="flex justify-between text-muted-foreground">
+                <span>{month}</span>
+                <span className="font-medium text-foreground">{monthValues[i]}/{target}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </TableCell>
+  );
+};
+
 export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTableProps> = ({
   projects,
   selectedKPI,
   isLoading
 }) => {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-  const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set(["mobiliser"])); // Default mobiliser expanded
+  const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set(["mobiliser"]));
+  const [expandedQuarters, setExpandedQuarters] = useState<Set<string>>(new Set());
 
   const toggleRow = (projectId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -178,6 +188,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     }
     setExpandedRows(newExpanded);
   };
+
   const toggleRole = (projectId: string, role: string) => {
     const roleKey = `${projectId}-${role}`;
     const newExpanded = new Set(expandedRoles);
@@ -188,56 +199,27 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     }
     setExpandedRoles(newExpanded);
   };
+
+  const toggleQuarter = (quarterKey: string) => {
+    const newExpanded = new Set(expandedQuarters);
+    if (newExpanded.has(quarterKey)) {
+      newExpanded.delete(quarterKey);
+    } else {
+      newExpanded.add(quarterKey);
+    }
+    setExpandedQuarters(newExpanded);
+  };
+
   const isRoleExpanded = (projectId: string, role: string) => {
     return expandedRoles.has(`${projectId}-${role}`);
   };
-  const columns = KPI_COLUMNS[selectedKPI];
-  const renderCellValue = (project: ProjectPerformance, columnKey: string) => {
-    switch (columnKey) {
-      case "projectName":
-        return project.projectName;
-      case "actualTeam":
-        return project.totalAchieved;
-      case "requiredTeam":
-        return project.totalTarget;
-      case "teamTarget":
-        return `${project.totalAchieved}/${project.totalTarget}`;
-      case "teamTargeted":
-        return project.totalTarget;
-      case "aprilManpower":
-        return project.monthlyData.april?.achieved || 0;
-      case "mayManpower":
-        return project.monthlyData.may?.achieved || 0;
-      case "juneManpower":
-        return project.monthlyData.june?.achieved || 0;
-      case "april":
-        return project.monthlyData.april?.achieved || 0;
-      case "may":
-        return `${project.monthlyData.may?.percent || 0}%`;
-      case "june":
-        return project.monthlyData.june?.achieved || 0;
-      case "ytd":
-        return project.totalAchieved;
-      case "targetCostPerCandidate":
-        return `₹5,000`;
-      case "actualCostPerCandidate":
-        return `₹4,800`;
-      case "budgetAllotted":
-        return `₹${(project.totalTarget * 5000).toLocaleString()}`;
-      case "budgetConsumed":
-        return `₹${(project.totalAchieved * 4800).toLocaleString()}`;
-      case "actualEnrolment":
-        return project.totalAchieved;
-      case "candidatesInTraining":
-        return Math.round(project.totalAchieved * 0.85);
-      case "month":
-        return project.monthlyData.june?.achieved || 0;
-      default:
-        return "-";
-    }
-  };
+
+  const isManpowerKPI = selectedKPI === "mobilisation_team";
+  const showQuarters = ["mobilisation_team", "enrolment_target", "training_completion"].includes(selectedKPI);
+
   if (isLoading) {
-    return <Card>
+    return (
+      <Card>
         <CardHeader>
           <CardTitle>Performance Data</CardTitle>
         </CardHeader>
@@ -246,11 +228,34 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
             <div className="text-muted-foreground">Loading...</div>
           </div>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
-  return <Card>
+
+  const renderCostColumns = (project: ProjectPerformance) => (
+    <>
+      <TableCell>₹5,000</TableCell>
+      <TableCell>₹4,800</TableCell>
+      <TableCell>₹{(project.totalTarget * 5000).toLocaleString()}</TableCell>
+      <TableCell>₹{(project.totalAchieved * 4800).toLocaleString()}</TableCell>
+    </>
+  );
+
+  const renderConversionColumns = (project: ProjectPerformance) => (
+    <>
+      <TableCell>{project.totalTarget}</TableCell>
+      <TableCell>{project.monthlyData.june?.achieved || 0}</TableCell>
+      <TableCell>{project.totalAchieved}</TableCell>
+      <TableCell>Apr - Mar</TableCell>
+    </>
+  );
+
+  return (
+    <Card>
       <CardHeader>
-        <CardTitle>Mobilisation Manpower Analysis (Approved Vs Actual)</CardTitle>
+        <CardTitle>
+          {isManpowerKPI ? "Mobilisation Manpower Analysis (Approved Vs Actual)" : "Performance Analysis"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -258,49 +263,111 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
-                {columns.map(col => <TableHead key={col.key}>{col.label}</TableHead>)}
+                <TableHead className="min-w-[200px]">Project Name</TableHead>
+                <TableHead>Actual</TableHead>
+                <TableHead>Target</TableHead>
+                {showQuarters && QUARTERS.map(q => (
+                  <TableHead key={q.key} className="text-center min-w-[100px]">
+                    {q.label}
+                    <span className="block text-xs text-muted-foreground font-normal">
+                      {q.months[0]}-{q.months[2]}
+                    </span>
+                  </TableHead>
+                ))}
+                {showQuarters && <TableHead className="text-center font-semibold">YTD</TableHead>}
+                {selectedKPI === "mobilisation_cost" && (
+                  <>
+                    <TableHead>Target Cost/Candidate</TableHead>
+                    <TableHead>Actual Cost/Candidate</TableHead>
+                    <TableHead>Budget Allotted</TableHead>
+                    <TableHead>Budget Consumed</TableHead>
+                  </>
+                )}
+                {selectedKPI === "conversion_pe" && (
+                  <>
+                    <TableHead>Team Targeted</TableHead>
+                    <TableHead>Month</TableHead>
+                    <TableHead>YTD</TableHead>
+                    <TableHead>Date Range</TableHead>
+                  </>
+                )}
+                {selectedKPI === "conversion_rp" && (
+                  <>
+                    <TableHead>Team Targeted</TableHead>
+                    <TableHead>Total Cost</TableHead>
+                    <TableHead>Cost/Candidate</TableHead>
+                  </>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {projects.map(project => {
-              const isExpanded = expandedRows.has(project.projectId);
-              return <React.Fragment key={project.projectId}>
+                const isExpanded = expandedRows.has(project.projectId);
+                const ytdValue = project.totalAchieved;
+                
+                return (
+                  <React.Fragment key={project.projectId}>
                     {/* Main Project Row */}
-                    <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => toggleRow(project.projectId)}>
+                    <TableRow 
+                      className="cursor-pointer hover:bg-muted/50" 
+                      onClick={() => toggleRow(project.projectId)}
+                    >
                       <TableCell>
                         {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </TableCell>
-                      {columns.map(col => <TableCell key={col.key} className="font-medium">
-                          {renderCellValue(project, col.key)}
-                        </TableCell>)}
+                      <TableCell className="font-medium">{project.projectName}</TableCell>
+                      <TableCell>{project.totalAchieved}</TableCell>
+                      <TableCell>{project.totalTarget}</TableCell>
+                      {showQuarters && QUARTERS.map(q => (
+                        <QuarterCell
+                          key={q.key}
+                          quarterKey={q.key}
+                          baseValue={Math.round(ytdValue / 4)}
+                          showData={true}
+                          expandedQuarters={expandedQuarters}
+                          toggleQuarter={toggleQuarter}
+                        />
+                      ))}
+                      {showQuarters && (
+                        <TableCell className="text-center font-semibold bg-muted/30">
+                          {ytdValue}
+                        </TableCell>
+                      )}
+                      {selectedKPI === "mobilisation_cost" && renderCostColumns(project)}
+                      {selectedKPI === "conversion_pe" && renderConversionColumns(project)}
+                      {selectedKPI === "conversion_rp" && (
+                        <>
+                          <TableCell>{project.totalTarget}</TableCell>
+                          <TableCell>₹{(project.totalAchieved * 4800).toLocaleString()}</TableCell>
+                          <TableCell>₹4,800</TableCell>
+                        </>
+                      )}
                     </TableRow>
 
-                    {/* Expanded Team Breakdown - Manpower Progress Row */}
-                    {isExpanded && <TableRow className="bg-muted/30">
+                    {/* Progress Row */}
+                    {isExpanded && (
+                      <TableRow className="bg-muted/30">
                         <TableCell></TableCell>
-                        <TableCell colSpan={columns.length} className="py-3">
+                        <TableCell colSpan={showQuarters ? 7 : 4} className="py-3">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-muted-foreground">
-                                {selectedKPI === "mobilisation_team" && "Manpower Percentage"}
-                                {selectedKPI === "enrolment_target" && "Enrolment Percentage"}
-                                {selectedKPI === "mobilisation_cost" && "Cost Overflow Percentage"}
-                                {selectedKPI === "training_completion" && "Training Completion Percentage"}
-                                {selectedKPI === "conversion_pe" && "Conversion Percentage"}
-                                {selectedKPI === "conversion_rp" && "Retention Percentage"}
+                                {isManpowerKPI ? "Manpower %" : "Achievement %"}
                               </span>
                               <span className="font-semibold">{project.manpowerPercent}%</span>
                             </div>
                             <Progress value={project.manpowerPercent} className="h-2" />
                           </div>
                         </TableCell>
-                      </TableRow>}
+                      </TableRow>
+                    )}
 
-                    {/* Mobilisers Header */}
-                    {isExpanded && <TableRow className="cursor-pointer hover:bg-muted/30 bg-muted/20" onClick={e => {
-                  e.stopPropagation();
-                  toggleRole(project.projectId, "mobiliser");
-                }}>
+                    {/* Mobiliser Role */}
+                    {isExpanded && (
+                      <TableRow 
+                        className="cursor-pointer hover:bg-muted/30 bg-muted/20" 
+                        onClick={e => { e.stopPropagation(); toggleRole(project.projectId, "mobiliser"); }}
+                      >
                         <TableCell></TableCell>
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
@@ -308,264 +375,335 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                             Mobiliser ({project.teamBreakdown.mobilisers.length}/10)
                           </div>
                         </TableCell>
-                        {selectedKPI === "mobilisation_team" ? (
+                        {isManpowerKPI ? (
                           <>
                             <TableCell>{project.teamBreakdown.mobilisers.length}</TableCell>
                             <TableCell>10</TableCell>
-                            <TableCell>8</TableCell>
-                            <TableCell>9</TableCell>
-                            <TableCell>10</TableCell>
+                            {QUARTERS.map(q => (
+                              <RoleQuarterCell
+                                key={q.key}
+                                quarterKey={q.key}
+                                actual={project.teamBreakdown.mobilisers.length}
+                                target={10}
+                                expandedQuarters={expandedQuarters}
+                                toggleQuarter={toggleQuarter}
+                              />
+                            ))}
+                            <TableCell className="text-center font-semibold bg-muted/30">
+                              {project.teamBreakdown.mobilisers.length}
+                            </TableCell>
                           </>
                         ) : (
                           <>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
+                            {showQuarters && QUARTERS.map(q => <TableCell key={q.key}></TableCell>)}
+                            {showQuarters && <TableCell></TableCell>}
                           </>
                         )}
-                      </TableRow>}
-                    {isExpanded && isRoleExpanded(project.projectId, "mobiliser") && project.teamBreakdown.mobilisers.map(mobiliser => <TableRow key={mobiliser.name} className="bg-muted/10">
+                      </TableRow>
+                    )}
+
+                    {/* Mobiliser Employees */}
+                    {isExpanded && isRoleExpanded(project.projectId, "mobiliser") && 
+                      project.teamBreakdown.mobilisers.map(mobiliser => (
+                        <TableRow key={mobiliser.name} className="bg-muted/10">
                           <TableCell></TableCell>
                           <TableCell className="pl-10">{mobiliser.name}</TableCell>
-                          {selectedKPI === "mobilisation_team" ? (
+                          {isManpowerKPI ? (
                             <>
                               <TableCell></TableCell>
                               <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
+                              {QUARTERS.map(q => <TableCell key={q.key}></TableCell>)}
                               <TableCell></TableCell>
                             </>
                           ) : (
                             <>
-                              <TableCell>{mobiliser.achieved.total}</TableCell>
+                              <TableCell>{mobiliser.achieved.total || 45}</TableCell>
                               <TableCell>{mobiliser.target}</TableCell>
-                              <TableCell>{mobiliser.achieved.april || 90}</TableCell>
-                              <TableCell>{mobiliser.achieved.may || 95}</TableCell>
-                              <TableCell>{mobiliser.achieved.june || 100}</TableCell>
+                              {showQuarters && QUARTERS.map(q => (
+                                <QuarterCell
+                                  key={q.key}
+                                  quarterKey={q.key}
+                                  baseValue={Math.round((mobiliser.achieved.total || 45) / 4)}
+                                  showData={true}
+                                  expandedQuarters={expandedQuarters}
+                                  toggleQuarter={toggleQuarter}
+                                />
+                              ))}
+                              {showQuarters && (
+                                <TableCell className="text-center font-semibold bg-muted/30">
+                                  {mobiliser.achieved.total || 45}
+                                </TableCell>
+                              )}
                             </>
                           )}
-                        </TableRow>)}
+                        </TableRow>
+                      ))
+                    }
 
-                    {/* Mobiliser Manager Header */}
-                    {isExpanded && <TableRow className="cursor-pointer hover:bg-muted/30 bg-muted/20" onClick={e => {
-                  e.stopPropagation();
-                  toggleRole(project.projectId, "mobiliser-manager");
-                }}>
+                    {/* Mobiliser Manager Role */}
+                    {isExpanded && (
+                      <TableRow 
+                        className="cursor-pointer hover:bg-muted/30 bg-muted/20" 
+                        onClick={e => { e.stopPropagation(); toggleRole(project.projectId, "mobiliser-manager"); }}
+                      >
                         <TableCell></TableCell>
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
                             {isRoleExpanded(project.projectId, "mobiliser-manager") ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                            Mobiliser Manager ({project.teamBreakdown.mobiliserManagers.count}/
-                            {project.teamBreakdown.mobiliserManagers.target})
+                            Mobiliser Manager ({project.teamBreakdown.mobiliserManagers.count}/{project.teamBreakdown.mobiliserManagers.target})
                           </div>
                         </TableCell>
-                        {selectedKPI === "mobilisation_team" ? (
+                        {isManpowerKPI ? (
                           <>
                             <TableCell>{project.teamBreakdown.mobiliserManagers.count}</TableCell>
                             <TableCell>{project.teamBreakdown.mobiliserManagers.target}</TableCell>
-                            <TableCell>2</TableCell>
-                            <TableCell>3</TableCell>
-                            <TableCell>3</TableCell>
+                            {QUARTERS.map(q => (
+                              <RoleQuarterCell
+                                key={q.key}
+                                quarterKey={q.key}
+                                actual={project.teamBreakdown.mobiliserManagers.count}
+                                target={project.teamBreakdown.mobiliserManagers.target}
+                                expandedQuarters={expandedQuarters}
+                                toggleQuarter={toggleQuarter}
+                              />
+                            ))}
+                            <TableCell className="text-center font-semibold bg-muted/30">
+                              {project.teamBreakdown.mobiliserManagers.count}
+                            </TableCell>
                           </>
                         ) : (
                           <>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
+                            {showQuarters && QUARTERS.map(q => <TableCell key={q.key}></TableCell>)}
+                            {showQuarters && <TableCell></TableCell>}
                           </>
                         )}
-                      </TableRow>}
-                    {isExpanded && isRoleExpanded(project.projectId, "mobiliser-manager") && <>
-                        <TableRow className="bg-muted/10">
-                          <TableCell></TableCell>
-                          <TableCell className="pl-10">Rajesh Kumar</TableCell>
-                          {selectedKPI === "mobilisation_team" ? (
-                            <>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                            </>
-                          ) : (
-                            <>
-                              <TableCell>45</TableCell>
-                              <TableCell>50</TableCell>
-                              <TableCell>12</TableCell>
-                              <TableCell>15</TableCell>
-                              <TableCell>18</TableCell>
-                            </>
-                          )}
-                        </TableRow>
-                        <TableRow className="bg-muted/10">
-                          <TableCell></TableCell>
-                          <TableCell className="pl-10">Priya Sharma</TableCell>
-                          {selectedKPI === "mobilisation_team" ? (
-                            <>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                            </>
-                          ) : (
-                            <>
-                              <TableCell>38</TableCell>
-                              <TableCell>50</TableCell>
-                              <TableCell>10</TableCell>
-                              <TableCell>12</TableCell>
-                              <TableCell>16</TableCell>
-                            </>
-                          )}
-                        </TableRow>
-                        <TableRow className="bg-muted/10">
-                          <TableCell></TableCell>
-                          <TableCell className="pl-10">Amit Verma</TableCell>
-                          {selectedKPI === "mobilisation_team" ? (
-                            <>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                              <TableCell></TableCell>
-                            </>
-                          ) : (
-                            <>
-                              <TableCell>52</TableCell>
-                              <TableCell>50</TableCell>
-                              <TableCell>15</TableCell>
-                              <TableCell>18</TableCell>
-                              <TableCell>19</TableCell>
-                            </>
-                          )}
-                        </TableRow>
-                      </>}
+                      </TableRow>
+                    )}
 
-                    {/* Centre Manager Header */}
-                    {isExpanded && <TableRow className="cursor-pointer hover:bg-muted/30 bg-muted/20" onClick={e => {
-                  e.stopPropagation();
-                  toggleRole(project.projectId, "centre-manager");
-                }}>
+                    {/* Mobiliser Manager Employees */}
+                    {isExpanded && isRoleExpanded(project.projectId, "mobiliser-manager") && (
+                      <>
+                        {[
+                          { name: "Rajesh Kumar", achieved: 45, target: 50 },
+                          { name: "Priya Sharma", achieved: 38, target: 50 },
+                          { name: "Amit Verma", achieved: 52, target: 50 }
+                        ].map(emp => (
+                          <TableRow key={emp.name} className="bg-muted/10">
+                            <TableCell></TableCell>
+                            <TableCell className="pl-10">{emp.name}</TableCell>
+                            {isManpowerKPI ? (
+                              <>
+                                <TableCell></TableCell>
+                                <TableCell></TableCell>
+                                {QUARTERS.map(q => <TableCell key={q.key}></TableCell>)}
+                                <TableCell></TableCell>
+                              </>
+                            ) : (
+                              <>
+                                <TableCell>{emp.achieved}</TableCell>
+                                <TableCell>{emp.target}</TableCell>
+                                {showQuarters && QUARTERS.map(q => (
+                                  <QuarterCell
+                                    key={q.key}
+                                    quarterKey={q.key}
+                                    baseValue={Math.round(emp.achieved / 4)}
+                                    showData={true}
+                                    expandedQuarters={expandedQuarters}
+                                    toggleQuarter={toggleQuarter}
+                                  />
+                                ))}
+                                {showQuarters && (
+                                  <TableCell className="text-center font-semibold bg-muted/30">
+                                    {emp.achieved}
+                                  </TableCell>
+                                )}
+                              </>
+                            )}
+                          </TableRow>
+                        ))}
+                      </>
+                    )}
+
+                    {/* Centre Manager Role */}
+                    {isExpanded && (
+                      <TableRow 
+                        className="cursor-pointer hover:bg-muted/30 bg-muted/20" 
+                        onClick={e => { e.stopPropagation(); toggleRole(project.projectId, "centre-manager"); }}
+                      >
                         <TableCell></TableCell>
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
                             {isRoleExpanded(project.projectId, "centre-manager") ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                            Centre Manager ({project.teamBreakdown.centreManagers.count}/
-                            {project.teamBreakdown.centreManagers.target})
+                            Centre Manager ({project.teamBreakdown.centreManagers.count}/{project.teamBreakdown.centreManagers.target})
                           </div>
                         </TableCell>
-                        {selectedKPI === "mobilisation_team" ? (
+                        {isManpowerKPI ? (
                           <>
                             <TableCell>{project.teamBreakdown.centreManagers.count}</TableCell>
                             <TableCell>{project.teamBreakdown.centreManagers.target}</TableCell>
-                            <TableCell>1</TableCell>
-                            <TableCell>1</TableCell>
-                            <TableCell>1</TableCell>
+                            {QUARTERS.map(q => (
+                              <RoleQuarterCell
+                                key={q.key}
+                                quarterKey={q.key}
+                                actual={project.teamBreakdown.centreManagers.count}
+                                target={project.teamBreakdown.centreManagers.target}
+                                expandedQuarters={expandedQuarters}
+                                toggleQuarter={toggleQuarter}
+                              />
+                            ))}
+                            <TableCell className="text-center font-semibold bg-muted/30">
+                              {project.teamBreakdown.centreManagers.count}
+                            </TableCell>
                           </>
                         ) : (
                           <>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
+                            {showQuarters && QUARTERS.map(q => <TableCell key={q.key}></TableCell>)}
+                            {showQuarters && <TableCell></TableCell>}
                           </>
                         )}
-                      </TableRow>}
-                    {isExpanded && isRoleExpanded(project.projectId, "centre-manager") && <TableRow className="bg-muted/10">
+                      </TableRow>
+                    )}
+
+                    {/* Centre Manager Employee */}
+                    {isExpanded && isRoleExpanded(project.projectId, "centre-manager") && (
+                      <TableRow className="bg-muted/10">
                         <TableCell></TableCell>
                         <TableCell className="pl-10">Deepak Singh</TableCell>
-                        {selectedKPI === "mobilisation_team" ? (
+                        {isManpowerKPI ? (
                           <>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
+                            {QUARTERS.map(q => <TableCell key={q.key}></TableCell>)}
                             <TableCell></TableCell>
                           </>
                         ) : (
                           <>
                             <TableCell>85</TableCell>
                             <TableCell>100</TableCell>
-                            <TableCell>25</TableCell>
-                            <TableCell>30</TableCell>
-                            <TableCell>30</TableCell>
+                            {showQuarters && QUARTERS.map(q => (
+                              <QuarterCell
+                                key={q.key}
+                                quarterKey={q.key}
+                                baseValue={21}
+                                showData={true}
+                                expandedQuarters={expandedQuarters}
+                                toggleQuarter={toggleQuarter}
+                              />
+                            ))}
+                            {showQuarters && (
+                              <TableCell className="text-center font-semibold bg-muted/30">85</TableCell>
+                            )}
                           </>
                         )}
-                      </TableRow>}
+                      </TableRow>
+                    )}
 
-                    {/* Operation Manager Header */}
-                    {isExpanded && <TableRow className="cursor-pointer hover:bg-muted/30 bg-muted/20" onClick={e => {
-                  e.stopPropagation();
-                  toggleRole(project.projectId, "operation-manager");
-                }}>
+                    {/* Operation Manager Role */}
+                    {isExpanded && (
+                      <TableRow 
+                        className="cursor-pointer hover:bg-muted/30 bg-muted/20" 
+                        onClick={e => { e.stopPropagation(); toggleRole(project.projectId, "operation-manager"); }}
+                      >
                         <TableCell></TableCell>
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
                             {isRoleExpanded(project.projectId, "operation-manager") ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                            Operation Manager ({project.teamBreakdown.operationManagers.count}/
-                            {project.teamBreakdown.operationManagers.target})
+                            Operation Manager ({project.teamBreakdown.operationManagers.count}/{project.teamBreakdown.operationManagers.target})
                           </div>
                         </TableCell>
-                        {selectedKPI === "mobilisation_team" ? (
+                        {isManpowerKPI ? (
                           <>
                             <TableCell>{project.teamBreakdown.operationManagers.count}</TableCell>
                             <TableCell>{project.teamBreakdown.operationManagers.target}</TableCell>
-                            <TableCell>1</TableCell>
-                            <TableCell>1</TableCell>
-                            <TableCell>1</TableCell>
+                            {QUARTERS.map(q => (
+                              <RoleQuarterCell
+                                key={q.key}
+                                quarterKey={q.key}
+                                actual={project.teamBreakdown.operationManagers.count}
+                                target={project.teamBreakdown.operationManagers.target}
+                                expandedQuarters={expandedQuarters}
+                                toggleQuarter={toggleQuarter}
+                              />
+                            ))}
+                            <TableCell className="text-center font-semibold bg-muted/30">
+                              {project.teamBreakdown.operationManagers.count}
+                            </TableCell>
                           </>
                         ) : (
                           <>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
+                            {showQuarters && QUARTERS.map(q => <TableCell key={q.key}></TableCell>)}
+                            {showQuarters && <TableCell></TableCell>}
                           </>
                         )}
-                      </TableRow>}
-                    {isExpanded && isRoleExpanded(project.projectId, "operation-manager") && <TableRow className="bg-muted/10">
+                      </TableRow>
+                    )}
+
+                    {/* Operation Manager Employee */}
+                    {isExpanded && isRoleExpanded(project.projectId, "operation-manager") && (
+                      <TableRow className="bg-muted/10">
                         <TableCell></TableCell>
                         <TableCell className="pl-10">Vikram Malhotra</TableCell>
-                        {selectedKPI === "mobilisation_team" ? (
+                        {isManpowerKPI ? (
                           <>
                             <TableCell></TableCell>
                             <TableCell></TableCell>
-                            <TableCell></TableCell>
-                            <TableCell></TableCell>
+                            {QUARTERS.map(q => <TableCell key={q.key}></TableCell>)}
                             <TableCell></TableCell>
                           </>
                         ) : (
                           <>
                             <TableCell>170</TableCell>
                             <TableCell>250</TableCell>
-                            <TableCell>50</TableCell>
-                            <TableCell>55</TableCell>
-                            <TableCell>65</TableCell>
+                            {showQuarters && QUARTERS.map(q => (
+                              <QuarterCell
+                                key={q.key}
+                                quarterKey={q.key}
+                                baseValue={42}
+                                showData={true}
+                                expandedQuarters={expandedQuarters}
+                                toggleQuarter={toggleQuarter}
+                              />
+                            ))}
+                            {showQuarters && (
+                              <TableCell className="text-center font-semibold bg-muted/30">170</TableCell>
+                            )}
                           </>
                         )}
-                      </TableRow>}
+                      </TableRow>
+                    )}
 
                     {/* Total Row */}
-                    {isExpanded && <TableRow className="font-bold bg-muted/50">
+                    {isExpanded && (
+                      <TableRow className="font-bold bg-muted/50">
                         <TableCell></TableCell>
-                        <TableCell>Total Target/Manpower</TableCell>
+                        <TableCell>Total</TableCell>
                         <TableCell>{project.totalAchieved}</TableCell>
                         <TableCell>{project.totalTarget}</TableCell>
-                        <TableCell>{project.monthlyData.april?.achieved || 0}</TableCell>
-                        <TableCell>{project.monthlyData.may?.achieved || 0}</TableCell>
-                        <TableCell>{project.monthlyData.june?.achieved || 0}</TableCell>
-                      </TableRow>}
-                  </React.Fragment>;
-            })}
+                        {showQuarters && QUARTERS.map(q => (
+                          <TableCell key={q.key} className="text-center">
+                            {Math.round(project.totalAchieved / 4)}
+                          </TableCell>
+                        ))}
+                        {showQuarters && (
+                          <TableCell className="text-center bg-primary/10">{project.totalAchieved}</TableCell>
+                        )}
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
