@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparklines, SparklinesLine, SparklinesBars } from "react-sparklines";
+import { EmployeePerformanceDialog } from "./EmployeePerformanceDialog";
 
 export type KPIType = "mobilisation_team" | "enrolment_target" | "mobilisation_cost" | "training_completion" | "conversion_pe" | "conversion_rp";
 type ViewMode = "monthly" | "quarterly" | "halfyearly" | "annual";
@@ -87,6 +88,18 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set(["mobiliser"]));
   const [viewMode, setViewMode] = useState<ViewMode>("quarterly");
+  const [selectedEmployee, setSelectedEmployee] = useState<{
+    name: string;
+    target: number;
+    achieved: Record<string, number>;
+    ytd?: number;
+  } | null>(null);
+  const [showEmployeeDialog, setShowEmployeeDialog] = useState(false);
+
+  const handleEmployeeClick = (employee: { name: string; target: number; achieved: Record<string, number>; ytd?: number }) => {
+    setSelectedEmployee(employee);
+    setShowEmployeeDialog(true);
+  };
 
   const toggleRow = (projectId: string) => {
     const newExpanded = new Set(expandedRows);
@@ -355,7 +368,22 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         return (
                           <TableRow key={mobiliser.name} className="bg-muted/10">
                             <TableCell></TableCell>
-                            <TableCell className="pl-10">{mobiliser.name}</TableCell>
+                            <TableCell className="pl-10">
+                              <button 
+                                className="text-primary hover:underline font-medium cursor-pointer transition-colors hover:text-primary/80"
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  handleEmployeeClick({ 
+                                    name: mobiliser.name, 
+                                    target: mobiliser.target, 
+                                    achieved: mobiliser.achieved,
+                                    ytd: mobiliser.achieved.total || 45
+                                  }); 
+                                }}
+                              >
+                                {mobiliser.name}
+                              </button>
+                            </TableCell>
                             {isManpowerKPI ? (
                               <>
                                 <TableCell className="text-center">-</TableCell>
@@ -423,7 +451,22 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           return (
                             <TableRow key={emp.name} className="bg-muted/10">
                               <TableCell></TableCell>
-                              <TableCell className="pl-10">{emp.name}</TableCell>
+                              <TableCell className="pl-10">
+                                <button 
+                                  className="text-primary hover:underline font-medium cursor-pointer transition-colors hover:text-primary/80"
+                                  onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    handleEmployeeClick({ 
+                                      name: emp.name, 
+                                      target: emp.target, 
+                                      achieved: { total: emp.achieved },
+                                      ytd: emp.achieved
+                                    }); 
+                                  }}
+                                >
+                                  {emp.name}
+                                </button>
+                              </TableCell>
                               {isManpowerKPI ? (
                                 <>
                                   <TableCell className="text-center">-</TableCell>
@@ -484,7 +527,22 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                     {isExpanded && isRoleExpanded(project.projectId, "centre-manager") && (
                       <TableRow className="bg-muted/10">
                         <TableCell></TableCell>
-                        <TableCell className="pl-10">Deepak Singh</TableCell>
+                        <TableCell className="pl-10">
+                          <button 
+                            className="text-primary hover:underline font-medium cursor-pointer transition-colors hover:text-primary/80"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              handleEmployeeClick({ 
+                                name: "Deepak Singh", 
+                                target: 100, 
+                                achieved: { total: 85 },
+                                ytd: 85
+                              }); 
+                            }}
+                          >
+                            Deepak Singh
+                          </button>
+                        </TableCell>
                         {isManpowerKPI ? (
                           <>
                             <TableCell className="text-center">-</TableCell>
@@ -542,7 +600,22 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                     {isExpanded && isRoleExpanded(project.projectId, "operation-manager") && (
                       <TableRow className="bg-muted/10">
                         <TableCell></TableCell>
-                        <TableCell className="pl-10">Vikram Malhotra</TableCell>
+                        <TableCell className="pl-10">
+                          <button 
+                            className="text-primary hover:underline font-medium cursor-pointer transition-colors hover:text-primary/80"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              handleEmployeeClick({ 
+                                name: "Vikram Malhotra", 
+                                target: 250, 
+                                achieved: { total: 170 },
+                                ytd: 170
+                              }); 
+                            }}
+                          >
+                            Vikram Malhotra
+                          </button>
+                        </TableCell>
                         {isManpowerKPI ? (
                           <>
                             <TableCell className="text-center">-</TableCell>
@@ -581,6 +654,12 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
             </TableBody>
           </Table>
         </div>
+
+        <EmployeePerformanceDialog
+          open={showEmployeeDialog}
+          onOpenChange={setShowEmployeeDialog}
+          employee={selectedEmployee}
+        />
       </CardContent>
     </Card>
   );
