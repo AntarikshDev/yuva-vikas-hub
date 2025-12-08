@@ -47,6 +47,9 @@ const roleColorMap: Record<string, string> = {
   centre_manager: 'bg-green-100 text-green-800 border-green-200',
   mobiliser_manager: 'bg-amber-100 text-amber-800 border-amber-200',
   mobiliser: 'bg-orange-100 text-orange-800 border-orange-200',
+  program_manager: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  coordinator: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  trainer: 'bg-rose-100 text-rose-800 border-rose-200',
 };
 
 const HierarchyNode: React.FC<HierarchyNodeProps> = ({
@@ -62,6 +65,7 @@ const HierarchyNode: React.FC<HierarchyNodeProps> = ({
   const hasChildren = node.children && node.children.length > 0;
   const isVacant = !node.currentAssignee;
   const hasHistory = node.pastAssignees && node.pastAssignees.length > 0;
+  const isNewlyAssigned = node.currentAssignee?.isNewlyAssigned;
 
   // Check if this node or its children match search
   const matchesSearch = (n: RoleNode): boolean => {
@@ -152,9 +156,16 @@ const HierarchyNode: React.FC<HierarchyNodeProps> = ({
 
                 {node.currentAssignee ? (
                   <div className="mt-2">
-                    <p className="font-semibold text-foreground">
-                      {node.currentAssignee.name}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground">
+                        {node.currentAssignee.name}
+                      </p>
+                      {isNewlyAssigned && (
+                        <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                          NEW
+                        </Badge>
+                      )}
+                    </div>
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Mail className="h-3.5 w-3.5" />
