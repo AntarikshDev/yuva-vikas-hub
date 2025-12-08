@@ -531,6 +531,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
         items: [
           { name: 'Dashboard', path: '/national-head/dashboard', icon: Home },
           { name: 'Mobilisation Monitoring', path: '/national-head/mobilisation-monitoring', icon: TrendingUp },
+          { name: 'Team & Program Management', path: '/national-head/team-management', icon: Users },
           { name: 'State Performance', path: '/national-head/state-performance', icon: Map },
         ]
       },
