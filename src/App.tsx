@@ -51,6 +51,7 @@ import DirectorOFRMonitoring from "./pages/director/OFRMonitoring";
 // National Head Routes
 import NationalHeadDashboard from "./pages/national-head/Dashboard";
 import NationalHeadMobilisationMonitoring from "./pages/national-head/MobilisationMonitoring";
+import NationalHeadTeamManagement from "./pages/national-head/TeamManagement";
 import NationalHeadProfile from "./pages/national-head/Profile";
 
 // Mobilizer App Routes
@@ -218,6 +219,7 @@ const App = () => {
             {/* National Head Routes */}
             <Route path="/national-head/dashboard" element={<NationalHeadDashboard />} />
             <Route path="/national-head/mobilisation-monitoring" element={<NationalHeadMobilisationMonitoring />} />
+            <Route path="/national-head/team-management" element={<NationalHeadTeamManagement />} />
             <Route path="/national-head/profile" element={<NationalHeadProfile />} />
             
             {/* Mobilizer App Routes */}
