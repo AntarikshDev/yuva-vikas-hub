@@ -305,23 +305,47 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         <TableCell className="font-semibold">
                           <div className="flex items-center gap-2">
                             {isRoleExpanded(project.projectId, "mobiliser") ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                            Mobiliser
+                            Mobiliser ({project.teamBreakdown.mobilisers.length}/10)
                           </div>
                         </TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
+                        {selectedKPI === "mobilisation_team" ? (
+                          <>
+                            <TableCell>{project.teamBreakdown.mobilisers.length}</TableCell>
+                            <TableCell>10</TableCell>
+                            <TableCell>8</TableCell>
+                            <TableCell>9</TableCell>
+                            <TableCell>10</TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        )}
                       </TableRow>}
                     {isExpanded && isRoleExpanded(project.projectId, "mobiliser") && project.teamBreakdown.mobilisers.map(mobiliser => <TableRow key={mobiliser.name} className="bg-muted/10">
                           <TableCell></TableCell>
                           <TableCell className="pl-10">{mobiliser.name}</TableCell>
-                          <TableCell>{mobiliser.achieved.total}</TableCell>
-                          <TableCell>{mobiliser.target}</TableCell>
-                          <TableCell>{mobiliser.achieved.april || 90}</TableCell>
-                          <TableCell>{mobiliser.achieved.may || 95}</TableCell>
-                          <TableCell>{mobiliser.achieved.june || 100}</TableCell>
+                          {selectedKPI === "mobilisation_team" ? (
+                            <>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                            </>
+                          ) : (
+                            <>
+                              <TableCell>{mobiliser.achieved.total}</TableCell>
+                              <TableCell>{mobiliser.target}</TableCell>
+                              <TableCell>{mobiliser.achieved.april || 90}</TableCell>
+                              <TableCell>{mobiliser.achieved.may || 95}</TableCell>
+                              <TableCell>{mobiliser.achieved.june || 100}</TableCell>
+                            </>
+                          )}
                         </TableRow>)}
 
                     {/* Mobiliser Manager Header */}
@@ -337,39 +361,87 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                             {project.teamBreakdown.mobiliserManagers.target})
                           </div>
                         </TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
+                        {selectedKPI === "mobilisation_team" ? (
+                          <>
+                            <TableCell>{project.teamBreakdown.mobiliserManagers.count}</TableCell>
+                            <TableCell>{project.teamBreakdown.mobiliserManagers.target}</TableCell>
+                            <TableCell>2</TableCell>
+                            <TableCell>3</TableCell>
+                            <TableCell>3</TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        )}
                       </TableRow>}
                     {isExpanded && isRoleExpanded(project.projectId, "mobiliser-manager") && <>
                         <TableRow className="bg-muted/10">
                           <TableCell></TableCell>
                           <TableCell className="pl-10">Rajesh Kumar</TableCell>
-                          <TableCell>1</TableCell>
-                          <TableCell>1</TableCell>
-                          <TableCell>-</TableCell>
-                          <TableCell>-</TableCell>
-                          <TableCell>-</TableCell>
+                          {selectedKPI === "mobilisation_team" ? (
+                            <>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                            </>
+                          ) : (
+                            <>
+                              <TableCell>45</TableCell>
+                              <TableCell>50</TableCell>
+                              <TableCell>12</TableCell>
+                              <TableCell>15</TableCell>
+                              <TableCell>18</TableCell>
+                            </>
+                          )}
                         </TableRow>
                         <TableRow className="bg-muted/10">
                           <TableCell></TableCell>
                           <TableCell className="pl-10">Priya Sharma</TableCell>
-                          <TableCell>1</TableCell>
-                          <TableCell>1</TableCell>
-                          <TableCell>-</TableCell>
-                          <TableCell>-</TableCell>
-                          <TableCell>-</TableCell>
+                          {selectedKPI === "mobilisation_team" ? (
+                            <>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                            </>
+                          ) : (
+                            <>
+                              <TableCell>38</TableCell>
+                              <TableCell>50</TableCell>
+                              <TableCell>10</TableCell>
+                              <TableCell>12</TableCell>
+                              <TableCell>16</TableCell>
+                            </>
+                          )}
                         </TableRow>
                         <TableRow className="bg-muted/10">
                           <TableCell></TableCell>
                           <TableCell className="pl-10">Amit Verma</TableCell>
-                          <TableCell>1</TableCell>
-                          <TableCell>1</TableCell>
-                          <TableCell>-</TableCell>
-                          <TableCell>-</TableCell>
-                          <TableCell>-</TableCell>
+                          {selectedKPI === "mobilisation_team" ? (
+                            <>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                              <TableCell></TableCell>
+                            </>
+                          ) : (
+                            <>
+                              <TableCell>52</TableCell>
+                              <TableCell>50</TableCell>
+                              <TableCell>15</TableCell>
+                              <TableCell>18</TableCell>
+                              <TableCell>19</TableCell>
+                            </>
+                          )}
                         </TableRow>
                       </>}
 
@@ -386,20 +458,44 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                             {project.teamBreakdown.centreManagers.target})
                           </div>
                         </TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
+                        {selectedKPI === "mobilisation_team" ? (
+                          <>
+                            <TableCell>{project.teamBreakdown.centreManagers.count}</TableCell>
+                            <TableCell>{project.teamBreakdown.centreManagers.target}</TableCell>
+                            <TableCell>1</TableCell>
+                            <TableCell>1</TableCell>
+                            <TableCell>1</TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        )}
                       </TableRow>}
                     {isExpanded && isRoleExpanded(project.projectId, "centre-manager") && <TableRow className="bg-muted/10">
                         <TableCell></TableCell>
                         <TableCell className="pl-10">Deepak Singh</TableCell>
-                        <TableCell>1</TableCell>
-                        <TableCell>2</TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>-</TableCell>
+                        {selectedKPI === "mobilisation_team" ? (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell>85</TableCell>
+                            <TableCell>100</TableCell>
+                            <TableCell>25</TableCell>
+                            <TableCell>30</TableCell>
+                            <TableCell>30</TableCell>
+                          </>
+                        )}
                       </TableRow>}
 
                     {/* Operation Manager Header */}
@@ -415,20 +511,44 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                             {project.teamBreakdown.operationManagers.target})
                           </div>
                         </TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
+                        {selectedKPI === "mobilisation_team" ? (
+                          <>
+                            <TableCell>{project.teamBreakdown.operationManagers.count}</TableCell>
+                            <TableCell>{project.teamBreakdown.operationManagers.target}</TableCell>
+                            <TableCell>1</TableCell>
+                            <TableCell>1</TableCell>
+                            <TableCell>1</TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        )}
                       </TableRow>}
                     {isExpanded && isRoleExpanded(project.projectId, "operation-manager") && <TableRow className="bg-muted/10">
                         <TableCell></TableCell>
                         <TableCell className="pl-10">Vikram Malhotra</TableCell>
-                        <TableCell>1</TableCell>
-                        <TableCell>1</TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>-</TableCell>
-                        <TableCell>-</TableCell>
+                        {selectedKPI === "mobilisation_team" ? (
+                          <>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                            <TableCell></TableCell>
+                          </>
+                        ) : (
+                          <>
+                            <TableCell>170</TableCell>
+                            <TableCell>250</TableCell>
+                            <TableCell>50</TableCell>
+                            <TableCell>55</TableCell>
+                            <TableCell>65</TableCell>
+                          </>
+                        )}
                       </TableRow>}
 
                     {/* Total Row */}
