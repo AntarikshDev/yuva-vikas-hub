@@ -142,14 +142,30 @@ const mockHierarchy: RoleNode = {
       children: [
         {
           id: 'mis-1',
-          role: 'mis_counsellor',
-          roleDisplayName: 'MIS Counsellor',
+          role: 'mis',
+          roleDisplayName: 'MIS',
           currentAssignee: {
             id: 'emp-3',
             name: 'Amit Patel',
             email: 'amit.patel@lnj.com',
             phone: '+91 9876543213',
             assignmentStartDate: '2024-03-01',
+            assignmentEndDate: null,
+            isCurrentlyAssigned: true,
+          },
+          pastAssignees: [],
+          children: [],
+        },
+        {
+          id: 'counsellor-1',
+          role: 'counsellor',
+          roleDisplayName: 'Counsellor',
+          currentAssignee: {
+            id: 'emp-10',
+            name: 'Kavita Singh',
+            email: 'kavita.singh@lnj.com',
+            phone: '+91 9876543222',
+            assignmentStartDate: '2024-02-15',
             assignmentEndDate: null,
             isCurrentlyAssigned: true,
           },

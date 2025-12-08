@@ -42,7 +42,8 @@ interface HierarchyNodeProps {
 const roleColorMap: Record<string, string> = {
   state_head: 'bg-purple-100 text-purple-800 border-purple-200',
   state_admin: 'bg-blue-100 text-blue-800 border-blue-200',
-  mis_counsellor: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+  mis: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+  counsellor: 'bg-teal-100 text-teal-800 border-teal-200',
   centre_manager: 'bg-green-100 text-green-800 border-green-200',
   mobiliser_manager: 'bg-amber-100 text-amber-800 border-amber-200',
   mobiliser: 'bg-orange-100 text-orange-800 border-orange-200',
