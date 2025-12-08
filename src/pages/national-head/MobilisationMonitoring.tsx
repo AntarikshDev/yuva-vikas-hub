@@ -121,7 +121,7 @@ const NationalHeadMobilisationMonitoring = () => {
             onClick={() => handleKPIClick('conversion_pe')}
           />
           <MobilisationKPICard
-            title="Conversion Ratio (R/P)"
+            title="Retention Over Placements"
             metrics={kpiMetrics.conversion_rp}
             isSelected={selectedKPI === 'conversion_rp'}
             onClick={() => handleKPIClick('conversion_rp')}
