@@ -27,36 +27,31 @@ const NationalHeadMobilisationMonitoring = () => {
 
   // Calculate KPI metrics
   const kpiMetrics = useMemo(() => {
-    const totalTarget = filteredProjects.reduce((sum, p) => sum + p.totalTarget, 0);
-    const totalAchieved = filteredProjects.reduce((sum, p) => sum + p.totalAchieved, 0);
-    const totalCost = filteredProjects.reduce((sum, p) => sum + (p.teamBreakdown.mobilisers.reduce((s, m) => s + (m.cost || 0), 0)), 0);
-    const avgCostPerCandidate = totalAchieved > 0 ? Math.round(totalCost / totalAchieved) : 0;
-
     return {
       mobilisation_team: [
-        { label: 'Team', target: 20, achieved: 25 },
-        { label: 'District', target: 20, achieved: 25 },
-        { label: 'Block', target: 120, achieved: 125 },
+        { label: 'Team', target: 25, achieved: 20 },
+        { label: 'District', target: 25, achieved: 20 },
+        { label: 'Block', target: 125, achieved: 120 },
       ],
       enrolment_target: [
-        { label: 'Target', target: totalTarget, achieved: totalAchieved },
-        { label: 'Achieved', target: totalTarget, achieved: totalAchieved },
+        { label: 'Target', target: 55, achieved: 45 },
+        { label: 'Achieved', target: 55, achieved: 45 },
       ],
       mobilisation_cost: [
-        { label: 'Total Cost', target: 250, achieved: 200 },
-        { label: 'Cost/Candidate', target: avgCostPerCandidate, achieved: avgCostPerCandidate },
+        { label: 'Budget', target: 1500000, achieved: 750000 },
+        { label: 'Cost/Candidate', target: 1000, achieved: 1200 },
       ],
-      training_completion: [
-        { label: 'Enrolled', target: 200, achieved: 150 },
-        { label: 'Training', target: 200, achieved: 150 },
+      trained_over_enrolled: [
+        { label: 'Enrolled', target: 250, achieved: 200 },
+        { label: 'Trained', target: 250, achieved: 150 },
       ],
-      conversion_pe: [
-        { label: 'Placed', target: 100, achieved: 75 },
-        { label: 'Enrolled', target: 100, achieved: 100 },
+      placed_over_trained: [
+        { label: 'Trained', target: 250, achieved: 150 },
+        { label: 'Placed', target: 250, achieved: 125 },
       ],
-      conversion_rp: [
-        { label: 'Retained', target: 80, achieved: 80 },
-        { label: 'Placed', target: 100, achieved: 75 },
+      retained_over_placed: [
+        { label: 'Placed', target: 250, achieved: 125 },
+        { label: 'Retained', target: 250, achieved: 102 },
       ],
     };
   }, [filteredProjects]);
@@ -112,22 +107,22 @@ const NationalHeadMobilisationMonitoring = () => {
             isCurrency={true}
           />
           <MobilisationKPICard
-            title="Training Completion"
-            metrics={kpiMetrics.training_completion}
-            isSelected={selectedKPI === 'training_completion'}
-            onClick={() => handleKPIClick('training_completion')}
+            title="Trained over Enrolled"
+            metrics={kpiMetrics.trained_over_enrolled}
+            isSelected={selectedKPI === 'trained_over_enrolled'}
+            onClick={() => handleKPIClick('trained_over_enrolled')}
           />
           <MobilisationKPICard
-            title="Placement over Enrolment"
-            metrics={kpiMetrics.conversion_pe}
-            isSelected={selectedKPI === 'conversion_pe'}
-            onClick={() => handleKPIClick('conversion_pe')}
+            title="Placed over Trained"
+            metrics={kpiMetrics.placed_over_trained}
+            isSelected={selectedKPI === 'placed_over_trained'}
+            onClick={() => handleKPIClick('placed_over_trained')}
           />
           <MobilisationKPICard
-            title="Retention Over Placements"
-            metrics={kpiMetrics.conversion_rp}
-            isSelected={selectedKPI === 'conversion_rp'}
-            onClick={() => handleKPIClick('conversion_rp')}
+            title="Retained over Placed"
+            metrics={kpiMetrics.retained_over_placed}
+            isSelected={selectedKPI === 'retained_over_placed'}
+            onClick={() => handleKPIClick('retained_over_placed')}
           />
         </div>
 
