@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparklines, SparklinesLine, SparklinesBars } from "react-sparklines";
 import { EmployeePerformanceDialog } from "./EmployeePerformanceDialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export type KPIType = "mobilisation_team" | "enrolment_target" | "mobilisation_cost" | "training_completion" | "conversion_pe" | "conversion_rp";
 type ViewMode = "monthly" | "quarterly" | "halfyearly" | "annual";
@@ -267,12 +268,19 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
       return (
         <TableCell key={col.key} className="text-center">
           <div className="flex flex-col items-center gap-1">
-            <span className={cn(
-              "font-medium text-xs px-2 py-0.5 rounded",
-              meetsTarget ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-            )}>
-              {actual}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className={cn(
+                  "font-medium text-xs px-2 py-0.5 rounded cursor-help",
+                  meetsTarget ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                )}>
+                  {actual}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Target: {target}</p>
+              </TooltipContent>
+            </Tooltip>
             {showChart && viewMode !== "annual" && (
               <MiniChart 
                 data={viewMode === "monthly" ? monthlyActual : 
@@ -354,12 +362,19 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
       return (
         <TableCell key={col.key} className="text-center">
           <div className="flex flex-col items-center gap-1">
-            <span className={cn(
-              "font-medium text-xs px-2 py-0.5 rounded",
-              meetsTarget ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-            )}>
-              {actualVal}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className={cn(
+                  "font-medium text-xs px-2 py-0.5 rounded cursor-help",
+                  meetsTarget ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                )}>
+                  {actualVal}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Target: {targetVal}</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </TableCell>
       );
@@ -387,6 +402,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
   };
 
   return (
+    <TooltipProvider>
     <Card>
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -852,5 +868,6 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
         />
       </CardContent>
     </Card>
+    </TooltipProvider>
   );
 };
