@@ -1,7 +1,33 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 
 // Types
-export type TargetType = 'mobilisation' | 'counselling' | 'enrolment' | 'training' | 'placement' | 'retention';
+export type TargetType = 
+  | 'mobilisation' 
+  | 'ofr_registration' 
+  | 'approved_ofr' 
+  | 'migration' 
+  | 'enrolment' 
+  | 'training_completion' 
+  | 'assessment' 
+  | 'placement' 
+  | 'retention';
+
+// Target types that can be carried forward (pre-enrollment phase)
+export const CARRY_FORWARD_ALLOWED_TYPES: TargetType[] = [
+  'mobilisation',
+  'ofr_registration',
+  'approved_ofr',
+  'migration',
+];
+
+// Target types that cannot be carried forward - shortfall = dropout
+export const NO_CARRY_FORWARD_TYPES: TargetType[] = [
+  'enrolment',
+  'training_completion',
+  'assessment',
+  'placement',
+  'retention',
+];
 export type TargetPeriod = 'day' | 'week' | 'month';
 export type TargetStatus = 'active' | 'completed' | 'carried_forward' | 'reassigned' | 'void';
 export type EmployeeStatus = 'active' | 'departed' | 'on_leave';
@@ -161,12 +187,12 @@ const generateMockTargets = (): Target[] => [
   },
   {
     id: 'T003',
-    type: 'training',
+    type: 'ofr_registration',
     period: 'week',
     periodStart: '2024-12-02',
     periodEnd: '2024-12-08',
-    value: 50,
-    achieved: 45,
+    value: 150,
+    achieved: 145,
     assignedTo: 'EMP003',
     assignedToName: 'Suresh Kumar',
     assignedToRole: 'manager',
@@ -176,6 +202,25 @@ const generateMockTargets = (): Target[] => [
     createdAt: '2024-12-02T00:00:00Z',
     updatedAt: '2024-12-08T00:00:00Z',
     state: 'Maharashtra',
+  },
+  {
+    id: 'T005',
+    type: 'approved_ofr',
+    period: 'month',
+    periodStart: '2024-12-01',
+    periodEnd: '2024-12-31',
+    value: 120,
+    achieved: 95,
+    assignedTo: 'EMP002',
+    assignedToName: 'Priya Patel',
+    assignedToRole: 'cluster_manager',
+    assignedBy: 'EMP001',
+    assignedByName: 'Rahul Sharma',
+    status: 'active',
+    createdAt: '2024-12-01T00:00:00Z',
+    updatedAt: '2024-12-09T00:00:00Z',
+    state: 'Maharashtra',
+    program: 'DDU-GKY',
   },
   {
     id: 'T004',
@@ -290,15 +335,26 @@ const generateCarryForwardQueue = (): CarryForwardItem[] => [
     targetType: 'mobilisation',
   },
   {
-    targetId: 'T005',
-    originalValue: 100,
-    achieved: 80,
+    targetId: 'T006',
+    originalValue: 150,
+    achieved: 130,
     pending: 20,
     fromPeriod: 'November 2024',
     toPeriod: 'December 2024',
     employeeId: 'EMP002',
     employeeName: 'Priya Patel',
-    targetType: 'enrolment',
+    targetType: 'ofr_registration',
+  },
+  {
+    targetId: 'T007',
+    originalValue: 100,
+    achieved: 90,
+    pending: 10,
+    fromPeriod: 'November 2024',
+    toPeriod: 'December 2024',
+    employeeId: 'EMP003',
+    employeeName: 'Suresh Kumar',
+    targetType: 'approved_ofr',
   },
 ];
 
