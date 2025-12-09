@@ -190,9 +190,31 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     );
   }
 
-  // Render period cells for a row
-  const renderPeriodCells = (ytdValue: number, showData: boolean, showChart: boolean = false) => {
-    const monthlyData = generateMonthlyData(ytdValue);
+  // Render period cells for a row with target comparison (green/red coloring)
+  // For non-manpower KPIs: quarterly = monthly * 3, halfyearly = monthly * 6, annual = monthly * 12
+  const renderPeriodCells = (ytdValue: number, targetValue: number, showData: boolean, showChart: boolean = false) => {
+    // Generate monthly data with varying values around target
+    const generateMonthlyDataWithVariation = (baseTarget: number): { actual: number[]; target: number[] } => {
+      const monthlyTarget = Math.round(baseTarget / 12);
+      const patterns = [
+        monthlyTarget,           // Apr - at target (green)
+        monthlyTarget - Math.ceil(monthlyTarget * 0.1),  // May - below target (red)
+        monthlyTarget,           // Jun - at target (green)
+        monthlyTarget - Math.ceil(monthlyTarget * 0.15), // Jul - below target (red)
+        monthlyTarget + Math.ceil(monthlyTarget * 0.05), // Aug - above target (green)
+        monthlyTarget - Math.ceil(monthlyTarget * 0.1),  // Sep - below target (red)
+        monthlyTarget,           // Oct - at target (green)
+        monthlyTarget + Math.ceil(monthlyTarget * 0.1),  // Nov - above target (green)
+        monthlyTarget,           // Dec - at target (green)
+        monthlyTarget - Math.ceil(monthlyTarget * 0.2),  // Jan - below target (red)
+        monthlyTarget,           // Feb - at target (green)
+        monthlyTarget + Math.ceil(monthlyTarget * 0.05), // Mar - above target (green)
+      ];
+      return {
+        actual: patterns.map(v => Math.max(0, v)),
+        target: Array(12).fill(monthlyTarget)
+      };
+    };
     
     if (!showData) {
       return periodColumns.map(col => (
@@ -200,21 +222,69 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
       ));
     }
 
-    return periodColumns.map(col => (
-      <TableCell key={col.key} className="text-center">
-        <div className="flex flex-col items-center gap-1">
-          <span className="font-medium">{getPeriodValue(monthlyData, col.key)}</span>
-          {showChart && viewMode !== "annual" && (
-            <MiniChart 
-              data={viewMode === "monthly" ? monthlyData : 
-                    viewMode === "quarterly" ? [monthlyData.slice(0,3).reduce((a,b)=>a+b,0), monthlyData.slice(3,6).reduce((a,b)=>a+b,0), monthlyData.slice(6,9).reduce((a,b)=>a+b,0), monthlyData.slice(9,12).reduce((a,b)=>a+b,0)] :
-                    [monthlyData.slice(0,6).reduce((a,b)=>a+b,0), monthlyData.slice(6,12).reduce((a,b)=>a+b,0)]}
-              color="#22c55e"
-            />
-          )}
-        </div>
-      </TableCell>
-    ));
+    const { actual: monthlyActual, target: monthlyTargetArr } = generateMonthlyDataWithVariation(targetValue);
+
+    // Get period value with proper target multiplier for non-manpower KPIs
+    const getPeriodValueWithTarget = (monthlyData: number[], monthlyTargets: number[], periodKey: string): { actual: number; target: number } => {
+      switch (viewMode) {
+        case "monthly":
+          const monthIndex = MONTHS.findIndex(m => m.toLowerCase() === periodKey);
+          return { 
+            actual: monthlyData[monthIndex] || 0, 
+            target: monthlyTargets[monthIndex] || 0 
+          };
+        case "quarterly":
+          const quarterDef = QUARTERS.find(q => q.key === periodKey);
+          if (!quarterDef) return { actual: 0, target: 0 };
+          const qActual = quarterDef.months.reduce((sum, month) => {
+            const idx = MONTHS.indexOf(month);
+            return sum + (monthlyData[idx] || 0);
+          }, 0);
+          const qTarget = monthlyTargets[0] * 3; // Monthly target * 3
+          return { actual: qActual, target: qTarget };
+        case "halfyearly":
+          const halfDef = HALF_YEARS.find(h => h.key === periodKey);
+          if (!halfDef) return { actual: 0, target: 0 };
+          const hActual = halfDef.months.reduce((sum, month) => {
+            const idx = MONTHS.indexOf(month);
+            return sum + (monthlyData[idx] || 0);
+          }, 0);
+          const hTarget = monthlyTargets[0] * 6; // Monthly target * 6
+          return { actual: hActual, target: hTarget };
+        case "annual":
+          const annualActual = monthlyData.reduce((a, b) => a + b, 0);
+          const annualTarget = monthlyTargets[0] * 12; // Monthly target * 12
+          return { actual: annualActual, target: annualTarget };
+        default:
+          return { actual: 0, target: 0 };
+      }
+    };
+
+    return periodColumns.map(col => {
+      const { actual, target } = getPeriodValueWithTarget(monthlyActual, monthlyTargetArr, col.key);
+      const meetsTarget = actual >= target;
+      
+      return (
+        <TableCell key={col.key} className="text-center">
+          <div className="flex flex-col items-center gap-1">
+            <span className={cn(
+              "font-medium text-xs px-2 py-0.5 rounded",
+              meetsTarget ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+            )}>
+              {actual}
+            </span>
+            {showChart && viewMode !== "annual" && (
+              <MiniChart 
+                data={viewMode === "monthly" ? monthlyActual : 
+                      viewMode === "quarterly" ? [monthlyActual.slice(0,3).reduce((a,b)=>a+b,0), monthlyActual.slice(3,6).reduce((a,b)=>a+b,0), monthlyActual.slice(6,9).reduce((a,b)=>a+b,0), monthlyActual.slice(9,12).reduce((a,b)=>a+b,0)] :
+                      [monthlyActual.slice(0,6).reduce((a,b)=>a+b,0), monthlyActual.slice(6,12).reduce((a,b)=>a+b,0)]}
+                color={meetsTarget ? "#22c55e" : "#ef4444"}
+              />
+            )}
+          </div>
+        </TableCell>
+      );
+    });
   };
 
   // Render role period cells (for manpower KPI showing count only)
@@ -391,7 +461,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                       <TableCell className="text-center">
                         {isCostKPI ? `₹${displayTarget.toLocaleString()}` : displayTarget}
                       </TableCell>
-                      {showPeriods && renderPeriodCells(ytdValue, true)}
+                      {showPeriods && renderPeriodCells(ytdValue, project.totalTarget, true)}
                       {showCostPeriods && periodColumns.map(col => {
                         const colValue = getPeriodValue(monthlyData, col.key);
                         return (
@@ -496,7 +566,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                               <>
                                 <TableCell className="text-center">{mobiliser.achieved.total || 45}</TableCell>
                                 <TableCell className="text-center">{mobiliser.target}</TableCell>
-                                {showPeriods && renderPeriodCells(mobiliser.achieved.total || 45, true)}
+                                {showPeriods && renderPeriodCells(mobiliser.achieved.total || 45, mobiliser.target, true)}
                                 {showCostPeriods && periodColumns.map(col => {
                                   const colValue = getPeriodValue(empMonthly, col.key);
                                   return <TableCell key={col.key} className="text-center">{colValue}</TableCell>;
@@ -583,7 +653,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                                 <>
                                   <TableCell className="text-center">{emp.achieved}</TableCell>
                                   <TableCell className="text-center">{emp.target}</TableCell>
-                                  {showPeriods && renderPeriodCells(emp.achieved, true)}
+                                  {showPeriods && renderPeriodCells(emp.achieved, emp.target, true)}
                                   {showCostPeriods && periodColumns.map(col => {
                                     const colValue = getPeriodValue(empMonthly, col.key);
                                     return <TableCell key={col.key} className="text-center">{colValue}</TableCell>;
@@ -663,7 +733,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           <>
                             <TableCell className="text-center">85</TableCell>
                             <TableCell className="text-center">100</TableCell>
-                            {showPeriods && renderPeriodCells(85, true)}
+                            {showPeriods && renderPeriodCells(85, 100, true)}
                             {showCostPeriods && periodColumns.map(col => {
                               const colValue = getPeriodValue(generateMonthlyData(85), col.key);
                               return <TableCell key={col.key} className="text-center">{colValue}</TableCell>;
@@ -740,7 +810,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           <>
                             <TableCell className="text-center">170</TableCell>
                             <TableCell className="text-center">250</TableCell>
-                            {showPeriods && renderPeriodCells(170, true)}
+                            {showPeriods && renderPeriodCells(170, 250, true)}
                             {showCostPeriods && periodColumns.map(col => {
                               const colValue = getPeriodValue(generateMonthlyData(170), col.key);
                               return <TableCell key={col.key} className="text-center">{colValue}</TableCell>;
@@ -759,7 +829,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         <TableCell>Total</TableCell>
                         <TableCell className="text-center">{isCostKPI ? `₹${displayValue.toLocaleString()}` : project.totalAchieved}</TableCell>
                         <TableCell className="text-center">{isCostKPI ? `₹${displayTarget.toLocaleString()}` : project.totalTarget}</TableCell>
-                        {showPeriods && renderPeriodCells(project.totalAchieved, true)}
+                        {showPeriods && renderPeriodCells(project.totalAchieved, project.totalTarget, true)}
                         {showCostPeriods && periodColumns.map(col => {
                           const colValue = getPeriodValue(monthlyData, col.key);
                           return <TableCell key={col.key} className="text-center">{isCostKPI ? `₹${colValue.toLocaleString()}` : colValue}</TableCell>;
