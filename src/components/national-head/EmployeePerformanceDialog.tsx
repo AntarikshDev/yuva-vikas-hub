@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowRight, TrendingDown, Calendar, Target, MapPin, Phone, Mail } from 'lucide-react';
+import { ArrowRight, TrendingDown, Calendar, Target, MapPin, Phone, Mail, MessageSquarePlus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-
+import { PerformanceReviewDialog } from './PerformanceReviewDialog';
 interface EmployeePerformanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -261,6 +262,7 @@ export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps>
   employee
 }) => {
   const [timePeriod, setTimePeriod] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
   if (!employee) return null;
 
@@ -306,10 +308,27 @@ export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps>
                 </div>
               </div>
             </div>
-            <Badge variant={overallPercent >= 100 ? 'default' : overallPercent >= 80 ? 'secondary' : 'destructive'} className="text-xs px-2 py-1 self-start sm:self-center">
-              {overallPercent}% Target
-            </Badge>
+            <div className="flex flex-col items-end gap-2">
+              <Badge variant={overallPercent >= 100 ? 'default' : overallPercent >= 80 ? 'secondary' : 'destructive'} className="text-xs px-2 py-1">
+                {overallPercent}% Target
+              </Badge>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setReviewDialogOpen(true)}
+                className="gap-1.5 text-xs h-7 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 border-amber-500/30 hover:border-amber-500/50 hover:bg-gradient-to-r hover:from-amber-500/20 hover:to-yellow-500/20"
+              >
+                <MessageSquarePlus className="h-3.5 w-3.5 text-amber-500" />
+                Add Review
+              </Button>
+            </div>
           </div>
+          
+          <PerformanceReviewDialog
+            open={reviewDialogOpen}
+            onOpenChange={setReviewDialogOpen}
+            employeeName={employee.name}
+          />
         </DialogHeader>
 
         <div className="space-y-4 pt-3">
