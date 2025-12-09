@@ -218,25 +218,38 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
   };
 
   // Render role period cells (for manpower KPI showing count only)
-  // Green if count >= target, Red if count < target
+  // Green if count equals target, Red if count < target
   const renderRolePeriodCells = (actual: number, target: number) => {
-    // Generate monthly data where some months meet target and some don't
-    // Earlier months are more likely to be below target, later months meet target
-    const generateRoleMonthlyData = (targetPerMonth: number): number[] => {
+    // Generate monthly data with varying values
+    // Some months meet target (green), some are below (red)
+    const generateRoleMonthlyData = (targetValue: number): number[] => {
+      // Create a pattern where different months have different values
+      // The target per month is the target value itself (not divided by 12)
       return MONTHS.map((_, index) => {
-        // First 6 months: below target (red), Last 6 months: meets target (green)
-        // This creates a realistic progression
-        if (index < 6) {
-          return Math.max(0, targetPerMonth - 1); // Below target
-        } else {
-          return targetPerMonth; // Meets target
-        }
+        // Create varied pattern: some months at target, some below
+        // Apr(0), May(1), Jun(2), Jul(3), Aug(4), Sep(5) - mix of values
+        // Oct(6), Nov(7), Dec(8), Jan(9), Feb(10), Mar(11) - mostly at target
+        const patterns = [
+          targetValue,           // Apr - at target (green)
+          targetValue - 1,       // May - below target (red)
+          targetValue,           // Jun - at target (green)
+          targetValue - 1,       // Jul - below target (red)
+          targetValue,           // Aug - at target (green)
+          targetValue - 1,       // Sep - below target (red)
+          targetValue,           // Oct - at target (green)
+          targetValue,           // Nov - at target (green)
+          targetValue,           // Dec - at target (green)
+          targetValue - 1,       // Jan - below target (red)
+          targetValue,           // Feb - at target (green)
+          targetValue,           // Mar - at target (green)
+        ];
+        return Math.max(0, patterns[index]);
       });
     };
 
-    const targetPerMonth = Math.max(1, Math.round(target / 12));
-    const monthlyActual = generateRoleMonthlyData(targetPerMonth);
-    const monthlyTarget = Array(12).fill(targetPerMonth);
+    // Target is already the monthly target (not annual)
+    const monthlyActual = generateRoleMonthlyData(target);
+    const monthlyTarget = Array(12).fill(target);
 
     return periodColumns.map(col => {
       const actualVal = getPeriodValue(monthlyActual, col.key);
