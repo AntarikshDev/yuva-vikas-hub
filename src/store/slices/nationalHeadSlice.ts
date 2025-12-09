@@ -149,7 +149,7 @@ interface NationalHeadState {
   pendingDocuments: PendingDocument[];
   activityMetrics: ActivityMetrics | null;
   costEfficiency: CostEfficiency | null;
-  selectedKPI: 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 'ofr_target' | 'approved_ofr_target' | 'migration_target';
+  selectedKPI: 'team_matrix' | 'district_block_matrix' | 'enrolment_target' | 'mobilisation_cost' | 'ofr_target' | 'approved_ofr_target' | 'migration_target';
   selectedPrograms: string[];
   selectedWorkOrders: string[];
   filters: {
@@ -177,7 +177,7 @@ const initialState: NationalHeadState = {
   pendingDocuments: [],
   activityMetrics: null,
   costEfficiency: null,
-  selectedKPI: 'mobilisation_team',
+  selectedKPI: 'team_matrix',
   selectedPrograms: ['DDUGKY'],
   selectedWorkOrders: ['W/O:UP', 'W/O:BR'],
   filters: {

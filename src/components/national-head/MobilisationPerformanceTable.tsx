@@ -9,7 +9,7 @@ import { Sparklines, SparklinesLine, SparklinesBars } from "react-sparklines";
 import { EmployeePerformanceDialog } from "./EmployeePerformanceDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export type KPIType = "mobilisation_team" | "enrolment_target" | "mobilisation_cost" | "ofr_target" | "approved_ofr_target" | "migration_target";
+export type KPIType = "team_matrix" | "district_block_matrix" | "enrolment_target" | "mobilisation_cost" | "ofr_target" | "approved_ofr_target" | "migration_target";
 type ViewMode = "monthly" | "quarterly" | "halfyearly" | "annual";
 
 interface MobiliserData {
@@ -127,8 +127,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     return expandedRoles.has(`${projectId}-${role}`);
   };
 
-  const isManpowerKPI = selectedKPI === "mobilisation_team";
-  const showPeriods = ["mobilisation_team", "enrolment_target", "training_completion"].includes(selectedKPI);
+  const isManpowerKPI = selectedKPI === "team_matrix" || selectedKPI === "district_block_matrix";
+  const showPeriods = ["team_matrix", "district_block_matrix", "enrolment_target", "training_completion"].includes(selectedKPI);
   const showCostPeriods = ["mobilisation_cost", "conversion_pe", "conversion_rp"].includes(selectedKPI);
 
   // Get period columns based on view mode
@@ -384,10 +384,12 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
   // Get table title based on selected KPI
   const getTableTitle = () => {
     switch (selectedKPI) {
-      case 'mobilisation_team':
-        return 'Mobilisation Manpower Analysis';
+      case 'team_matrix':
+        return 'Mobilisation Team Matrix Analysis';
+      case 'district_block_matrix':
+        return 'District & Block Matrix Analysis';
       case 'enrolment_target':
-        return 'Enrolment Performance Analysis';
+        return 'Enrolment Target Matrix Analysis';
       case 'mobilisation_cost':
         return 'Mobilisation Cost Analysis';
       case 'ofr_target':

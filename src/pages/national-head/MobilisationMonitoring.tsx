@@ -28,17 +28,15 @@ const NationalHeadMobilisationMonitoring = () => {
   // Calculate KPI metrics
   const kpiMetrics = useMemo(() => {
     return {
-      mobilisation_team: [
+      team_matrix: [
         { label: 'Target Team Count', value: 25 },
         { label: 'Current Team Count', value: 20 },
+      ],
+      district_block_matrix: [
         { label: 'Target Districts', value: 25 },
         { label: 'Current Districts', value: 20 },
         { label: 'Target Blocks', value: 125 },
         { label: 'Current Blocks', value: 120 },
-      ],
-      enrolment_target: [
-        { label: 'Target', value: 55 },
-        { label: 'Achieved', value: 45 },
       ],
       mobilisation_cost: [
         { label: 'Target cost/candidate', value: '₹1,000' },
@@ -60,6 +58,11 @@ const NationalHeadMobilisationMonitoring = () => {
         { label: 'Approved OFR', value: 220 },
         { label: 'Migrated', value: 180 },
         { label: 'Migration %', value: '82%' },
+      ],
+      enrolment_target: [
+        { label: 'Target', value: 55 },
+        { label: 'Achieved', value: 45 },
+        { label: 'Achievement %', value: '82%' },
       ],
     };
   }, [filteredProjects]);
@@ -94,18 +97,18 @@ const NationalHeadMobilisationMonitoring = () => {
         />
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
           <MobilisationKPICard
-            title="Mobilisation Team"
-            metrics={kpiMetrics.mobilisation_team}
-            isSelected={selectedKPI === 'mobilisation_team'}
-            onClick={() => handleKPIClick('mobilisation_team')}
+            title="Mobilisation Team Matrix"
+            metrics={kpiMetrics.team_matrix}
+            isSelected={selectedKPI === 'team_matrix'}
+            onClick={() => handleKPIClick('team_matrix')}
           />
           <MobilisationKPICard
-            title="Enrolment Target"
-            metrics={kpiMetrics.enrolment_target}
-            isSelected={selectedKPI === 'enrolment_target'}
-            onClick={() => handleKPIClick('enrolment_target')}
+            title="District & Block Matrix"
+            metrics={kpiMetrics.district_block_matrix}
+            isSelected={selectedKPI === 'district_block_matrix'}
+            onClick={() => handleKPIClick('district_block_matrix')}
           />
           <MobilisationKPICard
             title="Mobilisation Cost"
@@ -130,6 +133,12 @@ const NationalHeadMobilisationMonitoring = () => {
             metrics={kpiMetrics.migration_target}
             isSelected={selectedKPI === 'migration_target'}
             onClick={() => handleKPIClick('migration_target')}
+          />
+          <MobilisationKPICard
+            title="Enrolment Target Matrix"
+            metrics={kpiMetrics.enrolment_target}
+            isSelected={selectedKPI === 'enrolment_target'}
+            onClick={() => handleKPIClick('enrolment_target')}
           />
         </div>
 
