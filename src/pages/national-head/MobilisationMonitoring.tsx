@@ -29,29 +29,40 @@ const NationalHeadMobilisationMonitoring = () => {
   const kpiMetrics = useMemo(() => {
     return {
       mobilisation_team: [
-        { label: 'Team', target: 25, achieved: 20 },
-        { label: 'District', target: 25, achieved: 20 },
-        { label: 'Block', target: 125, achieved: 120 },
+        { label: 'Target Team Count', value: 25 },
+        { label: 'Current Team Count', value: 20 },
+        { label: 'Target Districts', value: 25 },
+        { label: 'Current Districts', value: 20 },
+        { label: 'Target Blocks', value: 125 },
+        { label: 'Current Blocks', value: 120 },
       ],
       enrolment_target: [
-        { label: 'Target', target: 55, achieved: 45 },
-        { label: 'Achieved', target: 55, achieved: 45 },
+        { label: 'Target', value: 55 },
+        { label: 'Achieved', value: 45 },
       ],
       mobilisation_cost: [
-        { label: 'Budget', target: 1500000, achieved: 750000 },
-        { label: 'Cost/Candidate', target: 1000, achieved: 1200 },
+        { label: 'Target cost/candidate', value: '₹1,000' },
+        { label: 'Actual cost/candidate', value: '₹1,200' },
+        { label: 'Mobilisation Budget', value: '₹15,00,000' },
+        { label: 'Budget Consumed', value: '₹7,50,000' },
       ],
       trained_over_enrolled: [
-        { label: 'Enrolled', target: 250, achieved: 200 },
-        { label: 'Trained', target: 250, achieved: 150 },
+        { label: 'Target Enrolment', value: 250 },
+        { label: 'Enrolled', value: 200 },
+        { label: 'Target Trained', value: 250 },
+        { label: 'Trained', value: 150 },
       ],
       placed_over_trained: [
-        { label: 'Trained', target: 250, achieved: 150 },
-        { label: 'Placed', target: 250, achieved: 125 },
+        { label: 'Target Trained', value: 250 },
+        { label: 'Trained', value: 150 },
+        { label: 'Target Placed', value: 250 },
+        { label: 'Placed', value: 125 },
       ],
       retained_over_placed: [
-        { label: 'Placed', target: 250, achieved: 125 },
-        { label: 'Retained', target: 250, achieved: 102 },
+        { label: 'Target Placed', value: 250 },
+        { label: 'Placed', value: 125 },
+        { label: 'Target Retained', value: 250 },
+        { label: 'Retained', value: 102 },
       ],
     };
   }, [filteredProjects]);
@@ -104,7 +115,6 @@ const NationalHeadMobilisationMonitoring = () => {
             metrics={kpiMetrics.mobilisation_cost}
             isSelected={selectedKPI === 'mobilisation_cost'}
             onClick={() => handleKPIClick('mobilisation_cost')}
-            isCurrency={true}
           />
           <MobilisationKPICard
             title="Trained over Enrolled"
