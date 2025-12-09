@@ -32,13 +32,16 @@ export const TargetAssignmentForm: React.FC = () => {
   const [state, setState] = useState('all');
   const [program, setProgram] = useState('all');
 
-  const targetTypes: { value: TargetType; label: string }[] = [
-    { value: 'mobilisation', label: 'Mobilisation' },
-    { value: 'counselling', label: 'Counselling' },
-    { value: 'enrolment', label: 'Enrolment' },
-    { value: 'training', label: 'Training' },
-    { value: 'placement', label: 'Placement' },
-    { value: 'retention', label: 'Retention' },
+  const targetTypes: { value: TargetType; label: string; description?: string }[] = [
+    { value: 'mobilisation', label: 'Mobilisation', description: 'Initial candidate outreach' },
+    { value: 'ofr_registration', label: 'OFR (Registration)', description: 'Online Form Registration - higher buffer for dropouts' },
+    { value: 'approved_ofr', label: 'Approved OFR', description: 'Verified and approved registrations' },
+    { value: 'migration', label: 'Migration', description: 'Candidate migration to training center' },
+    { value: 'enrolment', label: 'Enrolment', description: 'Final enrollment - no carry forward' },
+    { value: 'training_completion', label: 'Training Completion', description: 'Training completion - no carry forward' },
+    { value: 'assessment', label: 'Assessment', description: 'Assessment completion - no carry forward' },
+    { value: 'placement', label: 'Placement', description: 'Job placement - no carry forward' },
+    { value: 'retention', label: 'Retention', description: 'Post-placement retention - no carry forward' },
   ];
 
   const roles: { value: RoleType; label: string }[] = [
@@ -148,13 +151,19 @@ export const TargetAssignmentForm: React.FC = () => {
                   key={type.value}
                   type="button"
                   variant={targetType === type.value ? 'default' : 'outline'}
-                  className="w-full"
+                  className="w-full text-xs h-auto py-2 px-2"
                   onClick={() => setTargetType(type.value)}
+                  title={type.description}
                 >
                   {type.label}
                 </Button>
               ))}
             </div>
+            {['enrolment', 'training_completion', 'assessment', 'placement', 'retention'].includes(targetType) && (
+              <p className="text-xs text-amber-600 mt-2">
+                ⚠️ This target type cannot be carried forward. Any shortfall will be counted as dropout.
+              </p>
+            )}
           </div>
 
           {/* Period Selection */}

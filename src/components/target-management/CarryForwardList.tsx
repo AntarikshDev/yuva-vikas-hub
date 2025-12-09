@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppSelector';
-import { processCarryForward, CarryForwardItem } from '@/store/slices/targetManagementSlice';
+import { processCarryForward, CarryForwardItem, CARRY_FORWARD_ALLOWED_TYPES, NO_CARRY_FORWARD_TYPES } from '@/store/slices/targetManagementSlice';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -62,13 +62,35 @@ export const CarryForwardList: React.FC = () => {
   const getTargetTypeColor = (type: string) => {
     const colors: Record<string, string> = {
       mobilisation: 'bg-blue-100 text-blue-800',
-      counselling: 'bg-purple-100 text-purple-800',
+      ofr_registration: 'bg-purple-100 text-purple-800',
+      approved_ofr: 'bg-indigo-100 text-indigo-800',
+      migration: 'bg-cyan-100 text-cyan-800',
       enrolment: 'bg-green-100 text-green-800',
-      training: 'bg-orange-100 text-orange-800',
+      training_completion: 'bg-orange-100 text-orange-800',
+      assessment: 'bg-yellow-100 text-yellow-800',
       placement: 'bg-teal-100 text-teal-800',
       retention: 'bg-pink-100 text-pink-800',
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getTargetTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      mobilisation: 'Mobilisation',
+      ofr_registration: 'OFR Registration',
+      approved_ofr: 'Approved OFR',
+      migration: 'Migration',
+      enrolment: 'Enrolment',
+      training_completion: 'Training Completion',
+      assessment: 'Assessment',
+      placement: 'Placement',
+      retention: 'Retention',
+    };
+    return labels[type] || type;
+  };
+
+  const canCarryForward = (type: string) => {
+    return CARRY_FORWARD_ALLOWED_TYPES.includes(type as any);
   };
 
   if (carryForwardQueue.length === 0) {
@@ -126,47 +148,67 @@ export const CarryForwardList: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {carryForwardQueue.map((item) => (
-              <TableRow key={item.targetId}>
-                <TableCell>
-                  <Checkbox
-                    checked={selectedItems.includes(item.targetId)}
-                    onCheckedChange={(checked) => handleSelectItem(item.targetId, checked as boolean)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Badge className={getTargetTypeColor(item.targetType)}>
-                    {item.targetType}
-                  </Badge>
-                </TableCell>
-                <TableCell className="font-medium">{item.employeeName}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground">{item.fromPeriod}</span>
-                    <ArrowRight className="h-3 w-3" />
-                    <span>{item.toPeriod}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">{item.originalValue}</TableCell>
-                <TableCell className="text-right text-emerald-600">{item.achieved}</TableCell>
-                <TableCell className="text-right text-amber-600 font-medium">{item.pending}</TableCell>
-                <TableCell>
-                  <Select
-                    value={actions[item.targetId] || 'add_to_next'}
-                    onValueChange={(value) => handleActionChange(item.targetId, value as any)}
-                  >
-                    <SelectTrigger className="w-[160px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="add_to_next">Add to Next Month</SelectItem>
-                      <SelectItem value="redistribute">Redistribute</SelectItem>
-                      <SelectItem value="void">Mark as Void</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-              </TableRow>
-            ))}
+            {carryForwardQueue.map((item) => {
+              const allowCarryForward = canCarryForward(item.targetType);
+              return (
+                <TableRow key={item.targetId} className={!allowCarryForward ? 'bg-red-50/50' : ''}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedItems.includes(item.targetId)}
+                      onCheckedChange={(checked) => handleSelectItem(item.targetId, checked as boolean)}
+                      disabled={!allowCarryForward}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      <Badge className={getTargetTypeColor(item.targetType)}>
+                        {getTargetTypeLabel(item.targetType)}
+                      </Badge>
+                      {!allowCarryForward && (
+                        <span className="text-xs text-red-600">Cannot carry forward</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">{item.employeeName}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">{item.fromPeriod}</span>
+                      <ArrowRight className="h-3 w-3" />
+                      <span>{item.toPeriod}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">{item.originalValue}</TableCell>
+                  <TableCell className="text-right text-emerald-600">{item.achieved}</TableCell>
+                  <TableCell className="text-right text-amber-600 font-medium">
+                    {item.pending}
+                    {!allowCarryForward && (
+                      <span className="block text-xs text-red-600">= Dropout</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {allowCarryForward ? (
+                      <Select
+                        value={actions[item.targetId] || 'add_to_next'}
+                        onValueChange={(value) => handleActionChange(item.targetId, value as any)}
+                      >
+                        <SelectTrigger className="w-[160px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="add_to_next">Add to Next Month</SelectItem>
+                          <SelectItem value="redistribute">Redistribute</SelectItem>
+                          <SelectItem value="void">Mark as Void</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Badge variant="destructive" className="text-xs">
+                        Marked as Dropout
+                      </Badge>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
 
