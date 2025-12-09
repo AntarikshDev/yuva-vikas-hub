@@ -406,9 +406,21 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     <Card>
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle>
-            {getTableTitle()}
-          </CardTitle>
+          <div className="flex flex-col gap-2">
+            <CardTitle>
+              {getTableTitle()}
+            </CardTitle>
+            <div className="flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded bg-green-100 border border-green-300"></span>
+                <span className="text-muted-foreground">Meets/Exceeds Target</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded bg-red-100 border border-red-300"></span>
+                <span className="text-muted-foreground">Below Target</span>
+              </div>
+            </div>
+          </div>
           {(showPeriods || showCostPeriods) && (
             <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
               <TabsList className="grid grid-cols-4 w-full sm:w-auto">
