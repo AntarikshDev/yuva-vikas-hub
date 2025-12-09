@@ -488,6 +488,11 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
         label: 'Operations',
         items: [
           { 
+            name: 'Target Management', 
+            path: '/director/target-management', 
+            icon: ({ className }) => <span className={className || ''}>🎯</span>
+          },
+          { 
             name: 'Mobilisation', 
             path: '/director/mobilisation', 
             icon: Users,
@@ -538,7 +543,7 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
       {
         label: 'Management',
         items: [
-          { name: 'Assign Targets', path: '/national-head/assign-targets', icon: ({ className }) => <span className={className || ''}>🎯</span> },
+          { name: 'Target Management', path: '/director/target-management', icon: ({ className }) => <span className={className || ''}>🎯</span> },
           { name: 'State Admins', path: '/national-head/state-admins', icon: Users },
           { name: 'Reports & Scheduler', path: '/national-head/reports', icon: BarChart },
           { name: 'Notifications', path: '/national-head/notifications', icon: Bell },
