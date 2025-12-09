@@ -10,6 +10,7 @@ import { TargetReassignmentPanel } from '@/components/target-management/TargetRe
 import { EmployeeDepartureHandler } from '@/components/target-management/EmployeeDepartureHandler';
 import { TargetHistoryTable } from '@/components/target-management/TargetHistoryTable';
 import { ActiveTargetsTable } from '@/components/target-management/ActiveTargetsTable';
+import { DropoutAnalytics } from '@/components/target-management/DropoutAnalytics';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 
@@ -53,9 +54,10 @@ const TargetManagement: React.FC = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-7 lg:w-auto lg:inline-grid">
             <TabsTrigger value="overview">Active Targets</TabsTrigger>
             <TabsTrigger value="assign">Assign Target</TabsTrigger>
+            <TabsTrigger value="dropouts">Dropout Analytics</TabsTrigger>
             <TabsTrigger value="carry-forward">
               Carry Forward
               {stats.carryForwardTargets > 0 && (
@@ -68,7 +70,7 @@ const TargetManagement: React.FC = () => {
             <TabsTrigger value="departures">
               Departures
               {stats.unassignedTargets > 0 && (
-                <span className="ml-2 rounded-full bg-red-500 px-2 py-0.5 text-xs text-white">
+                <span className="ml-2 rounded-full bg-destructive px-2 py-0.5 text-xs text-destructive-foreground">
                   {stats.unassignedTargets}
                 </span>
               )}
@@ -82,6 +84,10 @@ const TargetManagement: React.FC = () => {
 
           <TabsContent value="assign" className="space-y-4">
             <TargetAssignmentForm />
+          </TabsContent>
+
+          <TabsContent value="dropouts" className="space-y-4">
+            <DropoutAnalytics loading={loading} />
           </TabsContent>
 
           <TabsContent value="carry-forward" className="space-y-4">
