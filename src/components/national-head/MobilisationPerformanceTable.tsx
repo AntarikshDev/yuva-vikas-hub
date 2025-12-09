@@ -9,7 +9,7 @@ import { Sparklines, SparklinesLine, SparklinesBars } from "react-sparklines";
 import { EmployeePerformanceDialog } from "./EmployeePerformanceDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export type KPIType = "mobilisation_team" | "enrolment_target" | "mobilisation_cost" | "trained_over_enrolled" | "placed_over_trained" | "retained_over_placed";
+export type KPIType = "mobilisation_team" | "enrolment_target" | "mobilisation_cost" | "ofr_target" | "approved_ofr_target" | "migration_target";
 type ViewMode = "monthly" | "quarterly" | "halfyearly" | "annual";
 
 interface MobiliserData {
@@ -390,12 +390,12 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
         return 'Enrolment Performance Analysis';
       case 'mobilisation_cost':
         return 'Mobilisation Cost Analysis';
-      case 'trained_over_enrolled':
-        return 'Trained over Enrolled Analysis';
-      case 'placed_over_trained':
-        return 'Placed over Trained Analysis';
-      case 'retained_over_placed':
-        return 'Retained over Placed Analysis';
+      case 'ofr_target':
+        return 'OFR Target Analysis';
+      case 'approved_ofr_target':
+        return 'Approved OFR Target Analysis';
+      case 'migration_target':
+        return 'Migration Target Analysis';
       default:
         return 'Performance Analysis';
     }

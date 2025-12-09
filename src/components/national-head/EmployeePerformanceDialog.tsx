@@ -38,21 +38,19 @@ const generateTableData = (baseValue: number, period: 'daily' | 'weekly' | 'mont
   const multiplier = period === 'daily' ? 0.05 : period === 'weekly' ? 0.15 : 0.08;
   
   return periods.map((name) => {
-    const ofr = Math.floor(baseValue * multiplier * (0.8 + Math.random() * 0.4));
-    const migration = Math.floor(ofr * (0.88 + Math.random() * 0.1));
-    const enrolled = Math.floor(migration * (0.85 + Math.random() * 0.1));
-    const training = Math.floor(enrolled * (0.9 + Math.random() * 0.08));
-    const placed = Math.floor(training * (0.75 + Math.random() * 0.15));
-    const retained = Math.floor(placed * (0.8 + Math.random() * 0.15));
+    const ofrTarget = Math.floor(baseValue * multiplier * 1.5 * (0.8 + Math.random() * 0.4));
+    const ofrFilled = Math.floor(ofrTarget * (0.85 + Math.random() * 0.12));
+    const approvedOfr = Math.floor(ofrFilled * (0.88 + Math.random() * 0.1));
+    const migration = Math.floor(approvedOfr * (0.85 + Math.random() * 0.1));
+    const enrolled = Math.floor(migration * (0.9 + Math.random() * 0.08));
     
     return {
       period: name,
-      ofr,
+      ofrTarget,
+      ofrFilled,
+      approvedOfr,
       migration,
       enrolled,
-      training,
-      placed,
-      retained,
     };
   });
 };
@@ -73,40 +71,34 @@ const getEmployeeDetails = (name: string) => ({
 // Mock pipeline data for employee
 const getEmployeePipeline = (baseValue: number): PipelineStage[] => [
   { 
-    name: 'OFR', 
+    name: 'OFR Target', 
+    value: Math.ceil(baseValue * 1.5), 
+    target: Math.ceil(baseValue * 1.5),
+    gradient: 'from-slate-500 to-slate-600'
+  },
+  { 
+    name: 'OFR Filled', 
     value: baseValue, 
     target: Math.ceil(baseValue * 1.2),
     gradient: 'from-blue-500 to-blue-600'
   },
   { 
-    name: 'Migration', 
+    name: 'Approved OFR', 
     value: Math.floor(baseValue * 0.92), 
     target: Math.ceil(baseValue * 1.1),
     gradient: 'from-indigo-500 to-indigo-600'
   },
   { 
-    name: 'Enrolled', 
+    name: 'Migration', 
     value: Math.floor(baseValue * 0.85), 
     target: Math.ceil(baseValue * 1.0),
     gradient: 'from-violet-500 to-purple-600'
   },
   { 
-    name: 'Training', 
+    name: 'Enrolled', 
     value: Math.floor(baseValue * 0.78), 
     target: Math.ceil(baseValue * 0.9),
     gradient: 'from-purple-500 to-purple-600'
-  },
-  { 
-    name: 'Placed', 
-    value: Math.floor(baseValue * 0.65), 
-    target: Math.ceil(baseValue * 0.75),
-    gradient: 'from-fuchsia-500 to-pink-600'
-  },
-  { 
-    name: 'Retained', 
-    value: Math.floor(baseValue * 0.55), 
-    target: Math.ceil(baseValue * 0.6),
-    gradient: 'from-pink-500 to-rose-600'
   },
 ];
 
@@ -156,13 +148,12 @@ const PipelineCard: React.FC<{ stage: PipelineStage; index: number; total: numbe
 
 const PerformanceDataTable: React.FC<{ data: ReturnType<typeof generateTableData>; period: string }> = ({ data, period }) => {
   const totals = data.reduce((acc, row) => ({
-    ofr: acc.ofr + row.ofr,
+    ofrTarget: acc.ofrTarget + row.ofrTarget,
+    ofrFilled: acc.ofrFilled + row.ofrFilled,
+    approvedOfr: acc.approvedOfr + row.approvedOfr,
     migration: acc.migration + row.migration,
     enrolled: acc.enrolled + row.enrolled,
-    training: acc.training + row.training,
-    placed: acc.placed + row.placed,
-    retained: acc.retained + row.retained,
-  }), { ofr: 0, migration: 0, enrolled: 0, training: 0, placed: 0, retained: 0 });
+  }), { ofrTarget: 0, ofrFilled: 0, approvedOfr: 0, migration: 0, enrolled: 0 });
 
   return (
     <Card className="overflow-hidden">
@@ -176,34 +167,31 @@ const PerformanceDataTable: React.FC<{ data: ReturnType<typeof generateTableData
           <TableHeader>
             <TableRow className="bg-muted/20">
               <TableHead className="font-semibold text-xs">Period</TableHead>
-              <TableHead className="text-center font-semibold text-xs text-blue-600">OFR</TableHead>
-              <TableHead className="text-center font-semibold text-xs text-indigo-600">Migration</TableHead>
-              <TableHead className="text-center font-semibold text-xs text-violet-600">Enrolled</TableHead>
-              <TableHead className="text-center font-semibold text-xs text-purple-600">Training</TableHead>
-              <TableHead className="text-center font-semibold text-xs text-fuchsia-600">Placed</TableHead>
-              <TableHead className="text-center font-semibold text-xs text-pink-600">Retained</TableHead>
+              <TableHead className="text-center font-semibold text-xs text-slate-600">OFR Target</TableHead>
+              <TableHead className="text-center font-semibold text-xs text-blue-600">OFR Filled</TableHead>
+              <TableHead className="text-center font-semibold text-xs text-indigo-600">Approved OFR</TableHead>
+              <TableHead className="text-center font-semibold text-xs text-violet-600">Migration</TableHead>
+              <TableHead className="text-center font-semibold text-xs text-purple-600">Enrolled</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((row, index) => (
               <TableRow key={index} className="hover:bg-muted/30 transition-colors">
                 <TableCell className="font-medium text-xs py-2">{row.period}</TableCell>
-                <TableCell className="text-center text-xs py-2">{row.ofr}</TableCell>
+                <TableCell className="text-center text-xs py-2">{row.ofrTarget}</TableCell>
+                <TableCell className="text-center text-xs py-2">{row.ofrFilled}</TableCell>
+                <TableCell className="text-center text-xs py-2">{row.approvedOfr}</TableCell>
                 <TableCell className="text-center text-xs py-2">{row.migration}</TableCell>
                 <TableCell className="text-center text-xs py-2">{row.enrolled}</TableCell>
-                <TableCell className="text-center text-xs py-2">{row.training}</TableCell>
-                <TableCell className="text-center text-xs py-2">{row.placed}</TableCell>
-                <TableCell className="text-center text-xs py-2">{row.retained}</TableCell>
               </TableRow>
             ))}
             <TableRow className="bg-muted/40 font-semibold border-t-2">
               <TableCell className="text-xs py-2">Total</TableCell>
-              <TableCell className="text-center text-xs py-2 text-blue-600">{totals.ofr}</TableCell>
-              <TableCell className="text-center text-xs py-2 text-indigo-600">{totals.migration}</TableCell>
-              <TableCell className="text-center text-xs py-2 text-violet-600">{totals.enrolled}</TableCell>
-              <TableCell className="text-center text-xs py-2 text-purple-600">{totals.training}</TableCell>
-              <TableCell className="text-center text-xs py-2 text-fuchsia-600">{totals.placed}</TableCell>
-              <TableCell className="text-center text-xs py-2 text-pink-600">{totals.retained}</TableCell>
+              <TableCell className="text-center text-xs py-2 text-slate-600">{totals.ofrTarget}</TableCell>
+              <TableCell className="text-center text-xs py-2 text-blue-600">{totals.ofrFilled}</TableCell>
+              <TableCell className="text-center text-xs py-2 text-indigo-600">{totals.approvedOfr}</TableCell>
+              <TableCell className="text-center text-xs py-2 text-violet-600">{totals.migration}</TableCell>
+              <TableCell className="text-center text-xs py-2 text-purple-600">{totals.enrolled}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -214,12 +202,11 @@ const PerformanceDataTable: React.FC<{ data: ReturnType<typeof generateTableData
 
 const PerformanceChart: React.FC<{ data: ReturnType<typeof generateTableData> }> = ({ data }) => {
   const chartColors = {
-    ofr: '#3b82f6',
-    migration: '#6366f1',
-    enrolled: '#8b5cf6',
-    training: '#a855f7',
-    placed: '#d946ef',
-    retained: '#ec4899',
+    ofrTarget: '#64748b',
+    ofrFilled: '#3b82f6',
+    approvedOfr: '#6366f1',
+    migration: '#8b5cf6',
+    enrolled: '#a855f7',
   };
 
   return (
@@ -244,11 +231,11 @@ const PerformanceChart: React.FC<{ data: ReturnType<typeof generateTableData> }>
                 }}
               />
               <Legend wrapperStyle={{ fontSize: 10 }} />
-              <Bar dataKey="ofr" fill={chartColors.ofr} name="OFR" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="ofrTarget" fill={chartColors.ofrTarget} name="OFR Target" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="ofrFilled" fill={chartColors.ofrFilled} name="OFR Filled" radius={[3, 3, 0, 0]} />
+              <Bar dataKey="approvedOfr" fill={chartColors.approvedOfr} name="Approved OFR" radius={[3, 3, 0, 0]} />
               <Bar dataKey="migration" fill={chartColors.migration} name="Migration" radius={[3, 3, 0, 0]} />
               <Bar dataKey="enrolled" fill={chartColors.enrolled} name="Enrolled" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="placed" fill={chartColors.placed} name="Placed" radius={[3, 3, 0, 0]} />
-              <Bar dataKey="retained" fill={chartColors.retained} name="Retained" radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

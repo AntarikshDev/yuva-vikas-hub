@@ -149,7 +149,7 @@ interface NationalHeadState {
   pendingDocuments: PendingDocument[];
   activityMetrics: ActivityMetrics | null;
   costEfficiency: CostEfficiency | null;
-  selectedKPI: 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 'trained_over_enrolled' | 'placed_over_trained' | 'retained_over_placed';
+  selectedKPI: 'mobilisation_team' | 'enrolment_target' | 'mobilisation_cost' | 'ofr_target' | 'approved_ofr_target' | 'migration_target';
   selectedPrograms: string[];
   selectedWorkOrders: string[];
   filters: {
