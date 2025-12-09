@@ -128,6 +128,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
   const isManpowerKPI = selectedKPI === "mobilisation_team";
   const showPeriods = ["mobilisation_team", "enrolment_target", "training_completion"].includes(selectedKPI);
+  const showCostPeriods = ["mobilisation_cost", "conversion_pe", "conversion_rp"].includes(selectedKPI);
 
   // Get period columns based on view mode
   const getPeriodColumns = () => {
@@ -250,7 +251,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
           <CardTitle>
             {isManpowerKPI ? "Mobilisation Manpower Analysis" : "Performance Analysis"}
           </CardTitle>
-          {showPeriods && (
+          {(showPeriods || showCostPeriods) && (
             <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
               <TabsList className="grid grid-cols-4 w-full sm:w-auto">
                 <TabsTrigger value="monthly" className="text-xs">Monthly</TabsTrigger>
@@ -271,12 +272,12 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                 <TableHead className="min-w-[180px]">Name</TableHead>
                 <TableHead className="text-center">Actual</TableHead>
                 <TableHead className="text-center">Target</TableHead>
-                {showPeriods && periodColumns.map(col => (
+                {(showPeriods || showCostPeriods) && periodColumns.map(col => (
                   <TableHead key={col.key} className="text-center min-w-[80px] text-xs">
                     {col.label}
                   </TableHead>
                 ))}
-                {showPeriods && <TableHead className="text-center font-semibold">YTD</TableHead>}
+                {(showPeriods || showCostPeriods) && <TableHead className="text-center font-semibold">YTD</TableHead>}
                 <TableHead className="text-center">Trend</TableHead>
               </TableRow>
             </TableHeader>
@@ -285,6 +286,21 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                 const isExpanded = expandedRows.has(project.projectId);
                 const ytdValue = project.totalAchieved;
                 const monthlyData = generateMonthlyData(ytdValue);
+                
+                // Calculate cost/conversion values based on viewMode
+                const getCostValue = (baseValue: number) => {
+                  switch(viewMode) {
+                    case 'monthly': return baseValue;
+                    case 'quarterly': return baseValue * 3;
+                    case 'halfyearly': return baseValue * 6;
+                    case 'annual': return baseValue * 12;
+                    default: return baseValue;
+                  }
+                };
+
+                const isCostKPI = selectedKPI === 'mobilisation_cost';
+                const displayValue = showCostPeriods ? getCostValue(ytdValue) : ytdValue;
+                const displayTarget = showCostPeriods ? getCostValue(project.totalTarget) : project.totalTarget;
                 
                 return (
                   <React.Fragment key={project.projectId}>
@@ -297,12 +313,24 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                         {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </TableCell>
                       <TableCell className="font-medium">{project.projectName}</TableCell>
-                      <TableCell className="text-center">{project.totalAchieved}</TableCell>
-                      <TableCell className="text-center">{project.totalTarget}</TableCell>
+                      <TableCell className="text-center">
+                        {isCostKPI ? `₹${displayValue.toLocaleString()}` : displayValue}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {isCostKPI ? `₹${displayTarget.toLocaleString()}` : displayTarget}
+                      </TableCell>
                       {showPeriods && renderPeriodCells(ytdValue, true)}
-                      {showPeriods && (
+                      {showCostPeriods && periodColumns.map(col => {
+                        const colValue = getPeriodValue(monthlyData, col.key);
+                        return (
+                          <TableCell key={col.key} className="text-center">
+                            {isCostKPI ? `₹${colValue.toLocaleString()}` : colValue}
+                          </TableCell>
+                        );
+                      })}
+                      {(showPeriods || showCostPeriods) && (
                         <TableCell className="text-center font-semibold bg-muted/30">
-                          {ytdValue}
+                          {isCostKPI ? `₹${displayValue.toLocaleString()}` : displayValue}
                         </TableCell>
                       )}
                       <TableCell>
@@ -314,7 +342,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                     {isExpanded && (
                       <TableRow className="bg-muted/30">
                         <TableCell></TableCell>
-                        <TableCell colSpan={showPeriods ? periodColumns.length + 5 : 4} className="py-3">
+                        <TableCell colSpan={(showPeriods || showCostPeriods) ? periodColumns.length + 5 : 4} className="py-3">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-muted-foreground">
@@ -353,8 +381,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           <>
                             <TableCell className="text-center">-</TableCell>
                             <TableCell className="text-center">-</TableCell>
-                            {showPeriods && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
-                            {showPeriods && <TableCell>-</TableCell>}
+                            {(showPeriods || showCostPeriods) && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
+                            {(showPeriods || showCostPeriods) && <TableCell>-</TableCell>}
                             <TableCell>-</TableCell>
                           </>
                         )}
@@ -388,8 +416,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                               <>
                                 <TableCell className="text-center">-</TableCell>
                                 <TableCell className="text-center">-</TableCell>
-                                {showPeriods && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
-                                {showPeriods && <TableCell>-</TableCell>}
+                                {(showPeriods || showCostPeriods) && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
+                                {(showPeriods || showCostPeriods) && <TableCell>-</TableCell>}
                                 <TableCell>-</TableCell>
                               </>
                             ) : (
@@ -397,7 +425,11 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                                 <TableCell className="text-center">{mobiliser.achieved.total || 45}</TableCell>
                                 <TableCell className="text-center">{mobiliser.target}</TableCell>
                                 {showPeriods && renderPeriodCells(mobiliser.achieved.total || 45, true)}
-                                {showPeriods && <TableCell className="text-center font-semibold bg-muted/30">{mobiliser.achieved.total || 45}</TableCell>}
+                                {showCostPeriods && periodColumns.map(col => {
+                                  const colValue = getPeriodValue(empMonthly, col.key);
+                                  return <TableCell key={col.key} className="text-center">{colValue}</TableCell>;
+                                })}
+                                {(showPeriods || showCostPeriods) && <TableCell className="text-center font-semibold bg-muted/30">{mobiliser.achieved.total || 45}</TableCell>}
                                 <TableCell><MiniChart data={empMonthly} color="#f59e0b" /></TableCell>
                               </>
                             )}
@@ -431,8 +463,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           <>
                             <TableCell className="text-center">-</TableCell>
                             <TableCell className="text-center">-</TableCell>
-                            {showPeriods && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
-                            {showPeriods && <TableCell>-</TableCell>}
+                            {(showPeriods || showCostPeriods) && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
+                            {(showPeriods || showCostPeriods) && <TableCell>-</TableCell>}
                             <TableCell>-</TableCell>
                           </>
                         )}
@@ -471,8 +503,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                                 <>
                                   <TableCell className="text-center">-</TableCell>
                                   <TableCell className="text-center">-</TableCell>
-                                  {showPeriods && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
-                                  {showPeriods && <TableCell>-</TableCell>}
+                                  {(showPeriods || showCostPeriods) && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
+                                  {(showPeriods || showCostPeriods) && <TableCell>-</TableCell>}
                                   <TableCell>-</TableCell>
                                 </>
                               ) : (
@@ -480,7 +512,11 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                                   <TableCell className="text-center">{emp.achieved}</TableCell>
                                   <TableCell className="text-center">{emp.target}</TableCell>
                                   {showPeriods && renderPeriodCells(emp.achieved, true)}
-                                  {showPeriods && <TableCell className="text-center font-semibold bg-muted/30">{emp.achieved}</TableCell>}
+                                  {showCostPeriods && periodColumns.map(col => {
+                                    const colValue = getPeriodValue(empMonthly, col.key);
+                                    return <TableCell key={col.key} className="text-center">{colValue}</TableCell>;
+                                  })}
+                                  {(showPeriods || showCostPeriods) && <TableCell className="text-center font-semibold bg-muted/30">{emp.achieved}</TableCell>}
                                   <TableCell><MiniChart data={empMonthly} color="#f59e0b" /></TableCell>
                                 </>
                               )}
@@ -515,8 +551,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           <>
                             <TableCell className="text-center">-</TableCell>
                             <TableCell className="text-center">-</TableCell>
-                            {showPeriods && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
-                            {showPeriods && <TableCell>-</TableCell>}
+                            {(showPeriods || showCostPeriods) && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
+                            {(showPeriods || showCostPeriods) && <TableCell>-</TableCell>}
                             <TableCell>-</TableCell>
                           </>
                         )}
@@ -547,8 +583,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           <>
                             <TableCell className="text-center">-</TableCell>
                             <TableCell className="text-center">-</TableCell>
-                            {showPeriods && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
-                            {showPeriods && <TableCell>-</TableCell>}
+                            {(showPeriods || showCostPeriods) && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
+                            {(showPeriods || showCostPeriods) && <TableCell>-</TableCell>}
                             <TableCell>-</TableCell>
                           </>
                         ) : (
@@ -556,7 +592,11 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                             <TableCell className="text-center">85</TableCell>
                             <TableCell className="text-center">100</TableCell>
                             {showPeriods && renderPeriodCells(85, true)}
-                            {showPeriods && <TableCell className="text-center font-semibold bg-muted/30">85</TableCell>}
+                            {showCostPeriods && periodColumns.map(col => {
+                              const colValue = getPeriodValue(generateMonthlyData(85), col.key);
+                              return <TableCell key={col.key} className="text-center">{colValue}</TableCell>;
+                            })}
+                            {(showPeriods || showCostPeriods) && <TableCell className="text-center font-semibold bg-muted/30">85</TableCell>}
                             <TableCell><MiniChart data={generateMonthlyData(85)} color="#f59e0b" /></TableCell>
                           </>
                         )}
@@ -588,8 +628,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           <>
                             <TableCell className="text-center">-</TableCell>
                             <TableCell className="text-center">-</TableCell>
-                            {showPeriods && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
-                            {showPeriods && <TableCell>-</TableCell>}
+                            {(showPeriods || showCostPeriods) && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
+                            {(showPeriods || showCostPeriods) && <TableCell>-</TableCell>}
                             <TableCell>-</TableCell>
                           </>
                         )}
@@ -620,8 +660,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                           <>
                             <TableCell className="text-center">-</TableCell>
                             <TableCell className="text-center">-</TableCell>
-                            {showPeriods && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
-                            {showPeriods && <TableCell>-</TableCell>}
+                            {(showPeriods || showCostPeriods) && periodColumns.map(col => <TableCell key={col.key} className="text-center">-</TableCell>)}
+                            {(showPeriods || showCostPeriods) && <TableCell>-</TableCell>}
                             <TableCell>-</TableCell>
                           </>
                         ) : (
@@ -629,7 +669,11 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                             <TableCell className="text-center">170</TableCell>
                             <TableCell className="text-center">250</TableCell>
                             {showPeriods && renderPeriodCells(170, true)}
-                            {showPeriods && <TableCell className="text-center font-semibold bg-muted/30">170</TableCell>}
+                            {showCostPeriods && periodColumns.map(col => {
+                              const colValue = getPeriodValue(generateMonthlyData(170), col.key);
+                              return <TableCell key={col.key} className="text-center">{colValue}</TableCell>;
+                            })}
+                            {(showPeriods || showCostPeriods) && <TableCell className="text-center font-semibold bg-muted/30">170</TableCell>}
                             <TableCell><MiniChart data={generateMonthlyData(170)} color="#f59e0b" /></TableCell>
                           </>
                         )}
@@ -641,10 +685,14 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                       <TableRow className="font-bold bg-muted/50">
                         <TableCell></TableCell>
                         <TableCell>Total</TableCell>
-                        <TableCell className="text-center">{project.totalAchieved}</TableCell>
-                        <TableCell className="text-center">{project.totalTarget}</TableCell>
+                        <TableCell className="text-center">{isCostKPI ? `₹${displayValue.toLocaleString()}` : project.totalAchieved}</TableCell>
+                        <TableCell className="text-center">{isCostKPI ? `₹${displayTarget.toLocaleString()}` : project.totalTarget}</TableCell>
                         {showPeriods && renderPeriodCells(project.totalAchieved, true)}
-                        {showPeriods && <TableCell className="text-center bg-primary/10">{project.totalAchieved}</TableCell>}
+                        {showCostPeriods && periodColumns.map(col => {
+                          const colValue = getPeriodValue(monthlyData, col.key);
+                          return <TableCell key={col.key} className="text-center">{isCostKPI ? `₹${colValue.toLocaleString()}` : colValue}</TableCell>;
+                        })}
+                        {(showPeriods || showCostPeriods) && <TableCell className="text-center bg-primary/10">{isCostKPI ? `₹${displayValue.toLocaleString()}` : project.totalAchieved}</TableCell>}
                         <TableCell><MiniBarChart data={monthlyData} color="#6366f1" /></TableCell>
                       </TableRow>
                     )}
