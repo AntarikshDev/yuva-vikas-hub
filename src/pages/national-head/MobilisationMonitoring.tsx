@@ -46,23 +46,20 @@ const NationalHeadMobilisationMonitoring = () => {
         { label: 'Mobilisation Budget', value: '₹15,00,000' },
         { label: 'Budget Consumed', value: '₹7,50,000' },
       ],
-      trained_over_enrolled: [
-        { label: 'Target Enrolment', value: 250 },
-        { label: 'Enrolled', value: 200 },
-        { label: 'Target Trained', value: 250 },
-        { label: 'Trained', value: 150 },
+      ofr_target: [
+        { label: 'OFR Target', value: 300 },
+        { label: 'OFR Filled', value: 250 },
+        { label: 'Conversion %', value: '83%' },
       ],
-      placed_over_trained: [
-        { label: 'Target Trained', value: 250 },
-        { label: 'Trained', value: 150 },
-        { label: 'Target Placed', value: 250 },
-        { label: 'Placed', value: 125 },
+      approved_ofr_target: [
+        { label: 'OFR Filled', value: 250 },
+        { label: 'Approved OFR', value: 220 },
+        { label: 'Approval %', value: '88%' },
       ],
-      retained_over_placed: [
-        { label: 'Target Placed', value: 250 },
-        { label: 'Placed', value: 125 },
-        { label: 'Target Retained', value: 250 },
-        { label: 'Retained', value: 102 },
+      migration_target: [
+        { label: 'Approved OFR', value: 220 },
+        { label: 'Migrated', value: 180 },
+        { label: 'Migration %', value: '82%' },
       ],
     };
   }, [filteredProjects]);
@@ -117,22 +114,22 @@ const NationalHeadMobilisationMonitoring = () => {
             onClick={() => handleKPIClick('mobilisation_cost')}
           />
           <MobilisationKPICard
-            title="Trained over Enrolled"
-            metrics={kpiMetrics.trained_over_enrolled}
-            isSelected={selectedKPI === 'trained_over_enrolled'}
-            onClick={() => handleKPIClick('trained_over_enrolled')}
+            title="OFR Target"
+            metrics={kpiMetrics.ofr_target}
+            isSelected={selectedKPI === 'ofr_target'}
+            onClick={() => handleKPIClick('ofr_target')}
           />
           <MobilisationKPICard
-            title="Placed over Trained"
-            metrics={kpiMetrics.placed_over_trained}
-            isSelected={selectedKPI === 'placed_over_trained'}
-            onClick={() => handleKPIClick('placed_over_trained')}
+            title="Approved OFR Target"
+            metrics={kpiMetrics.approved_ofr_target}
+            isSelected={selectedKPI === 'approved_ofr_target'}
+            onClick={() => handleKPIClick('approved_ofr_target')}
           />
           <MobilisationKPICard
-            title="Retained over Placed"
-            metrics={kpiMetrics.retained_over_placed}
-            isSelected={selectedKPI === 'retained_over_placed'}
-            onClick={() => handleKPIClick('retained_over_placed')}
+            title="Migration Target"
+            metrics={kpiMetrics.migration_target}
+            isSelected={selectedKPI === 'migration_target'}
+            onClick={() => handleKPIClick('migration_target')}
           />
         </div>
 
