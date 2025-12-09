@@ -219,32 +219,57 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
   // Render role period cells (for manpower KPI showing count only)
   // Green if count equals target, Red if count < target
+  // For quarterly/half-yearly/annual: show average of months
   const renderRolePeriodCells = (actual: number, target: number) => {
     // Generate monthly data with varying values
     // Some months meet target (green), some are below (red)
     const generateRoleMonthlyData = (targetValue: number): number[] => {
       // Create a pattern where different months have different values
-      // The target per month is the target value itself (not divided by 12)
-      return MONTHS.map((_, index) => {
-        // Create varied pattern: some months at target, some below
-        // Apr(0), May(1), Jun(2), Jul(3), Aug(4), Sep(5) - mix of values
-        // Oct(6), Nov(7), Dec(8), Jan(9), Feb(10), Mar(11) - mostly at target
-        const patterns = [
-          targetValue,           // Apr - at target (green)
-          targetValue - 1,       // May - below target (red)
-          targetValue,           // Jun - at target (green)
-          targetValue - 1,       // Jul - below target (red)
-          targetValue,           // Aug - at target (green)
-          targetValue - 1,       // Sep - below target (red)
-          targetValue,           // Oct - at target (green)
-          targetValue,           // Nov - at target (green)
-          targetValue,           // Dec - at target (green)
-          targetValue - 1,       // Jan - below target (red)
-          targetValue,           // Feb - at target (green)
-          targetValue,           // Mar - at target (green)
-        ];
-        return Math.max(0, patterns[index]);
-      });
+      const patterns = [
+        targetValue,           // Apr - at target (green)
+        targetValue - 1,       // May - below target (red)
+        targetValue,           // Jun - at target (green)
+        targetValue - 1,       // Jul - below target (red)
+        targetValue,           // Aug - at target (green)
+        targetValue - 1,       // Sep - below target (red)
+        targetValue,           // Oct - at target (green)
+        targetValue,           // Nov - at target (green)
+        targetValue,           // Dec - at target (green)
+        targetValue - 1,       // Jan - below target (red)
+        targetValue,           // Feb - at target (green)
+        targetValue,           // Mar - at target (green)
+      ];
+      return patterns.map(v => Math.max(0, v));
+    };
+
+    // Calculate average value for role cells (not sum)
+    const getRolePeriodValue = (monthlyData: number[], periodKey: string): number => {
+      switch (viewMode) {
+        case "monthly":
+          const monthIndex = MONTHS.findIndex(m => m.toLowerCase() === periodKey);
+          return monthlyData[monthIndex] || 0;
+        case "quarterly":
+          const quarterDef = QUARTERS.find(q => q.key === periodKey);
+          if (!quarterDef) return 0;
+          const qSum = quarterDef.months.reduce((sum, month) => {
+            const idx = MONTHS.indexOf(month);
+            return sum + (monthlyData[idx] || 0);
+          }, 0);
+          return Math.round(qSum / 3); // Average of 3 months
+        case "halfyearly":
+          const halfDef = HALF_YEARS.find(h => h.key === periodKey);
+          if (!halfDef) return 0;
+          const hSum = halfDef.months.reduce((sum, month) => {
+            const idx = MONTHS.indexOf(month);
+            return sum + (monthlyData[idx] || 0);
+          }, 0);
+          return Math.round(hSum / 6); // Average of 6 months
+        case "annual":
+          const annualSum = monthlyData.reduce((a, b) => a + b, 0);
+          return Math.round(annualSum / 12); // Average of 12 months
+        default:
+          return 0;
+      }
     };
 
     // Target is already the monthly target (not annual)
@@ -252,8 +277,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     const monthlyTarget = Array(12).fill(target);
 
     return periodColumns.map(col => {
-      const actualVal = getPeriodValue(monthlyActual, col.key);
-      const targetVal = getPeriodValue(monthlyTarget, col.key);
+      const actualVal = getRolePeriodValue(monthlyActual, col.key);
+      const targetVal = getRolePeriodValue(monthlyTarget, col.key);
       const meetsTarget = actualVal >= targetVal;
       
       return (
