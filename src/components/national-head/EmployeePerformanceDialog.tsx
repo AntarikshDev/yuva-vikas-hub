@@ -5,9 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowRight, TrendingDown, Calendar, Target, MapPin, Phone, Mail, MessageSquarePlus } from 'lucide-react';
+import { ArrowRight, TrendingDown, Calendar, Target, MapPin, Phone, Mail, MessageSquarePlus, Star, History } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { PerformanceReviewDialog } from './PerformanceReviewDialog';
+import { format } from 'date-fns';
 interface EmployeePerformanceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -256,6 +257,109 @@ const PerformanceChart: React.FC<{ data: ReturnType<typeof generateTableData> }>
   );
 };
 
+// Mock review history data
+const getReviewHistory = () => [
+  {
+    id: 1,
+    reviewer: 'Vikram Sharma',
+    role: 'Business Head',
+    rating: 5,
+    label: 'Excellent',
+    comment: 'Outstanding performance this quarter. Exceeded all targets and showed great leadership in team coordination.',
+    date: new Date(2024, 11, 5),
+  },
+  {
+    id: 2,
+    reviewer: 'Priya Mehta',
+    role: 'Regional Head',
+    rating: 4,
+    label: 'Good',
+    comment: 'Consistent performer with good communication skills. Need to focus more on retention metrics.',
+    date: new Date(2024, 10, 20),
+  },
+  {
+    id: 3,
+    reviewer: 'Vikram Sharma',
+    role: 'Business Head',
+    rating: 3,
+    label: 'Average',
+    comment: 'Meeting basic expectations. Encouraged to take more initiative in mobilisation activities.',
+    date: new Date(2024, 9, 15),
+  },
+];
+
+const ratingConfig = [
+  { label: 'Not Satisfactory', color: 'bg-red-500', starColor: 'text-red-500' },
+  { label: 'Need Improvement', color: 'bg-orange-500', starColor: 'text-orange-500' },
+  { label: 'Average', color: 'bg-yellow-500', starColor: 'text-yellow-500' },
+  { label: 'Good', color: 'bg-lime-500', starColor: 'text-lime-500' },
+  { label: 'Excellent', color: 'bg-amber-400', starColor: 'text-amber-400' },
+];
+
+const ReviewHistorySection: React.FC<{ employeeName: string }> = ({ employeeName }) => {
+  const reviews = getReviewHistory();
+
+  return (
+    <Card>
+      <CardHeader className="bg-muted/30 border-b py-3">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <History className="h-4 w-4 text-primary" />
+          Review History
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-4 space-y-4">
+        {reviews.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-4">No reviews yet</p>
+        ) : (
+          reviews.map((review) => (
+            <div
+              key={review.id}
+              className="border rounded-lg p-4 space-y-3 bg-muted/10 hover:bg-muted/20 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary/80 to-primary/40 flex items-center justify-center text-primary-foreground text-xs font-bold">
+                    {review.reviewer.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{review.reviewer}</p>
+                    <p className="text-xs text-muted-foreground">{review.role}</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-4 w-4 ${
+                          star <= review.rating
+                            ? `${ratingConfig[review.rating - 1].starColor} fill-current`
+                            : 'text-muted-foreground/30'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <Badge
+                    className={`text-[10px] ${ratingConfig[review.rating - 1].color} text-white border-0`}
+                  >
+                    {review.label}
+                  </Badge>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                "{review.comment}"
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {format(review.date, 'dd MMM yyyy, hh:mm a')}
+              </p>
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps> = ({
   open,
   onOpenChange,
@@ -375,6 +479,9 @@ export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps>
 
           {/* Performance Table */}
           <PerformanceDataTable data={tableData} period={timePeriod} />
+
+          {/* Review History */}
+          <ReviewHistorySection employeeName={employee.name} />
         </div>
       </DialogContent>
     </Dialog>
