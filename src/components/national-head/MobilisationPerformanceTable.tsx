@@ -217,7 +217,8 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     ));
   };
 
-  // Render role period cells (for manpower KPI showing actual/target)
+  // Render role period cells (for manpower KPI showing count only)
+  // Green if count >= target, Red if count < target
   const renderRolePeriodCells = (actual: number, target: number) => {
     const monthlyActual = generateMonthlyData(actual);
     const monthlyTarget = generateMonthlyData(target);
@@ -225,18 +226,16 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     return periodColumns.map(col => {
       const actualVal = getPeriodValue(monthlyActual, col.key);
       const targetVal = getPeriodValue(monthlyTarget, col.key);
-      const percent = targetVal > 0 ? Math.round((actualVal / targetVal) * 100) : 0;
+      const meetsTarget = actualVal >= targetVal;
       
       return (
         <TableCell key={col.key} className="text-center">
           <div className="flex flex-col items-center gap-1">
             <span className={cn(
               "font-medium text-xs px-2 py-0.5 rounded",
-              percent >= 100 ? "bg-green-100 text-green-700" :
-              percent >= 80 ? "bg-yellow-100 text-yellow-700" :
-              "bg-red-100 text-red-700"
+              meetsTarget ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
             )}>
-              {actualVal}/{targetVal}
+              {actualVal}
             </span>
           </div>
         </TableCell>
