@@ -220,8 +220,23 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
   // Render role period cells (for manpower KPI showing count only)
   // Green if count >= target, Red if count < target
   const renderRolePeriodCells = (actual: number, target: number) => {
-    const monthlyActual = generateMonthlyData(actual);
-    const monthlyTarget = generateMonthlyData(target);
+    // Generate monthly data where some months meet target and some don't
+    // Earlier months are more likely to be below target, later months meet target
+    const generateRoleMonthlyData = (targetPerMonth: number): number[] => {
+      return MONTHS.map((_, index) => {
+        // First 6 months: below target (red), Last 6 months: meets target (green)
+        // This creates a realistic progression
+        if (index < 6) {
+          return Math.max(0, targetPerMonth - 1); // Below target
+        } else {
+          return targetPerMonth; // Meets target
+        }
+      });
+    };
+
+    const targetPerMonth = Math.max(1, Math.round(target / 12));
+    const monthlyActual = generateRoleMonthlyData(targetPerMonth);
+    const monthlyTarget = Array(12).fill(targetPerMonth);
 
     return periodColumns.map(col => {
       const actualVal = getPeriodValue(monthlyActual, col.key);
