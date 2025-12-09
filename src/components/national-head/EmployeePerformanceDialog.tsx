@@ -119,26 +119,26 @@ const PipelineCard: React.FC<{ stage: PipelineStage; index: number; total: numbe
   const isFirst = index === 0;
   
   return (
-    <div className="flex items-center gap-1 sm:gap-2">
+    <div className="flex items-center gap-1 flex-1">
       <div 
-        className={`relative overflow-hidden rounded-lg p-3 sm:p-4 text-white min-w-[100px] sm:min-w-[120px] shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl bg-gradient-to-br ${stage.gradient}`}
+        className={`relative overflow-hidden rounded-lg p-3 text-white w-full shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl bg-gradient-to-br ${stage.gradient}`}
       >
-        <div className="absolute top-0 right-0 w-12 h-12 bg-white/10 rounded-full -translate-y-6 translate-x-6" />
+        <div className="absolute top-0 right-0 w-10 h-10 bg-white/10 rounded-full -translate-y-5 translate-x-5" />
         
         <div className="relative z-10">
-          <div className="text-[10px] sm:text-xs font-medium opacity-90 mb-1">{stage.name}</div>
-          <div className="text-xl sm:text-2xl font-bold tracking-tight">{stage.value.toLocaleString()}</div>
-          <div className="text-[10px] opacity-80 mt-1">{percentOfTotal}%</div>
+          <div className="text-[10px] font-medium opacity-90 mb-0.5">{stage.name}</div>
+          <div className="text-lg font-bold tracking-tight">{stage.value.toLocaleString()}</div>
+          <div className="text-[10px] opacity-80">{percentOfTotal}%</div>
           {!isFirst && (
-            <div className="flex items-center gap-0.5 mt-0.5 text-[10px] opacity-80">
-              <TrendingDown className="h-2.5 w-2.5" />
+            <div className="flex items-center gap-0.5 text-[9px] opacity-80">
+              <TrendingDown className="h-2 w-2" />
               <span>-{(100 - parseFloat(percentOfTotal)).toFixed(0)}%</span>
             </div>
           )}
-          <div className="mt-2 pt-1 border-t border-white/20">
-            <div className="flex items-center justify-between text-[10px]">
+          <div className="mt-1.5 pt-1 border-t border-white/20">
+            <div className="flex items-center justify-between text-[9px]">
               <span className="opacity-80">T: {stage.target}</span>
-              <Badge variant="secondary" className="bg-white/20 text-white text-[9px] px-1 py-0">
+              <Badge variant="secondary" className="bg-white/20 text-white text-[8px] px-1 py-0">
                 {targetPercent}%
               </Badge>
             </div>
@@ -146,7 +146,7 @@ const PipelineCard: React.FC<{ stage: PipelineStage; index: number; total: numbe
         </div>
       </div>
       {index < total - 1 && (
-        <ArrowRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <ArrowRight className="h-3 w-3 text-muted-foreground flex-shrink-0" />
       )}
     </div>
   );
@@ -275,7 +275,7 @@ export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps>
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader className="pb-3 border-b">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -321,8 +321,8 @@ export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps>
                 Performance Pipeline
               </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4 pb-3">
-              <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2">
+            <CardContent className="pt-3 pb-2">
+              <div className="grid grid-cols-6 gap-1">
                 {pipeline.map((stage, index) => (
                   <PipelineCard 
                     key={stage.name} 
