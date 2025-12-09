@@ -244,12 +244,32 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
     });
   };
 
+  // Get table title based on selected KPI
+  const getTableTitle = () => {
+    switch (selectedKPI) {
+      case 'mobilisation_team':
+        return 'Mobilisation Manpower Analysis';
+      case 'enrolment_target':
+        return 'Enrolment Performance Analysis';
+      case 'mobilisation_cost':
+        return 'Mobilisation Cost Analysis';
+      case 'training_completion':
+        return 'Dropout Analysis (Training)';
+      case 'conversion_pe':
+        return 'Dropout Analysis (Placement)';
+      case 'conversion_rp':
+        return 'Dropout Analysis (Job)';
+      default:
+        return 'Performance Analysis';
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <CardTitle>
-            {isManpowerKPI ? "Mobilisation Manpower Analysis" : "Performance Analysis"}
+            {getTableTitle()}
           </CardTitle>
           {(showPeriods || showCostPeriods) && (
             <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as ViewMode)}>
