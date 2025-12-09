@@ -109,6 +109,8 @@ const NationalHeadMobilisationMonitoring = () => {
             metrics={kpiMetrics.mobilisation_cost}
             isSelected={selectedKPI === 'mobilisation_cost'}
             onClick={() => handleKPIClick('mobilisation_cost')}
+            showTimeFilter={true}
+            isCurrency={true}
           />
           <MobilisationKPICard
             title="Training Completion"
@@ -121,12 +123,14 @@ const NationalHeadMobilisationMonitoring = () => {
             metrics={kpiMetrics.conversion_pe}
             isSelected={selectedKPI === 'conversion_pe'}
             onClick={() => handleKPIClick('conversion_pe')}
+            showTimeFilter={true}
           />
           <MobilisationKPICard
             title="Retention Over Placements"
             metrics={kpiMetrics.conversion_rp}
             isSelected={selectedKPI === 'conversion_rp'}
             onClick={() => handleKPIClick('conversion_rp')}
+            showTimeFilter={true}
           />
         </div>
 
