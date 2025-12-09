@@ -10,7 +10,7 @@ interface ProgramWorkOrderFilterProps {
 }
 
 const PROGRAMS = ['DDUGKY', 'UPSDM', 'WDC'];
-const WORK_ORDERS = ['W/O:UP', 'W/O:MP', 'W/O:JH'];
+const WORK_ORDERS = ['W/O:UP', 'W/O:BR'];
 
 export const ProgramWorkOrderFilter: React.FC<ProgramWorkOrderFilterProps> = ({
   selectedPrograms,

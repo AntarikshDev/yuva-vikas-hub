@@ -179,7 +179,7 @@ const initialState: NationalHeadState = {
   costEfficiency: null,
   selectedKPI: 'mobilisation_team',
   selectedPrograms: ['DDUGKY'],
-  selectedWorkOrders: ['W/O:UP'],
+  selectedWorkOrders: ['W/O:UP', 'W/O:BR'],
   filters: {
     dateRange: [null, null],
     states: [],
@@ -415,6 +415,7 @@ export const fetchNHMobilisation = createAsyncThunk(
           { mobiliserId: '107', name: 'Anjali Mehta', cluster: 'Bangalore Urban', state: 'Karnataka', ofrCount: 88, convertRate: 0.40, costPerCandidate: 360, rank: 7 },
         ],
         projects: [
+          // DDUGKY Projects
           {
             projectId: 'ddugky-5',
             projectName: 'DDUGKY 5',
@@ -442,7 +443,7 @@ export const fetchNHMobilisation = createAsyncThunk(
             projectId: 'ddugky-6',
             projectName: 'DDUGKY 6',
             program: 'DDUGKY',
-            workOrder: 'W/O:MP',
+            workOrder: 'W/O:BR',
             manpowerPercent: 85,
             teamBreakdown: {
               mobilisers: [
@@ -459,6 +460,102 @@ export const fetchNHMobilisation = createAsyncThunk(
               april: { target: 120, achieved: 120, percent: 100 },
               may: { target: 120, achieved: 870, percent: 725 },
               june: { target: 60, achieved: 0, percent: 0 },
+            },
+          },
+          // UPSDM Projects
+          {
+            projectId: 'upsdm-1',
+            projectName: 'UPSDM 1',
+            program: 'UPSDM',
+            workOrder: 'W/O:UP',
+            manpowerPercent: 92,
+            teamBreakdown: {
+              mobilisers: [
+                { name: 'Priya Verma', target: 150, achieved: { total: 140, april: 48, may: 52, june: 40 }, ytd: 140, cost: 63000, costPerCandidate: 450 },
+                { name: 'Ankur Jain', target: 130, achieved: { total: 125, april: 42, may: 48, june: 35 }, ytd: 125, cost: 56250, costPerCandidate: 450 },
+                { name: 'Neha Sharma', target: 120, achieved: { total: 118, april: 40, may: 45, june: 33 }, ytd: 118, cost: 53100, costPerCandidate: 450 },
+              ],
+              mobiliserManagers: { count: 5, target: 5 },
+              centreManagers: { count: 2, target: 2 },
+              operationManagers: { count: 2, target: 2 },
+            },
+            totalTarget: 400,
+            totalAchieved: 383,
+            monthlyData: {
+              april: { target: 130, achieved: 130, percent: 100 },
+              may: { target: 145, achieved: 145, percent: 100 },
+              june: { target: 125, achieved: 108, percent: 86 },
+            },
+          },
+          {
+            projectId: 'upsdm-2',
+            projectName: 'UPSDM 2',
+            program: 'UPSDM',
+            workOrder: 'W/O:BR',
+            manpowerPercent: 78,
+            teamBreakdown: {
+              mobilisers: [
+                { name: 'Rohit Gupta', target: 110, achieved: { total: 85, april: 28, may: 32, june: 25 }, ytd: 85, cost: 46750, costPerCandidate: 550 },
+                { name: 'Kavita Singh', target: 100, achieved: { total: 78, april: 26, may: 29, june: 23 }, ytd: 78, cost: 42900, costPerCandidate: 550 },
+              ],
+              mobiliserManagers: { count: 3, target: 4 },
+              centreManagers: { count: 1, target: 2 },
+              operationManagers: { count: 1, target: 1 },
+            },
+            totalTarget: 210,
+            totalAchieved: 163,
+            monthlyData: {
+              april: { target: 70, achieved: 54, percent: 77 },
+              may: { target: 75, achieved: 61, percent: 81 },
+              june: { target: 65, achieved: 48, percent: 74 },
+            },
+          },
+          // WDC Projects
+          {
+            projectId: 'wdc-1',
+            projectName: 'WDC 1',
+            program: 'WDC',
+            workOrder: 'W/O:UP',
+            manpowerPercent: 65,
+            teamBreakdown: {
+              mobilisers: [
+                { name: 'Amit Patel', target: 80, achieved: { total: 52, april: 18, may: 20, june: 14 }, ytd: 52, cost: 33800, costPerCandidate: 650 },
+                { name: 'Sunita Devi', target: 75, achieved: { total: 48, april: 16, may: 18, june: 14 }, ytd: 48, cost: 31200, costPerCandidate: 650 },
+              ],
+              mobiliserManagers: { count: 2, target: 3 },
+              centreManagers: { count: 1, target: 2 },
+              operationManagers: { count: 1, target: 1 },
+            },
+            totalTarget: 155,
+            totalAchieved: 100,
+            monthlyData: {
+              april: { target: 52, achieved: 34, percent: 65 },
+              may: { target: 55, achieved: 38, percent: 69 },
+              june: { target: 48, achieved: 28, percent: 58 },
+            },
+          },
+          {
+            projectId: 'wdc-2',
+            projectName: 'WDC 2',
+            program: 'WDC',
+            workOrder: 'W/O:BR',
+            manpowerPercent: 88,
+            teamBreakdown: {
+              mobilisers: [
+                { name: 'Deepak Kumar', target: 95, achieved: { total: 88, april: 30, may: 33, june: 25 }, ytd: 88, cost: 39600, costPerCandidate: 450 },
+                { name: 'Rekha Rani', target: 90, achieved: { total: 82, april: 28, may: 30, june: 24 }, ytd: 82, cost: 36900, costPerCandidate: 450 },
+                { name: 'Manish Tiwari', target: 85, achieved: { total: 80, april: 27, may: 29, june: 24 }, ytd: 80, cost: 36000, costPerCandidate: 450 },
+              ],
+              mobiliserManagers: { count: 4, target: 4 },
+              centreManagers: { count: 2, target: 2 },
+              operationManagers: { count: 1, target: 1 },
+            },
+            totalTarget: 270,
+            totalAchieved: 250,
+            monthlyData: {
+              april: { target: 90, achieved: 85, percent: 94 },
+              may: { target: 95, achieved: 92, percent: 97 },
+              june: { target: 85, achieved: 73, percent: 86 },
             },
           },
         ],
