@@ -4,6 +4,7 @@ import dashboardSlice from './slices/dashboardSlice';
 import mobilisationSlice from './slices/mobilisationSlice';
 import directorSlice from './slices/directorSlice';
 import nationalHeadSlice from './slices/nationalHeadSlice';
+import targetManagementSlice from './slices/targetManagementSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     mobilisation: mobilisationSlice,
     director: directorSlice,
     nationalHead: nationalHeadSlice,
+    targetManagement: targetManagementSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
