@@ -4,8 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface MetricLine {
   label: string;
-  target: number;
-  achieved: number;
+  value: number | string;
 }
 
 interface MobilisationKPICardProps {
@@ -13,7 +12,6 @@ interface MobilisationKPICardProps {
   metrics: MetricLine[];
   isSelected: boolean;
   onClick: () => void;
-  isCurrency?: boolean;
 }
 
 export const MobilisationKPICard: React.FC<MobilisationKPICardProps> = ({
@@ -21,11 +19,10 @@ export const MobilisationKPICard: React.FC<MobilisationKPICardProps> = ({
   metrics,
   isSelected,
   onClick,
-  isCurrency = false,
 }) => {
-  const formatValue = (value: number) => {
-    if (isCurrency) {
-      return `₹${value.toLocaleString()}`;
+  const formatValue = (value: number | string) => {
+    if (typeof value === 'string') {
+      return value;
     }
     return value.toLocaleString();
   };
@@ -41,7 +38,7 @@ export const MobilisationKPICard: React.FC<MobilisationKPICardProps> = ({
       )}
     >
       <h3 className="text-sm font-semibold text-foreground mb-3">{title}</h3>
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {metrics.map((metric, index) => (
           <div key={index} className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">{metric.label}</span>
@@ -49,7 +46,7 @@ export const MobilisationKPICard: React.FC<MobilisationKPICardProps> = ({
               'text-sm font-bold',
               isSelected ? 'text-cyan-600' : 'text-foreground'
             )}>
-              {formatValue(metric.achieved)}/{formatValue(metric.target)}
+              {formatValue(metric.value)}
             </span>
           </div>
         ))}
