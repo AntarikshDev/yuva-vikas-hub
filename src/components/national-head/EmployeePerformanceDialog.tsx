@@ -3,9 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowRight, TrendingUp, TrendingDown, User, Calendar, Target, Award, MapPin, Phone, Mail } from 'lucide-react';
-import { Sparklines, SparklinesLine } from 'react-sparklines';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, Area, AreaChart } from 'recharts';
 
 interface EmployeePerformanceDialogProps {
   open: boolean;
@@ -26,10 +26,34 @@ interface PipelineStage {
   gradient: string;
 }
 
-// Generate mock performance data based on time period
-const generatePerformanceData = (baseValue: number, period: 'daily' | 'weekly' | 'monthly') => {
-  const days = period === 'daily' ? 7 : period === 'weekly' ? 4 : 12;
-  return Array.from({ length: days }, () => Math.floor(baseValue / days * (0.7 + Math.random() * 0.6)));
+// Generate performance data based on time period
+const generateTableData = (baseValue: number, period: 'daily' | 'weekly' | 'monthly') => {
+  const periods = period === 'daily' 
+    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    : period === 'weekly'
+    ? ['Week 1', 'Week 2', 'Week 3', 'Week 4']
+    : ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+
+  const multiplier = period === 'daily' ? 0.05 : period === 'weekly' ? 0.15 : 0.08;
+  
+  return periods.map((name, index) => {
+    const ofr = Math.floor(baseValue * multiplier * (0.8 + Math.random() * 0.4));
+    const migration = Math.floor(ofr * (0.88 + Math.random() * 0.1));
+    const enrolled = Math.floor(migration * (0.85 + Math.random() * 0.1));
+    const training = Math.floor(enrolled * (0.9 + Math.random() * 0.08));
+    const placed = Math.floor(training * (0.75 + Math.random() * 0.15));
+    const retained = Math.floor(placed * (0.8 + Math.random() * 0.15));
+    
+    return {
+      period: name,
+      ofr,
+      migration,
+      enrolled,
+      training,
+      placed,
+      retained,
+    };
+  });
 };
 
 // Mock employee details
@@ -160,66 +184,172 @@ const MetricCard: React.FC<{
   </div>
 );
 
-const PerformanceChart: React.FC<{ data: number[]; labels: string[]; title: string }> = ({ data, labels, title }) => (
-  <Card>
-    <CardHeader className="pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="h-24 mb-3">
-        <Sparklines data={data} height={96} width={400}>
-          <SparklinesLine color="hsl(var(--primary))" style={{ strokeWidth: 2, fill: 'none' }} />
-        </Sparklines>
-      </div>
-      <div className="flex justify-between text-xs text-muted-foreground">
-        {labels.map((label, i) => (
-          <span key={i}>{label}</span>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
-);
+const PerformanceDataTable: React.FC<{ data: ReturnType<typeof generateTableData>; period: string }> = ({ data, period }) => {
+  const totals = data.reduce((acc, row) => ({
+    ofr: acc.ofr + row.ofr,
+    migration: acc.migration + row.migration,
+    enrolled: acc.enrolled + row.enrolled,
+    training: acc.training + row.training,
+    placed: acc.placed + row.placed,
+    retained: acc.retained + row.retained,
+  }), { ofr: 0, migration: 0, enrolled: 0, training: 0, placed: 0, retained: 0 });
 
-const StageBreakdownTable: React.FC<{ pipeline: PipelineStage[] }> = ({ pipeline }) => (
-  <Card>
-    <CardHeader className="pb-3">
-      <CardTitle className="text-sm font-medium">Stage-wise Breakdown</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div className="space-y-3">
-        {pipeline.map((stage, index) => {
-          const percent = Math.round((stage.value / stage.target) * 100);
-          const conversionRate = index > 0 
-            ? ((stage.value / pipeline[index - 1].value) * 100).toFixed(1)
-            : '100.0';
-          
-          return (
-            <div key={stage.name} className="space-y-1.5">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${stage.color}`} />
-                  <span className="font-medium">{stage.name}</span>
-                </div>
-                <div className="flex items-center gap-4 text-xs">
-                  <span className="text-muted-foreground">
-                    Conv: <span className="font-medium text-foreground">{conversionRate}%</span>
-                  </span>
-                  <span className="text-muted-foreground">
-                    {stage.value} / {stage.target}
-                  </span>
-                  <Badge variant={percent >= 100 ? 'default' : percent >= 80 ? 'secondary' : 'destructive'} className="text-[10px]">
-                    {percent}%
-                  </Badge>
-                </div>
-              </div>
-              <Progress value={percent} className="h-1.5" />
-            </div>
-          );
-        })}
-      </div>
-    </CardContent>
-  </Card>
-);
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader className="bg-muted/30 border-b py-3">
+        <CardTitle className="text-sm font-medium">
+          {period === 'daily' ? 'Daily' : period === 'weekly' ? 'Weekly' : 'Monthly'} Performance Data
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/20">
+                <TableHead className="font-semibold">Period</TableHead>
+                <TableHead className="text-right font-semibold text-blue-600">OFR</TableHead>
+                <TableHead className="text-right font-semibold text-indigo-600">Migration</TableHead>
+                <TableHead className="text-right font-semibold text-violet-600">Enrolled</TableHead>
+                <TableHead className="text-right font-semibold text-purple-600">Training</TableHead>
+                <TableHead className="text-right font-semibold text-fuchsia-600">Placed</TableHead>
+                <TableHead className="text-right font-semibold text-pink-600">Retained</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((row, index) => (
+                <TableRow key={index} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="font-medium">{row.period}</TableCell>
+                  <TableCell className="text-right">{row.ofr}</TableCell>
+                  <TableCell className="text-right">{row.migration}</TableCell>
+                  <TableCell className="text-right">{row.enrolled}</TableCell>
+                  <TableCell className="text-right">{row.training}</TableCell>
+                  <TableCell className="text-right">{row.placed}</TableCell>
+                  <TableCell className="text-right">{row.retained}</TableCell>
+                </TableRow>
+              ))}
+              <TableRow className="bg-muted/40 font-semibold border-t-2">
+                <TableCell>Total</TableCell>
+                <TableCell className="text-right text-blue-600">{totals.ofr}</TableCell>
+                <TableCell className="text-right text-indigo-600">{totals.migration}</TableCell>
+                <TableCell className="text-right text-violet-600">{totals.enrolled}</TableCell>
+                <TableCell className="text-right text-purple-600">{totals.training}</TableCell>
+                <TableCell className="text-right text-fuchsia-600">{totals.placed}</TableCell>
+                <TableCell className="text-right text-pink-600">{totals.retained}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const PerformanceCharts: React.FC<{ data: ReturnType<typeof generateTableData>; period: string }> = ({ data, period }) => {
+  const chartColors = {
+    ofr: '#3b82f6',
+    migration: '#6366f1',
+    enrolled: '#8b5cf6',
+    training: '#a855f7',
+    placed: '#d946ef',
+    retained: '#ec4899',
+  };
+
+  return (
+    <div className="grid gap-6">
+      {/* Bar Chart */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Performance Comparison</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="period" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--popover))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Bar dataKey="ofr" fill={chartColors.ofr} name="OFR" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="migration" fill={chartColors.migration} name="Migration" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="enrolled" fill={chartColors.enrolled} name="Enrolled" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="placed" fill={chartColors.placed} name="Placed" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="retained" fill={chartColors.retained} name="Retained" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Line Chart - Trend Analysis */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Trend Analysis</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="period" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--popover))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Line type="monotone" dataKey="ofr" stroke={chartColors.ofr} strokeWidth={2} dot={{ r: 4 }} name="OFR" />
+                <Line type="monotone" dataKey="placed" stroke={chartColors.placed} strokeWidth={2} dot={{ r: 4 }} name="Placed" />
+                <Line type="monotone" dataKey="retained" stroke={chartColors.retained} strokeWidth={2} dot={{ r: 4 }} name="Retained" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Area Chart - Cumulative Flow */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Pipeline Flow</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="period" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--popover))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                <Area type="monotone" dataKey="ofr" stackId="1" stroke={chartColors.ofr} fill={chartColors.ofr} fillOpacity={0.6} name="OFR" />
+                <Area type="monotone" dataKey="enrolled" stackId="2" stroke={chartColors.enrolled} fill={chartColors.enrolled} fillOpacity={0.6} name="Enrolled" />
+                <Area type="monotone" dataKey="retained" stackId="3" stroke={chartColors.retained} fill={chartColors.retained} fillOpacity={0.6} name="Retained" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps> = ({
   open,
@@ -233,13 +363,7 @@ export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps>
   const baseValue = employee.achieved?.total || employee.ytd || 45;
   const employeeDetails = getEmployeeDetails(employee.name);
   const pipeline = getEmployeePipeline(baseValue);
-  
-  const performanceData = generatePerformanceData(baseValue, timePeriod);
-  const labels = timePeriod === 'daily' 
-    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    : timePeriod === 'weekly'
-    ? ['Week 1', 'Week 2', 'Week 3', 'Week 4']
-    : ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+  const tableData = generateTableData(baseValue, timePeriod);
 
   const totalAchieved = pipeline[0].value;
   const totalTarget = pipeline[0].target;
@@ -349,7 +473,7 @@ export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-primary" />
-                Performance Trends
+                Performance Analysis
               </h3>
               <TabsList>
                 <TabsTrigger value="daily">Daily</TabsTrigger>
@@ -358,54 +482,21 @@ export const EmployeePerformanceDialog: React.FC<EmployeePerformanceDialogProps>
               </TabsList>
             </div>
 
-            <TabsContent value="daily" className="mt-0">
-              <div className="grid md:grid-cols-2 gap-4">
-                <PerformanceChart data={performanceData} labels={labels.slice(0, 7)} title="Daily OFR Registrations (Last 7 Days)" />
-                <StageBreakdownTable pipeline={pipeline} />
-              </div>
+            <TabsContent value="daily" className="mt-0 space-y-6">
+              <PerformanceDataTable data={tableData} period="daily" />
+              <PerformanceCharts data={tableData} period="daily" />
             </TabsContent>
 
-            <TabsContent value="weekly" className="mt-0">
-              <div className="grid md:grid-cols-2 gap-4">
-                <PerformanceChart data={performanceData} labels={labels.slice(0, 4)} title="Weekly Performance (Last 4 Weeks)" />
-                <StageBreakdownTable pipeline={pipeline} />
-              </div>
+            <TabsContent value="weekly" className="mt-0 space-y-6">
+              <PerformanceDataTable data={tableData} period="weekly" />
+              <PerformanceCharts data={tableData} period="weekly" />
             </TabsContent>
 
-            <TabsContent value="monthly" className="mt-0">
-              <div className="grid md:grid-cols-2 gap-4">
-                <PerformanceChart data={performanceData} labels={labels} title="Monthly Performance (FY 2024-25)" />
-                <StageBreakdownTable pipeline={pipeline} />
-              </div>
+            <TabsContent value="monthly" className="mt-0 space-y-6">
+              <PerformanceDataTable data={tableData} period="monthly" />
+              <PerformanceCharts data={tableData} period="monthly" />
             </TabsContent>
           </Tabs>
-
-          {/* Detailed Metrics */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">Conversion Funnel Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                {[
-                  { from: 'OFR', to: 'Migration', rate: 92 },
-                  { from: 'Migration', to: 'Enrolled', rate: 92 },
-                  { from: 'Enrolled', to: 'Training', rate: 92 },
-                  { from: 'Training', to: 'Placed', rate: 83 },
-                  { from: 'Placed', to: 'Retained', rate: 85 },
-                ].map((step, i) => (
-                  <div key={i} className="text-center p-3 rounded-lg bg-muted/30">
-                    <div className="text-xs text-muted-foreground mb-1">
-                      {step.from} → {step.to}
-                    </div>
-                    <div className={`text-2xl font-bold ${step.rate >= 90 ? 'text-green-600' : step.rate >= 80 ? 'text-amber-600' : 'text-red-500'}`}>
-                      {step.rate}%
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </DialogContent>
     </Dialog>
