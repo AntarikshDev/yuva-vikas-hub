@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Archive, Download, FileSpreadsheet, Layers, MapPin, Briefcase, FileText, ChevronRight, Filter, FileDown } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Archive, Download, FileSpreadsheet, Layers, MapPin, Briefcase, FileText, ChevronRight, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MasterDataActionDialog } from '@/components/dialogs/MasterDataActionDialog';
@@ -15,7 +15,8 @@ import { SectorForm } from '@/components/forms/SectorForm';
 import { DirectorLocationForm } from '@/components/forms/DirectorLocationForm';
 import { DirectorJobRoleForm } from '@/components/forms/DirectorJobRoleForm';
 import { DirectorDocumentForm } from '@/components/forms/DirectorDocumentForm';
-import { downloadLocationTemplate, getLocationTypeName } from '@/utils/locationTemplates';
+import { downloadLocationTemplate } from '@/utils/locationTemplates';
+import { LocationBulkUploadDialog } from '@/components/dialogs/LocationBulkUploadDialog';
 
 type MasterDataCategory = 'programs' | 'locations' | 'sectors' | 'jobroles' | 'documents';
 type LocationSubType = 'state' | 'district' | 'block' | 'panchayat' | 'village' | 'pincode';
@@ -31,6 +32,7 @@ const DirectorMasterDataManagement = () => {
   const [locationFormOpen, setLocationFormOpen] = useState(false);
   const [jobRoleFormOpen, setJobRoleFormOpen] = useState(false);
   const [documentFormOpen, setDocumentFormOpen] = useState(false);
+  const [bulkUploadOpen, setBulkUploadOpen] = useState(false);
 
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
 
@@ -310,10 +312,14 @@ const DirectorMasterDataManagement = () => {
   };
 
   const handleBulkUpload = (category: string) => {
-    toast({
-      title: "Bulk Upload",
-      description: `Opening bulk upload for ${category}...`,
-    });
+    if (category === 'locations') {
+      setBulkUploadOpen(true);
+    } else {
+      toast({
+        title: "Bulk Upload",
+        description: `Opening bulk upload for ${category}...`,
+      });
+    }
   };
 
   // Filter functions
@@ -557,17 +563,21 @@ const DirectorMasterDataManagement = () => {
           <TabsContent value="locations" className="pt-6">
             <Card>
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Location Management</CardTitle>
-                    <CardDescription>Manage hierarchical location data</CardDescription>
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <CardTitle>Location Management</CardTitle>
+                      <CardDescription>Manage hierarchical location data</CardDescription>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  
+                  {/* Controls Row - Responsive */}
+                  <div className="flex flex-wrap items-center gap-2">
                     <Select value={locationSubType} onValueChange={(v) => setLocationSubType(v as LocationSubType)}>
-                      <SelectTrigger className="w-[150px]">
+                      <SelectTrigger className="w-[130px]">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-background border shadow-lg z-50">
                         <SelectItem value="state">States</SelectItem>
                         <SelectItem value="district">Districts</SelectItem>
                         <SelectItem value="block">Blocks</SelectItem>
@@ -576,48 +586,54 @@ const DirectorMasterDataManagement = () => {
                         <SelectItem value="pincode">Pincodes</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="relative">
+                    
+                    <div className="relative flex-1 min-w-[150px] max-w-[250px]">
                       <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input
-                        className="pl-8 w-[200px]"
-                        placeholder="Search locations..."
+                        className="pl-8 w-full"
+                        placeholder="Search..."
                         value={searchQueries.locations}
                         onChange={(e) => handleSearchChange('locations', e.target.value)}
                       />
                     </div>
-                    <Button variant="outline" onClick={() => downloadLocationTemplate(locationSubType)}>
-                      <FileDown className="h-4 w-4 mr-2" />
-                      Download Template
-                    </Button>
-                    <Button variant="outline" onClick={() => handleBulkUpload('locations')}>
-                      <FileSpreadsheet className="h-4 w-4 mr-2" />
-                      Bulk Upload
-                    </Button>
-                    <Button variant="outline" onClick={() => handleDownload('locations')}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
-                    </Button>
-                    <Button onClick={() => { setEditingItemId(null); setLocationFormOpen(true); }}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add {locationSubType.charAt(0).toUpperCase() + locationSubType.slice(1)}
-                    </Button>
+                    
+                    <div className="flex flex-wrap items-center gap-2 ml-auto">
+                      <Button variant="outline" size="sm" onClick={() => downloadLocationTemplate(locationSubType)}>
+                        <FileDown className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Template</span>
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleBulkUpload('locations')}>
+                        <FileSpreadsheet className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Bulk Upload</span>
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDownload('locations')}>
+                        <Download className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Export</span>
+                      </Button>
+                      <Button size="sm" onClick={() => { setEditingItemId(null); setLocationFormOpen(true); }}>
+                        <Plus className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Add</span>
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {/* Hierarchy Breadcrumb - Hidden on mobile */}
+                  <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground">
+                    <span className={locationSubType === 'state' ? 'font-medium text-foreground' : ''}>State</span>
+                    <ChevronRight className="h-3 w-3" />
+                    <span className={locationSubType === 'district' ? 'font-medium text-foreground' : ''}>District</span>
+                    <ChevronRight className="h-3 w-3" />
+                    <span className={locationSubType === 'block' ? 'font-medium text-foreground' : ''}>Block</span>
+                    <ChevronRight className="h-3 w-3" />
+                    <span className={locationSubType === 'panchayat' ? 'font-medium text-foreground' : ''}>Panchayat</span>
+                    <ChevronRight className="h-3 w-3" />
+                    <span className={locationSubType === 'village' ? 'font-medium text-foreground' : ''}>Village</span>
+                    <ChevronRight className="h-3 w-3" />
+                    <span className={locationSubType === 'pincode' ? 'font-medium text-foreground' : ''}>Pincode</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 mt-4 text-sm text-muted-foreground">
-                  <span>State</span>
-                  <ChevronRight className="h-4 w-4" />
-                  <span>District</span>
-                  <ChevronRight className="h-4 w-4" />
-                  <span>Block</span>
-                  <ChevronRight className="h-4 w-4" />
-                  <span>Panchayat</span>
-                  <ChevronRight className="h-4 w-4" />
-                  <span>Village</span>
-                  <ChevronRight className="h-4 w-4" />
-                  <span>Pincode</span>
-                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-x-auto">
                 {renderLocationTable()}
               </CardContent>
             </Card>
@@ -896,6 +912,12 @@ const DirectorMasterDataManagement = () => {
           itemName={actionDialog.itemName}
           category={actionDialog.category}
           onConfirm={handleActionConfirm}
+        />
+
+        <LocationBulkUploadDialog
+          open={bulkUploadOpen}
+          onOpenChange={setBulkUploadOpen}
+          locationType={locationSubType}
         />
       </div>
     </MainLayout>
