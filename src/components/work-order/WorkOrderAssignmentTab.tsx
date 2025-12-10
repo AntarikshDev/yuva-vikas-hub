@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, GitBranch, List, Plus, Download, CheckCircle } from "lucide-react";
+import { Users, GitBranch, List, Plus, Download, CheckCircle, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,8 @@ import TeamListTable from "./TeamListTable";
 import TeamApprovalPanel from "./TeamApprovalPanel";
 import AddTeamMemberDialog from "./AddTeamMemberDialog";
 import EmployeeProfileDialog from "./EmployeeProfileDialog";
+import ReplaceMemberDialog, { AssignmentHistory } from "./ReplaceMemberDialog";
+import TeamExportDialog from "./TeamExportDialog";
 
 export interface MobilisationTeamMember {
   id: string;
@@ -228,12 +230,44 @@ const buildHierarchy = (members: MobilisationTeamMember[]): TeamHierarchyNode =>
   };
 };
 
+// Mock available employees for replacement
+const availableEmployees = [
+  { id: "new-1", name: "Deepak Choudhary", email: "deepak.c@lnj.com", phone: "+91 98765 11111" },
+  { id: "new-2", name: "Meera Sharma", email: "meera.s@lnj.com", phone: "+91 98765 22222" },
+  { id: "new-3", name: "Arun Pandey", email: "arun.p@lnj.com", phone: "+91 98765 33333" },
+  { id: "new-4", name: "Pooja Mishra", email: "pooja.m@lnj.com", phone: "+91 98765 44444" },
+  { id: "new-5", name: "Ravi Tiwari", email: "ravi.t@lnj.com", phone: "+91 98765 55555" },
+];
+
 const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssignmentTabProps) => {
   const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart');
   const [teamMembers, setTeamMembers] = useState(mockTeamMembers);
   const [selectedMember, setSelectedMember] = useState<MobilisationTeamMember | null>(null);
+  const [memberToReplace, setMemberToReplace] = useState<MobilisationTeamMember | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isReplaceDialogOpen, setIsReplaceDialogOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [assignmentHistory, setAssignmentHistory] = useState<AssignmentHistory[]>([
+    {
+      id: "hist-1",
+      employeeId: "LNJ050",
+      employeeName: "Former Employee A",
+      role: "mobiliser",
+      startDate: "2023-06-01",
+      endDate: "2024-01-15",
+      reason: "Resigned",
+    },
+    {
+      id: "hist-2",
+      employeeId: "LNJ051",
+      employeeName: "Former Employee B",
+      role: "mobilisation_manager",
+      startDate: "2023-03-15",
+      endDate: "2024-02-01",
+      reason: "Transfer to another project",
+    },
+  ]);
 
   const canEdit = role === 'national-head';
   const hierarchy = buildHierarchy(teamMembers);
@@ -269,6 +303,42 @@ const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssig
     const newId = (teamMembers.length + 1).toString();
     const newEmployeeId = `LNJ${String(teamMembers.length + 1).padStart(3, '0')}`;
     setTeamMembers(prev => [...prev, { ...member, id: newId, employeeId: newEmployeeId }]);
+  };
+
+  const handleReplaceMember = (
+    memberId: string,
+    newMember: Omit<MobilisationTeamMember, 'id' | 'employeeId'>,
+    reason: string
+  ) => {
+    const oldMember = teamMembers.find(m => m.id === memberId);
+    if (!oldMember) return;
+
+    // Archive old member to history
+    const historyEntry: AssignmentHistory = {
+      id: `hist-${Date.now()}`,
+      employeeId: oldMember.employeeId,
+      employeeName: oldMember.name,
+      role: oldMember.role,
+      startDate: oldMember.assignmentStartDate,
+      endDate: new Date().toISOString().split('T')[0],
+      reason,
+    };
+    setAssignmentHistory(prev => [historyEntry, ...prev]);
+
+    // Replace member with new one
+    const newId = (teamMembers.length + 1).toString();
+    const newEmployeeId = `LNJ${String(teamMembers.length + 1).padStart(3, '0')}`;
+    
+    setTeamMembers(prev => prev.map(m => 
+      m.id === memberId 
+        ? { ...newMember, id: newId, employeeId: newEmployeeId }
+        : m
+    ));
+  };
+
+  const handleOpenReplace = (member: MobilisationTeamMember) => {
+    setMemberToReplace(member);
+    setIsReplaceDialogOpen(true);
   };
 
   return (
@@ -355,7 +425,7 @@ const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssig
               Add Member
             </Button>
           )}
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => setIsExportDialogOpen(true)}>
             <Download className="h-4 w-4" />
             Export
           </Button>
@@ -365,7 +435,15 @@ const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssig
       {/* Main Content */}
       <Card>
         <CardHeader>
-          <CardTitle>Mobilisation Team Hierarchy</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Mobilisation Team Hierarchy</span>
+            {assignmentHistory.length > 0 && (
+              <Badge variant="outline" className="gap-1">
+                <History className="h-3 w-3" />
+                {assignmentHistory.length} historical records
+              </Badge>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {viewMode === 'chart' ? (
@@ -373,6 +451,7 @@ const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssig
               hierarchy={hierarchy}
               onViewProfile={handleViewProfile}
               onRemove={canEdit ? handleRemove : undefined}
+              onReplace={canEdit ? handleOpenReplace : undefined}
               canEdit={canEdit}
             />
           ) : (
@@ -380,6 +459,7 @@ const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssig
               members={teamMembers.filter(m => m.status !== 'removed')}
               onViewProfile={handleViewProfile}
               onRemove={canEdit ? handleRemove : undefined}
+              onReplace={canEdit ? handleOpenReplace : undefined}
               canEdit={canEdit}
             />
           )}
@@ -398,6 +478,22 @@ const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssig
         onOpenChange={setIsAddDialogOpen}
         onAdd={handleAddMember}
         existingMembers={teamMembers}
+      />
+
+      <ReplaceMemberDialog
+        open={isReplaceDialogOpen}
+        onOpenChange={setIsReplaceDialogOpen}
+        memberToReplace={memberToReplace}
+        onReplace={handleReplaceMember}
+        availableEmployees={availableEmployees}
+        assignmentHistory={assignmentHistory}
+      />
+
+      <TeamExportDialog
+        open={isExportDialogOpen}
+        onOpenChange={setIsExportDialogOpen}
+        members={teamMembers}
+        workOrderId={workOrderId}
       />
     </div>
   );

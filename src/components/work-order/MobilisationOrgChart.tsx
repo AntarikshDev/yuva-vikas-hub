@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, User, MoreVertical, Eye, UserMinus, UserPlus } from "lucide-react";
+import { ChevronDown, ChevronRight, User, MoreVertical, Eye, UserMinus, UserPlus, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MobilisationTeamMember, TeamHierarchyNode } from "./WorkOrderAssignmentTab";
@@ -15,6 +16,7 @@ interface MobilisationOrgChartProps {
   hierarchy: TeamHierarchyNode;
   onViewProfile: (member: MobilisationTeamMember) => void;
   onRemove?: (memberId: string) => void;
+  onReplace?: (member: MobilisationTeamMember) => void;
   canEdit: boolean;
 }
 
@@ -39,12 +41,13 @@ interface OrgNodeProps {
   level: number;
   onViewProfile: (member: MobilisationTeamMember) => void;
   onRemove?: (memberId: string) => void;
+  onReplace?: (member: MobilisationTeamMember) => void;
   canEdit: boolean;
   isLast?: boolean;
   parentHasMore?: boolean;
 }
 
-const OrgNode = ({ node, level, onViewProfile, onRemove, canEdit, isLast, parentHasMore }: OrgNodeProps) => {
+const OrgNode = ({ node, level, onViewProfile, onRemove, onReplace, canEdit, isLast, parentHasMore }: OrgNodeProps) => {
   const [expanded, setExpanded] = useState(true);
   const hasChildren = node.children && node.children.length > 0;
   const member = node.member;
@@ -151,14 +154,23 @@ const OrgNode = ({ node, level, onViewProfile, onRemove, canEdit, isLast, parent
                   View Profile
                 </DropdownMenuItem>
               )}
-              {canEdit && member && onRemove && (
-                <DropdownMenuItem 
-                  onClick={() => onRemove(member.id)}
-                  className="text-destructive"
-                >
-                  <UserMinus className="h-4 w-4 mr-2" />
-                  Remove
+              {canEdit && member && onReplace && (
+                <DropdownMenuItem onClick={() => onReplace(member)}>
+                  <UserCog className="h-4 w-4 mr-2" />
+                  Replace
                 </DropdownMenuItem>
+              )}
+              {canEdit && member && onRemove && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={() => onRemove(member.id)}
+                    className="text-destructive"
+                  >
+                    <UserMinus className="h-4 w-4 mr-2" />
+                    Remove
+                  </DropdownMenuItem>
+                </>
               )}
               {canEdit && !member && (
                 <DropdownMenuItem>
@@ -180,6 +192,7 @@ const OrgNode = ({ node, level, onViewProfile, onRemove, canEdit, isLast, parent
                 level={level + 1}
                 onViewProfile={onViewProfile}
                 onRemove={onRemove}
+                onReplace={onReplace}
                 canEdit={canEdit}
                 isLast={index === node.children.length - 1}
                 parentHasMore={index < node.children.length - 1}
@@ -192,7 +205,7 @@ const OrgNode = ({ node, level, onViewProfile, onRemove, canEdit, isLast, parent
   );
 };
 
-const MobilisationOrgChart = ({ hierarchy, onViewProfile, onRemove, canEdit }: MobilisationOrgChartProps) => {
+const MobilisationOrgChart = ({ hierarchy, onViewProfile, onRemove, onReplace, canEdit }: MobilisationOrgChartProps) => {
   return (
     <div className="overflow-x-auto pb-4">
       <div className="min-w-max p-4">
@@ -236,6 +249,7 @@ const MobilisationOrgChart = ({ hierarchy, onViewProfile, onRemove, canEdit }: M
           level={0}
           onViewProfile={onViewProfile}
           onRemove={onRemove}
+          onReplace={onReplace}
           canEdit={canEdit}
         />
       </div>
