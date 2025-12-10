@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { RootState } from '../index';
 
 // Types - Programs
 import type {
@@ -68,13 +67,14 @@ interface BulkUploadGenericResponse {
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({
-    baseUrl: '/api',
-    prepareHeaders: (headers, { getState }) => {
-      const state = getState() as RootState;
-      const token = state.auth?.user ? 'mock-token' : null;
-      
-      if (token) {
-        headers.set('authorization', `Bearer ${token}`);
+    baseUrl: 'https://app-e2hhu.ondigitalocean.app',
+    prepareHeaders: (headers) => {
+      // Client-side: Use localStorage for token
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        if (token) {
+          headers.set('Authorization', `Bearer ${token}`);
+        }
       }
       headers.set('Content-Type', 'application/json');
       return headers;
@@ -92,12 +92,26 @@ export const apiSlice = createApi({
     'Sector',
     'JobRole',
     'DocumentType',
+    'User',
+    'Candidates',
+    'WorkOrders',
   ],
   endpoints: (builder) => ({
+    // ==================== AUTH ====================
+    login: builder.mutation({
+      query: (credentials) => ({
+        url: '/auth/role/login',
+        method: 'POST',
+        body: credentials,
+      }),
+      invalidatesTags: ['User'],
+    }),
+
     // ==================== PROGRAMS ====================
     getPrograms: builder.query<Program[], ProgramsQueryParams>({
       query: (params) => ({
-        url: 'programs',
+        url: '/work-orders/getPrograms',
+        method: 'GET',
         params: {
           search: params.search,
           status: params.status,
@@ -115,13 +129,13 @@ export const apiSlice = createApi({
     }),
 
     getProgramById: builder.query<Program, string>({
-      query: (id) => `programs/${id}`,
+      query: (id) => `/programs/${id}`,
       providesTags: (result, error, id) => [{ type: 'Program', id }],
     }),
 
     createProgram: builder.mutation<Program, CreateProgramDTO>({
       query: (body) => ({
-        url: 'programs',
+        url: '/programs',
         method: 'POST',
         body,
       }),
@@ -130,7 +144,7 @@ export const apiSlice = createApi({
 
     updateProgram: builder.mutation<Program, { id: string; data: UpdateProgramDTO }>({
       query: ({ id, data }) => ({
-        url: `programs/${id}`,
+        url: `/programs/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -142,7 +156,7 @@ export const apiSlice = createApi({
 
     deleteProgram: builder.mutation<void, string>({
       query: (id) => ({
-        url: `programs/${id}`,
+        url: `/programs/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: [{ type: 'Program', id: 'LIST' }],
@@ -150,7 +164,7 @@ export const apiSlice = createApi({
 
     bulkUploadPrograms: builder.mutation<BulkUploadResponse, FormData>({
       query: (formData) => ({
-        url: 'programs/bulk-upload',
+        url: '/programs/bulk-upload',
         method: 'POST',
         body: formData,
         formData: true,
@@ -160,7 +174,8 @@ export const apiSlice = createApi({
 
     getCentres: builder.query<Centre[], { stateId?: string; search?: string }>({
       query: (params) => ({
-        url: 'centres',
+        url: '/admin/centre/list',
+        method: 'GET',
         params,
       }),
       providesTags: ['Centre'],
@@ -169,7 +184,8 @@ export const apiSlice = createApi({
     // ==================== STATES ====================
     getStates: builder.query<State[], LocationsQueryParams>({
       query: (params) => ({
-        url: 'locations/states',
+        url: '/admin/state/list',
+        method: 'GET',
         params: {
           search: params.search,
           status: params.status,
@@ -187,13 +203,13 @@ export const apiSlice = createApi({
     }),
 
     getStateById: builder.query<State, string>({
-      query: (id) => `locations/states/${id}`,
+      query: (id) => `/admin/state/detail/${id}`,
       providesTags: (result, error, id) => [{ type: 'State', id }],
     }),
 
     createState: builder.mutation<State, CreateStateDTO>({
       query: (body) => ({
-        url: 'locations/states',
+        url: '/admin/state/add',
         method: 'POST',
         body,
       }),
@@ -202,9 +218,9 @@ export const apiSlice = createApi({
 
     updateState: builder.mutation<State, { id: string; data: UpdateStateDTO }>({
       query: ({ id, data }) => ({
-        url: `locations/states/${id}`,
+        url: '/admin/state/update',
         method: 'PUT',
-        body: data,
+        body: { id, ...data },
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: 'State', id },
@@ -212,9 +228,18 @@ export const apiSlice = createApi({
       ],
     }),
 
+    updateStateStatus: builder.mutation<void, { id: string; isActive: boolean }>({
+      query: (payload) => ({
+        url: '/admin/state/status/update',
+        method: 'PUT',
+        body: payload,
+      }),
+      invalidatesTags: ['State'],
+    }),
+
     deleteState: builder.mutation<void, string>({
       query: (id) => ({
-        url: `locations/states/${id}`,
+        url: `/admin/state/delete/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['State', 'District', 'Block', 'Panchayat', 'Village'],
@@ -223,7 +248,8 @@ export const apiSlice = createApi({
     // ==================== DISTRICTS ====================
     getDistricts: builder.query<District[], LocationsQueryParams>({
       query: (params) => ({
-        url: 'locations/districts',
+        url: '/locations/districts',
+        method: 'GET',
         params: {
           search: params.search,
           status: params.status,
@@ -241,14 +267,20 @@ export const apiSlice = createApi({
           : [{ type: 'District', id: 'LIST' }],
     }),
 
+    getDistrictsByState: builder.query<string[], string>({
+      query: (state) => `/work-orders/users/district?state=${encodeURIComponent(state)}`,
+      providesTags: ['District'],
+      transformResponse: (response: any) => response.data || [],
+    }),
+
     getDistrictById: builder.query<District, string>({
-      query: (id) => `locations/districts/${id}`,
+      query: (id) => `/locations/districts/${id}`,
       providesTags: (result, error, id) => [{ type: 'District', id }],
     }),
 
     createDistrict: builder.mutation<District, CreateDistrictDTO>({
       query: (body) => ({
-        url: 'locations/districts',
+        url: '/admin/state/district/add',
         method: 'POST',
         body,
       }),
@@ -257,9 +289,9 @@ export const apiSlice = createApi({
 
     updateDistrict: builder.mutation<District, { id: string; data: Partial<CreateDistrictDTO> }>({
       query: ({ id, data }) => ({
-        url: `locations/districts/${id}`,
+        url: '/admin/state/district/update',
         method: 'PUT',
-        body: data,
+        body: { id, ...data },
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: 'District', id },
@@ -269,7 +301,7 @@ export const apiSlice = createApi({
 
     deleteDistrict: builder.mutation<void, string>({
       query: (id) => ({
-        url: `locations/districts/${id}`,
+        url: `/locations/districts/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['District', 'Block', 'Panchayat', 'Village'],
@@ -278,7 +310,8 @@ export const apiSlice = createApi({
     // ==================== BLOCKS ====================
     getBlocks: builder.query<Block[], LocationsQueryParams>({
       query: (params) => ({
-        url: 'locations/blocks',
+        url: '/locations/blocks',
+        method: 'GET',
         params: {
           search: params.search,
           status: params.status,
@@ -298,7 +331,7 @@ export const apiSlice = createApi({
 
     createBlock: builder.mutation<Block, CreateBlockDTO>({
       query: (body) => ({
-        url: 'locations/blocks',
+        url: '/locations/blocks',
         method: 'POST',
         body,
       }),
@@ -307,7 +340,7 @@ export const apiSlice = createApi({
 
     updateBlock: builder.mutation<Block, { id: string; data: Partial<CreateBlockDTO> }>({
       query: ({ id, data }) => ({
-        url: `locations/blocks/${id}`,
+        url: `/locations/blocks/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -319,7 +352,7 @@ export const apiSlice = createApi({
 
     deleteBlock: builder.mutation<void, string>({
       query: (id) => ({
-        url: `locations/blocks/${id}`,
+        url: `/locations/blocks/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Block', 'Panchayat', 'Village'],
@@ -328,7 +361,8 @@ export const apiSlice = createApi({
     // ==================== PANCHAYATS ====================
     getPanchayats: builder.query<Panchayat[], LocationsQueryParams>({
       query: (params) => ({
-        url: 'locations/panchayats',
+        url: '/locations/panchayats',
+        method: 'GET',
         params: {
           search: params.search,
           status: params.status,
@@ -348,7 +382,7 @@ export const apiSlice = createApi({
 
     createPanchayat: builder.mutation<Panchayat, CreatePanchayatDTO>({
       query: (body) => ({
-        url: 'locations/panchayats',
+        url: '/locations/panchayats',
         method: 'POST',
         body,
       }),
@@ -357,7 +391,7 @@ export const apiSlice = createApi({
 
     updatePanchayat: builder.mutation<Panchayat, { id: string; data: Partial<CreatePanchayatDTO> }>({
       query: ({ id, data }) => ({
-        url: `locations/panchayats/${id}`,
+        url: `/locations/panchayats/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -369,7 +403,7 @@ export const apiSlice = createApi({
 
     deletePanchayat: builder.mutation<void, string>({
       query: (id) => ({
-        url: `locations/panchayats/${id}`,
+        url: `/locations/panchayats/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Panchayat', 'Village'],
@@ -378,7 +412,8 @@ export const apiSlice = createApi({
     // ==================== VILLAGES ====================
     getVillages: builder.query<Village[], LocationsQueryParams>({
       query: (params) => ({
-        url: 'locations/villages',
+        url: '/locations/villages',
+        method: 'GET',
         params: {
           search: params.search,
           status: params.status,
@@ -398,7 +433,7 @@ export const apiSlice = createApi({
 
     createVillage: builder.mutation<Village, CreateVillageDTO>({
       query: (body) => ({
-        url: 'locations/villages',
+        url: '/locations/villages',
         method: 'POST',
         body,
       }),
@@ -407,7 +442,7 @@ export const apiSlice = createApi({
 
     updateVillage: builder.mutation<Village, { id: string; data: Partial<CreateVillageDTO> }>({
       query: ({ id, data }) => ({
-        url: `locations/villages/${id}`,
+        url: `/locations/villages/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -419,7 +454,7 @@ export const apiSlice = createApi({
 
     deleteVillage: builder.mutation<void, string>({
       query: (id) => ({
-        url: `locations/villages/${id}`,
+        url: `/locations/villages/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Village'],
@@ -428,7 +463,8 @@ export const apiSlice = createApi({
     // ==================== PINCODES ====================
     getPincodes: builder.query<Pincode[], LocationsQueryParams>({
       query: (params) => ({
-        url: 'locations/pincodes',
+        url: '/locations/pincodes',
+        method: 'GET',
         params: {
           search: params.search,
           status: params.status,
@@ -448,7 +484,7 @@ export const apiSlice = createApi({
 
     createPincode: builder.mutation<Pincode, CreatePincodeDTO>({
       query: (body) => ({
-        url: 'locations/pincodes',
+        url: '/locations/pincodes',
         method: 'POST',
         body,
       }),
@@ -457,7 +493,7 @@ export const apiSlice = createApi({
 
     updatePincode: builder.mutation<Pincode, { id: string; data: Partial<CreatePincodeDTO> }>({
       query: ({ id, data }) => ({
-        url: `locations/pincodes/${id}`,
+        url: `/locations/pincodes/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -469,7 +505,7 @@ export const apiSlice = createApi({
 
     deletePincode: builder.mutation<void, string>({
       query: (id) => ({
-        url: `locations/pincodes/${id}`,
+        url: `/locations/pincodes/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Pincode'],
@@ -481,7 +517,7 @@ export const apiSlice = createApi({
       { type: LocationType; formData: FormData }
     >({
       query: ({ type, formData }) => ({
-        url: `locations/${type}/bulk-upload`,
+        url: `/locations/${type}/bulk-upload`,
         method: 'POST',
         body: formData,
         formData: true,
@@ -512,7 +548,7 @@ export const apiSlice = createApi({
       { stateId?: string; districtId?: string; blockId?: string; panchayatId?: string }
     >({
       query: (params) => ({
-        url: 'locations/hierarchy',
+        url: '/locations/hierarchy',
         params,
       }),
       providesTags: ['State', 'District', 'Block', 'Panchayat', 'Village'],
@@ -521,7 +557,8 @@ export const apiSlice = createApi({
     // ==================== SECTORS ====================
     getSectors: builder.query<Sector[], SectorsQueryParams>({
       query: (params) => ({
-        url: 'sectors',
+        url: '/sectors',
+        method: 'GET',
         params: {
           search: params.search,
           status: params.status,
@@ -539,13 +576,13 @@ export const apiSlice = createApi({
     }),
 
     getSectorById: builder.query<Sector, string>({
-      query: (id) => `sectors/${id}`,
+      query: (id) => `/sectors/${id}`,
       providesTags: (result, error, id) => [{ type: 'Sector', id }],
     }),
 
     createSector: builder.mutation<Sector, CreateSectorDTO>({
       query: (body) => ({
-        url: 'sectors',
+        url: '/sectors',
         method: 'POST',
         body,
       }),
@@ -554,7 +591,7 @@ export const apiSlice = createApi({
 
     updateSector: builder.mutation<Sector, { id: string; data: UpdateSectorDTO }>({
       query: ({ id, data }) => ({
-        url: `sectors/${id}`,
+        url: `/sectors/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -566,7 +603,7 @@ export const apiSlice = createApi({
 
     deleteSector: builder.mutation<void, string>({
       query: (id) => ({
-        url: `sectors/${id}`,
+        url: `/sectors/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: [{ type: 'Sector', id: 'LIST' }],
@@ -574,7 +611,7 @@ export const apiSlice = createApi({
 
     bulkUploadSectors: builder.mutation<BulkUploadGenericResponse, FormData>({
       query: (formData) => ({
-        url: 'sectors/bulk-upload',
+        url: '/sectors/bulk-upload',
         method: 'POST',
         body: formData,
       }),
@@ -584,7 +621,8 @@ export const apiSlice = createApi({
     // ==================== JOB ROLES ====================
     getJobRoles: builder.query<JobRole[], JobRolesQueryParams>({
       query: (params) => ({
-        url: 'job-roles',
+        url: '/job-roles',
+        method: 'GET',
         params: {
           search: params.search,
           sectorId: params.sectorId,
@@ -603,13 +641,13 @@ export const apiSlice = createApi({
     }),
 
     getJobRoleById: builder.query<JobRole, string>({
-      query: (id) => `job-roles/${id}`,
+      query: (id) => `/job-roles/${id}`,
       providesTags: (result, error, id) => [{ type: 'JobRole', id }],
     }),
 
     createJobRole: builder.mutation<JobRole, CreateJobRoleDTO>({
       query: (body) => ({
-        url: 'job-roles',
+        url: '/job-roles',
         method: 'POST',
         body,
       }),
@@ -618,7 +656,7 @@ export const apiSlice = createApi({
 
     updateJobRole: builder.mutation<JobRole, { id: string; data: UpdateJobRoleDTO }>({
       query: ({ id, data }) => ({
-        url: `job-roles/${id}`,
+        url: `/job-roles/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -630,7 +668,7 @@ export const apiSlice = createApi({
 
     deleteJobRole: builder.mutation<void, string>({
       query: (id) => ({
-        url: `job-roles/${id}`,
+        url: `/job-roles/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: [{ type: 'JobRole', id: 'LIST' }],
@@ -638,7 +676,7 @@ export const apiSlice = createApi({
 
     bulkUploadJobRoles: builder.mutation<BulkUploadGenericResponse, FormData>({
       query: (formData) => ({
-        url: 'job-roles/bulk-upload',
+        url: '/job-roles/bulk-upload',
         method: 'POST',
         body: formData,
       }),
@@ -648,7 +686,8 @@ export const apiSlice = createApi({
     // ==================== DOCUMENT TYPES ====================
     getDocumentTypes: builder.query<DocumentType[], DocumentTypesQueryParams>({
       query: (params) => ({
-        url: 'document-types',
+        url: '/document-types',
+        method: 'GET',
         params: {
           search: params.search,
           category: params.category,
@@ -667,13 +706,13 @@ export const apiSlice = createApi({
     }),
 
     getDocumentTypeById: builder.query<DocumentType, string>({
-      query: (id) => `document-types/${id}`,
+      query: (id) => `/document-types/${id}`,
       providesTags: (result, error, id) => [{ type: 'DocumentType', id }],
     }),
 
     createDocumentType: builder.mutation<DocumentType, CreateDocumentTypeDTO>({
       query: (body) => ({
-        url: 'document-types',
+        url: '/document-types',
         method: 'POST',
         body,
       }),
@@ -682,7 +721,7 @@ export const apiSlice = createApi({
 
     updateDocumentType: builder.mutation<DocumentType, { id: string; data: UpdateDocumentTypeDTO }>({
       query: ({ id, data }) => ({
-        url: `document-types/${id}`,
+        url: `/document-types/${id}`,
         method: 'PUT',
         body: data,
       }),
@@ -694,7 +733,7 @@ export const apiSlice = createApi({
 
     deleteDocumentType: builder.mutation<void, string>({
       query: (id) => ({
-        url: `document-types/${id}`,
+        url: `/document-types/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: [{ type: 'DocumentType', id: 'LIST' }],
@@ -702,17 +741,302 @@ export const apiSlice = createApi({
 
     bulkUploadDocumentTypes: builder.mutation<BulkUploadGenericResponse, FormData>({
       query: (formData) => ({
-        url: 'document-types/bulk-upload',
+        url: '/document-types/bulk-upload',
         method: 'POST',
         body: formData,
       }),
       invalidatesTags: [{ type: 'DocumentType', id: 'LIST' }],
+    }),
+
+    // ==================== USERS ====================
+    getUsersList: builder.query({
+      query: () => ({
+        url: '/admin/user/list',
+        method: 'GET',
+      }),
+      providesTags: ['User'],
+    }),
+
+    getUserDetail: builder.query({
+      query: (id) => ({
+        url: `/admin/user/detail/${id}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, id) => [{ type: 'User', id }],
+    }),
+
+    addUser: builder.mutation({
+      query: (user) => ({
+        url: '/admin/user/add',
+        method: 'POST',
+        body: user,
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    updateUser: builder.mutation({
+      query: (data) => ({
+        url: '/admin/user/update',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    updateUserStatus: builder.mutation({
+      query: (data) => ({
+        url: '/admin/user/status/change',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    deleteUser: builder.mutation({
+      query: (id) => ({
+        url: `/admin/user/delete/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    getUsersByFilters: builder.query({
+      query: (params?: { role?: string; state?: string }) => {
+        const baseUrl = '/work-orders/users';
+        if (!params) return baseUrl;
+        const { role, state } = params;
+        const searchParams = new URLSearchParams();
+        if (role) searchParams.append('role', role);
+        if (state) searchParams.append('state', state);
+        const queryString = searchParams.toString();
+        return `${baseUrl}${queryString ? `?${queryString}` : ''}`;
+      },
+      providesTags: ['User'],
+    }),
+
+    getAvailableRoles: builder.query({
+      query: () => '/work-orders/users/roles',
+      providesTags: ['User'],
+    }),
+
+    getAvailableStates: builder.query({
+      query: () => '/work-orders/users/states',
+      providesTags: ['User'],
+    }),
+
+    // ==================== CANDIDATES ====================
+    getCandidatesList: builder.query({
+      query: () => ({
+        url: '/candidates/candidate/list',
+        method: 'GET',
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    getCandidateDetails: builder.query({
+      query: (id) => `/candidates/detail/${id}`,
+      providesTags: ['Candidates'],
+    }),
+
+    updateCandidateStatus: builder.mutation({
+      query: (data) => ({
+        url: '/counsellor/candidate/status/change',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    updateCandidateDetails: builder.mutation({
+      query: (payload) => ({
+        url: '/candidates/update_candidate',
+        method: 'PUT',
+        body: payload,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    notInterestedCandidates: builder.query({
+      query: () => '/counsellor/notintrestedcandidate',
+      providesTags: ['Candidates'],
+    }),
+
+    notInterestedUpdateCandidate: builder.mutation({
+      query: (data) => ({
+        url: '/counsellor/notInterestedCandidate/status/change',
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    getMobiliserCandidateList: builder.query({
+      query: (id) => `/counsellor/candidate/list/${id}`,
+      providesTags: ['Candidates'],
+    }),
+
+    searchMobilizers: builder.mutation({
+      query: (searchTerm: string) => ({
+        url: '/counsellor/manager/list',
+        method: 'POST',
+        body: { search: searchTerm },
+      }),
+    }),
+
+    // ==================== WORK ORDERS ====================
+    getWorkOrders: builder.query({
+      query: () => '/workorders',
+      providesTags: ['WorkOrders'],
+    }),
+
+    createWorkOrder: builder.mutation({
+      query: (payload) => ({
+        url: '/work-orders',
+        method: 'POST',
+        body: payload,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    workOrdersByProgramId: builder.mutation({
+      query: (programId) => ({
+        url: '/work-orders/wbi',
+        method: 'POST',
+        body: { programId },
+      }),
+    }),
+
+    getDetailWorkOrdersByProgramIdAndStatus: builder.mutation({
+      query: (body) => ({
+        url: '/work-orders/programidAndState',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    // ==================== STATISTICS ====================
+    getPage: builder.query({
+      query: () => ({
+        url: '/business/gethome',
+        method: 'GET',
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    getFinalStats: builder.query({
+      query: () => ({
+        url: '/work-orders/getfinalStats',
+        method: 'GET',
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    getTopStats: builder.query({
+      query: () => ({
+        url: '/work-orders/mobilisation-stats',
+        method: 'GET',
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    getDetailKPI: builder.mutation({
+      query: (body) => ({
+        url: '/business/getdata',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    getActivityData: builder.query({
+      query: () => '/activity/list',
+      providesTags: ['Candidates'],
+    }),
+
+    // ==================== CENTERS ====================
+    getCentersList: builder.query({
+      query: () => ({
+        url: '/admin/centre/list',
+        method: 'GET',
+      }),
+      providesTags: ['Centre'],
+    }),
+
+    getCenterDetail: builder.query({
+      query: (id) => ({
+        url: `/admin/centre/detail/${id}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, id) => [{ type: 'Centre', id }],
+    }),
+
+    addCenter: builder.mutation({
+      query: (center) => ({
+        url: '/admin/centre/add',
+        method: 'POST',
+        body: center,
+      }),
+      invalidatesTags: ['Centre'],
+    }),
+
+    updateCenter: builder.mutation({
+      query: (center) => ({
+        url: '/admin/centre/update',
+        method: 'PUT',
+        body: center,
+      }),
+      invalidatesTags: ['Centre'],
+    }),
+
+    updateCenterStatus: builder.mutation({
+      query: (payload) => ({
+        url: '/admin/centre/status/update',
+        method: 'PUT',
+        body: payload,
+      }),
+      invalidatesTags: ['Centre'],
+    }),
+
+    deleteCenter: builder.mutation({
+      query: (id) => ({
+        url: `/admin/centre/delete/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Centre'],
+    }),
+
+    // ==================== ACTIVE STATES LIST ====================
+    getActiveStatesList: builder.query({
+      query: () => ({
+        url: '/admin/get/active/state/list',
+        method: 'GET',
+      }),
+      providesTags: ['State'],
+    }),
+
+    getStatesListForAdd: builder.query({
+      query: () => ({
+        url: '/auth/get/state/list',
+        method: 'GET',
+      }),
+      providesTags: ['State'],
+    }),
+
+    getDistrictListForAdd: builder.query({
+      query: (stateCode) => ({
+        url: `/auth/get/state/district/list/${stateCode}`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, stateCode) => [
+        { type: 'District', id: `${stateCode}-LIST` },
+      ],
     }),
   }),
 });
 
 // Export all hooks
 export const {
+  // Auth
+  useLoginMutation,
   // Programs
   useGetProgramsQuery,
   useGetProgramByIdQuery,
@@ -726,9 +1050,11 @@ export const {
   useGetStateByIdQuery,
   useCreateStateMutation,
   useUpdateStateMutation,
+  useUpdateStateStatusMutation,
   useDeleteStateMutation,
   // Districts
   useGetDistrictsQuery,
+  useGetDistrictsByStateQuery,
   useGetDistrictByIdQuery,
   useCreateDistrictMutation,
   useUpdateDistrictMutation,
@@ -777,6 +1103,48 @@ export const {
   useUpdateDocumentTypeMutation,
   useDeleteDocumentTypeMutation,
   useBulkUploadDocumentTypesMutation,
+  // Users
+  useGetUsersListQuery,
+  useGetUserDetailQuery,
+  useAddUserMutation,
+  useUpdateUserMutation,
+  useUpdateUserStatusMutation,
+  useDeleteUserMutation,
+  useGetUsersByFiltersQuery,
+  useGetAvailableRolesQuery,
+  useGetAvailableStatesQuery,
+  // Candidates
+  useGetCandidatesListQuery,
+  useGetCandidateDetailsQuery,
+  useUpdateCandidateStatusMutation,
+  useUpdateCandidateDetailsMutation,
+  useNotInterestedCandidatesQuery,
+  useNotInterestedUpdateCandidateMutation,
+  useGetMobiliserCandidateListQuery,
+  useSearchMobilizersMutation,
+  // Work Orders
+  useGetWorkOrdersQuery,
+  useLazyGetWorkOrdersQuery,
+  useCreateWorkOrderMutation,
+  useWorkOrdersByProgramIdMutation,
+  useGetDetailWorkOrdersByProgramIdAndStatusMutation,
+  // Statistics
+  useGetPageQuery,
+  useGetFinalStatsQuery,
+  useGetTopStatsQuery,
+  useGetDetailKPIMutation,
+  useGetActivityDataQuery,
+  // Centers
+  useGetCentersListQuery,
+  useGetCenterDetailQuery,
+  useAddCenterMutation,
+  useUpdateCenterMutation,
+  useUpdateCenterStatusMutation,
+  useDeleteCenterMutation,
+  // Active States
+  useGetActiveStatesListQuery,
+  useGetStatesListForAddQuery,
+  useGetDistrictListForAddQuery,
 } = apiSlice;
 
 export default apiSlice;
