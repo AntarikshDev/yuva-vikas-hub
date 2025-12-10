@@ -12,9 +12,10 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { 
   Users, Car, Calendar, MapPin, Plus, Trash2, IndianRupee, Calculator,
-  Info
+  Info, Loader2, CheckCircle
 } from 'lucide-react';
 import {
   Tooltip,
@@ -23,6 +24,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { WorkOrderBudget, HigherAuthorityAllocation, ActivityBudget } from './WorkOrderBudgetTab';
+import * as budgetApi from '@/services/budgetApi';
 
 interface CreateBudgetDialogProps {
   open: boolean;
@@ -30,6 +32,7 @@ interface CreateBudgetDialogProps {
   onSubmit: (budget: Partial<WorkOrderBudget>) => void;
   workOrderTarget: number;
   existingBudget?: WorkOrderBudget | null;
+  teamSalaryData?: budgetApi.TeamSalaryData | null;
 }
 
 export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
@@ -37,34 +40,85 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
   onOpenChange,
   onSubmit,
   workOrderTarget,
-  existingBudget
+  existingBudget,
+  teamSalaryData
 }) => {
   const [activeTab, setActiveTab] = useState('salary');
+  const [isLoadingHistorical, setIsLoadingHistorical] = useState(false);
+  const [higherAuthorityOptions, setHigherAuthorityOptions] = useState<HigherAuthorityAllocation[]>([]);
   
-  // Team Salary State
-  const [fixedSalary, setFixedSalary] = useState(existingBudget?.teamSalary.totalFixedSalary || 0);
-  const [higherAuthorityAllocations, setHigherAuthorityAllocations] = useState<HigherAuthorityAllocation[]>
-    (existingBudget?.teamSalary.higherAuthorityAllocations || []);
+  // Team Salary State - auto-populated from teamSalaryData
+  const [fixedSalary, setFixedSalary] = useState(0);
+  const [higherAuthorityAllocations, setHigherAuthorityAllocations] = useState<HigherAuthorityAllocation[]>([]);
   
   // Travel Expenses State
-  const [travelEstimate, setTravelEstimate] = useState(existingBudget?.travelExpenses.estimatedBudget || 0);
-  const [travelHistorical, setTravelHistorical] = useState(existingBudget?.travelExpenses.historicalAverage || 0);
+  const [travelEstimate, setTravelEstimate] = useState(0);
+  const [travelHistorical, setTravelHistorical] = useState(0);
   
   // Activity Costs State
-  const [rozgaarSabha, setRozgaarSabha] = useState<ActivityBudget>
-    (existingBudget?.activityCosts.rozgaarSabha || { name: 'Rozgaar Sabha', plannedEvents: 0, costPerEvent: 15000, totalCost: 0, historicalAverage: 14000 });
-  const [mela, setMela] = useState<ActivityBudget>
-    (existingBudget?.activityCosts.mela || { name: 'Job Mela', plannedEvents: 0, costPerEvent: 50000, totalCost: 0, historicalAverage: 48000 });
-  const [autoMicing, setAutoMicing] = useState<ActivityBudget>
-    (existingBudget?.activityCosts.autoMicing || { name: 'Auto Mic-ing', plannedEvents: 0, costPerEvent: 2500, totalCost: 0, historicalAverage: 2200 });
-  const [otherActivities, setOtherActivities] = useState<ActivityBudget[]>
-    (existingBudget?.activityCosts.otherActivities || []);
+  const [rozgaarSabha, setRozgaarSabha] = useState<ActivityBudget>({ name: 'Rozgaar Sabha', plannedEvents: 0, costPerEvent: 15000, totalCost: 0, historicalAverage: 14000 });
+  const [mela, setMela] = useState<ActivityBudget>({ name: 'Job Mela', plannedEvents: 0, costPerEvent: 50000, totalCost: 0, historicalAverage: 48000 });
+  const [autoMicing, setAutoMicing] = useState<ActivityBudget>({ name: 'Auto Mic-ing', plannedEvents: 0, costPerEvent: 2500, totalCost: 0, historicalAverage: 2200 });
+  const [otherActivities, setOtherActivities] = useState<ActivityBudget[]>([]);
   
   // Migration Costs State
-  const [transportCost, setTransportCost] = useState(existingBudget?.migrationCosts.transportCost || 0);
-  const [foodAllowance, setFoodAllowance] = useState(existingBudget?.migrationCosts.foodAllowance || 0);
-  const [accommodationCost, setAccommodationCost] = useState(existingBudget?.migrationCosts.accommodationCost || 0);
-  const [documentationCost, setDocumentationCost] = useState(existingBudget?.migrationCosts.documentationCost || 0);
+  const [transportCost, setTransportCost] = useState(0);
+  const [foodAllowance, setFoodAllowance] = useState(0);
+  const [accommodationCost, setAccommodationCost] = useState(0);
+  const [documentationCost, setDocumentationCost] = useState(0);
+
+  // Load data when dialog opens
+  useEffect(() => {
+    if (open) {
+      loadInitialData();
+    }
+  }, [open, teamSalaryData, existingBudget]);
+
+  const loadInitialData = async () => {
+    setIsLoadingHistorical(true);
+    try {
+      // Load higher authority options
+      const authorityOptions = await budgetApi.getHigherAuthorityOptions();
+      setHigherAuthorityOptions(authorityOptions);
+
+      if (existingBudget) {
+        // Edit mode - populate from existing budget
+        setFixedSalary(existingBudget.teamSalary.totalFixedSalary);
+        setHigherAuthorityAllocations(existingBudget.teamSalary.higherAuthorityAllocations);
+        setTravelEstimate(existingBudget.travelExpenses.estimatedBudget);
+        setTravelHistorical(existingBudget.travelExpenses.historicalAverage);
+        setRozgaarSabha(existingBudget.activityCosts.rozgaarSabha);
+        setMela(existingBudget.activityCosts.mela);
+        setAutoMicing(existingBudget.activityCosts.autoMicing);
+        setOtherActivities(existingBudget.activityCosts.otherActivities);
+        setTransportCost(existingBudget.migrationCosts.transportCost);
+        setFoodAllowance(existingBudget.migrationCosts.foodAllowance);
+        setAccommodationCost(existingBudget.migrationCosts.accommodationCost);
+        setDocumentationCost(existingBudget.migrationCosts.documentationCost);
+      } else {
+        // Create mode - auto-populate from team data
+        if (teamSalaryData) {
+          setFixedSalary(teamSalaryData.totalFixedSalary);
+          // Calculate travel estimate based on team composition
+          const estimatedTravel = budgetApi.calculateTravelEstimate(teamSalaryData.members);
+          setTravelEstimate(estimatedTravel);
+        }
+
+        // Fetch historical data
+        const historicalData = await budgetApi.fetchHistoricalData();
+        setTravelHistorical(historicalData.travelExpenses.averagePerMobiliser * 9 * 3); // 9 mobilisers * 3 months
+        
+        // Set historical averages for activities
+        setRozgaarSabha(prev => ({ ...prev, historicalAverage: historicalData.activityCosts.rozgaarSabha.historicalAverage }));
+        setMela(prev => ({ ...prev, historicalAverage: historicalData.activityCosts.mela.historicalAverage }));
+        setAutoMicing(prev => ({ ...prev, historicalAverage: historicalData.activityCosts.autoMicing.historicalAverage }));
+      }
+    } catch (error) {
+      console.error('Failed to load initial data:', error);
+    } finally {
+      setIsLoadingHistorical(false);
+    }
+  };
 
   // Calculations
   const totalHigherAuthorityAllocation = higherAuthorityAllocations.reduce((sum, a) => sum + a.allocatedAmount, 0);
@@ -80,10 +134,18 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
   const costPerCandidate = workOrderTarget > 0 ? Math.round(totalBudget / workOrderTarget) : 0;
 
   const addHigherAuthorityAllocation = () => {
-    setHigherAuthorityAllocations([
-      ...higherAuthorityAllocations,
-      { role: '', employeeName: '', baseSalary: 0, allocationPercentage: 0, allocatedAmount: 0 }
-    ]);
+    if (higherAuthorityOptions.length > 0) {
+      const option = higherAuthorityOptions[0];
+      setHigherAuthorityAllocations([
+        ...higherAuthorityAllocations,
+        { ...option, allocationPercentage: 0, allocatedAmount: 0 }
+      ]);
+    } else {
+      setHigherAuthorityAllocations([
+        ...higherAuthorityAllocations,
+        { role: '', employeeName: '', baseSalary: 0, allocationPercentage: 0, allocatedAmount: 0 }
+      ]);
+    }
   };
 
   const updateHigherAuthorityAllocation = (index: number, field: keyof HigherAuthorityAllocation, value: any) => {
@@ -94,6 +156,17 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
       updated[index].allocatedAmount = Math.round(updated[index].baseSalary * (updated[index].allocationPercentage / 100));
     }
     
+    setHigherAuthorityAllocations(updated);
+  };
+
+  const selectHigherAuthority = (index: number, optionIndex: number) => {
+    const option = higherAuthorityOptions[optionIndex];
+    const updated = [...higherAuthorityAllocations];
+    updated[index] = { 
+      ...option, 
+      allocationPercentage: updated[index].allocationPercentage,
+      allocatedAmount: Math.round(option.baseSalary * (updated[index].allocationPercentage / 100))
+    };
     setHigherAuthorityAllocations(updated);
   };
 
@@ -233,9 +306,15 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
-                        <TooltipContent>Total fixed salary of directly assigned team members</TooltipContent>
+                        <TooltipContent>Auto-fetched from Assignment section - total fixed salary of directly assigned team members</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
+                    {teamSalaryData && !existingBudget && (
+                      <Badge variant="outline" className="ml-2 text-green-600 border-green-300">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Auto-fetched
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -248,6 +327,26 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                       placeholder="Enter total fixed salary"
                     />
                   </div>
+                  
+                  {/* Show team breakdown when auto-fetched */}
+                  {teamSalaryData && !existingBudget && (
+                    <div className="mt-3 p-3 bg-muted/50 rounded-lg">
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Team Members from Assignment:</p>
+                      <div className="grid grid-cols-2 gap-1 text-xs">
+                        {teamSalaryData.members.slice(0, 6).map((member, idx) => (
+                          <div key={idx} className="flex justify-between">
+                            <span>{member.name} ({member.role})</span>
+                            <span className="font-medium">{formatCurrency(member.salary)}</span>
+                          </div>
+                        ))}
+                        {teamSalaryData.members.length > 6 && (
+                          <div className="col-span-2 text-muted-foreground">
+                            +{teamSalaryData.members.length - 6} more members
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -269,59 +368,73 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {higherAuthorityAllocations.map((allocation, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-end p-2 bg-muted/50 rounded">
-                      <div className="col-span-3">
-                        <Label className="text-xs">Role</Label>
-                        <Input
-                          value={allocation.role}
-                          onChange={(e) => updateHigherAuthorityAllocation(index, 'role', e.target.value)}
-                          placeholder="e.g., Regional Director"
-                        />
-                      </div>
-                      <div className="col-span-3">
-                        <Label className="text-xs">Employee Name</Label>
-                        <Input
-                          value={allocation.employeeName}
-                          onChange={(e) => updateHigherAuthorityAllocation(index, 'employeeName', e.target.value)}
-                          placeholder="Name"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label className="text-xs">Base Salary (₹)</Label>
-                        <Input
-                          type="number"
-                          value={allocation.baseSalary}
-                          onChange={(e) => updateHigherAuthorityAllocation(index, 'baseSalary', Number(e.target.value))}
-                        />
-                      </div>
-                      <div className="col-span-1">
-                        <Label className="text-xs">%</Label>
-                        <Input
-                          type="number"
-                          value={allocation.allocationPercentage}
-                          onChange={(e) => updateHigherAuthorityAllocation(index, 'allocationPercentage', Number(e.target.value))}
-                          max={100}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Label className="text-xs">Allocated</Label>
-                        <div className="h-10 px-3 py-2 bg-background border rounded text-sm">
-                          {formatCurrency(allocation.allocatedAmount)}
-                        </div>
-                      </div>
-                      <div className="col-span-1">
-                        <Button variant="ghost" size="icon" onClick={() => removeHigherAuthorityAllocation(index)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
+                  {isLoadingHistorical ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      <span className="text-sm text-muted-foreground">Loading authority options...</span>
                     </div>
-                  ))}
-                  
-                  {higherAuthorityAllocations.length === 0 && (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No higher authority allocations added. Click "Add" to include percentage-based salary allocations.
-                    </p>
+                  ) : (
+                    <>
+                      {higherAuthorityAllocations.map((allocation, index) => (
+                        <div key={index} className="grid grid-cols-12 gap-2 items-end p-2 bg-muted/50 rounded">
+                          <div className="col-span-3">
+                            <Label className="text-xs">Role</Label>
+                            <select
+                              className="w-full h-10 px-3 py-2 text-sm border rounded-md bg-background"
+                              value={higherAuthorityOptions.findIndex(o => o.employeeName === allocation.employeeName)}
+                              onChange={(e) => selectHigherAuthority(index, parseInt(e.target.value))}
+                            >
+                              <option value={-1}>Select...</option>
+                              {higherAuthorityOptions.map((opt, i) => (
+                                <option key={i} value={i}>{opt.role}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="col-span-3">
+                            <Label className="text-xs">Employee Name</Label>
+                            <Input
+                              value={allocation.employeeName}
+                              onChange={(e) => updateHigherAuthorityAllocation(index, 'employeeName', e.target.value)}
+                              placeholder="Name"
+                            />
+                          </div>
+                          <div className="col-span-2">
+                            <Label className="text-xs">Base Salary (₹)</Label>
+                            <Input
+                              type="number"
+                              value={allocation.baseSalary}
+                              onChange={(e) => updateHigherAuthorityAllocation(index, 'baseSalary', Number(e.target.value))}
+                            />
+                          </div>
+                          <div className="col-span-1">
+                            <Label className="text-xs">%</Label>
+                            <Input
+                              type="number"
+                              value={allocation.allocationPercentage}
+                              onChange={(e) => updateHigherAuthorityAllocation(index, 'allocationPercentage', Number(e.target.value))}
+                              max={100}
+                            />
+                          </div>
+                          <div className="col-span-2">
+                            <Label className="text-xs">Allocated</Label>
+                            <div className="h-10 px-3 py-2 bg-background border rounded text-sm">
+                              {formatCurrency(allocation.allocatedAmount)}
+                            </div>
+                          </div>
+                          <div className="col-span-1">
+                            <Button variant="ghost" size="icon" onClick={() => removeHigherAuthorityAllocation(index)}>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {higherAuthorityAllocations.length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          No higher authority allocations added. Click "Add" to include percentage-based salary allocations.
+                        </p>
+                      )}
+                    </>
                   )}
                 </CardContent>
               </Card>
@@ -344,6 +457,12 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                         <TooltipContent>Estimated travel budget based on historical data. Actual expenses will be tracked via TrackOlap or bulk upload.</TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
+                    {teamSalaryData && !existingBudget && (
+                      <Badge variant="outline" className="ml-2 text-blue-600 border-blue-300">
+                        <Calculator className="h-3 w-3 mr-1" />
+                        Auto-calculated
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -377,6 +496,7 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                     <ul className="text-muted-foreground space-y-1">
                       <li>• TrackOlap API integration for real-time expense sync (coming soon)</li>
                       <li>• Bulk upload from Centre Manager for manual expense reporting</li>
+                      <li>• Multi-level approval workflow: L1 → L2 → L3</li>
                     </ul>
                   </div>
                 </CardContent>
@@ -396,9 +516,9 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                   <CardTitle className="text-base">Rozgaar Sabha</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <Label className="text-xs">Planned Events</Label>
+                      <Label>Planned Events</Label>
                       <Input
                         type="number"
                         value={rozgaarSabha.plannedEvents}
@@ -406,7 +526,7 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="text-xs">Cost/Event (₹)</Label>
+                      <Label>Cost/Event (₹)</Label>
                       <Input
                         type="number"
                         value={rozgaarSabha.costPerEvent}
@@ -414,13 +534,15 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="text-xs">Historical Avg (₹)</Label>
-                      <Input type="number" value={rozgaarSabha.historicalAverage} disabled className="bg-muted" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Total Cost</Label>
+                      <Label>Total Cost</Label>
                       <div className="h-10 px-3 py-2 bg-muted border rounded text-sm font-medium">
                         {formatCurrency(rozgaarSabha.totalCost)}
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Hist. Avg/Event</Label>
+                      <div className="h-10 px-3 py-2 bg-muted border rounded text-sm text-muted-foreground">
+                        {formatCurrency(rozgaarSabha.historicalAverage)}
                       </div>
                     </div>
                   </div>
@@ -433,9 +555,9 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                   <CardTitle className="text-base">Job Mela</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <Label className="text-xs">Planned Events</Label>
+                      <Label>Planned Events</Label>
                       <Input
                         type="number"
                         value={mela.plannedEvents}
@@ -443,7 +565,7 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="text-xs">Cost/Event (₹)</Label>
+                      <Label>Cost/Event (₹)</Label>
                       <Input
                         type="number"
                         value={mela.costPerEvent}
@@ -451,13 +573,15 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="text-xs">Historical Avg (₹)</Label>
-                      <Input type="number" value={mela.historicalAverage} disabled className="bg-muted" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Total Cost</Label>
+                      <Label>Total Cost</Label>
                       <div className="h-10 px-3 py-2 bg-muted border rounded text-sm font-medium">
                         {formatCurrency(mela.totalCost)}
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Hist. Avg/Event</Label>
+                      <div className="h-10 px-3 py-2 bg-muted border rounded text-sm text-muted-foreground">
+                        {formatCurrency(mela.historicalAverage)}
                       </div>
                     </div>
                   </div>
@@ -470,9 +594,9 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                   <CardTitle className="text-base">Auto Mic-ing</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-4 gap-4">
                     <div>
-                      <Label className="text-xs">Planned Events</Label>
+                      <Label>Planned Events</Label>
                       <Input
                         type="number"
                         value={autoMicing.plannedEvents}
@@ -480,7 +604,7 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="text-xs">Cost/Event (₹)</Label>
+                      <Label>Cost/Event (₹)</Label>
                       <Input
                         type="number"
                         value={autoMicing.costPerEvent}
@@ -488,13 +612,15 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                       />
                     </div>
                     <div>
-                      <Label className="text-xs">Historical Avg (₹)</Label>
-                      <Input type="number" value={autoMicing.historicalAverage} disabled className="bg-muted" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Total Cost</Label>
+                      <Label>Total Cost</Label>
                       <div className="h-10 px-3 py-2 bg-muted border rounded text-sm font-medium">
                         {formatCurrency(autoMicing.totalCost)}
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Hist. Avg/Event</Label>
+                      <div className="h-10 px-3 py-2 bg-muted border rounded text-sm text-muted-foreground">
+                        {formatCurrency(autoMicing.historicalAverage)}
                       </div>
                     </div>
                   </div>
@@ -519,7 +645,7 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                         <Input
                           value={activity.name}
                           onChange={(e) => updateOtherActivity(index, 'name', e.target.value)}
-                          placeholder="Activity name"
+                          placeholder="e.g., Door-to-Door"
                         />
                       </div>
                       <div className="col-span-2">
@@ -530,19 +656,27 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                           onChange={(e) => updateOtherActivity(index, 'plannedEvents', Number(e.target.value))}
                         />
                       </div>
-                      <div className="col-span-3">
-                        <Label className="text-xs">Cost/Event (₹)</Label>
+                      <div className="col-span-2">
+                        <Label className="text-xs">Cost/Event</Label>
                         <Input
                           type="number"
                           value={activity.costPerEvent}
                           onChange={(e) => updateOtherActivity(index, 'costPerEvent', Number(e.target.value))}
                         />
                       </div>
-                      <div className="col-span-3">
+                      <div className="col-span-2">
                         <Label className="text-xs">Total</Label>
                         <div className="h-10 px-3 py-2 bg-background border rounded text-sm">
                           {formatCurrency(activity.totalCost)}
                         </div>
+                      </div>
+                      <div className="col-span-2">
+                        <Label className="text-xs">Hist. Avg</Label>
+                        <Input
+                          type="number"
+                          value={activity.historicalAverage}
+                          onChange={(e) => updateOtherActivity(index, 'historicalAverage', Number(e.target.value))}
+                        />
                       </div>
                       <div className="col-span-1">
                         <Button variant="ghost" size="icon" onClick={() => removeOtherActivity(index)}>
@@ -554,7 +688,7 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
                   
                   {otherActivities.length === 0 && (
                     <p className="text-sm text-muted-foreground text-center py-2">
-                      No other activities added.
+                      No other activities added yet.
                     </p>
                   )}
                 </CardContent>
@@ -570,71 +704,53 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
             <TabsContent value="migration" className="space-y-4">
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    Candidate Migration Costs
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
-                        <TooltipContent>Costs for transporting and settling candidates at placement locations</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </CardTitle>
+                  <CardTitle className="text-base">Candidate Migration Costs</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Transport Cost (₹)</Label>
-                      <div className="flex items-center gap-2">
-                        <IndianRupee className="h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          value={transportCost}
-                          onChange={(e) => setTransportCost(Number(e.target.value))}
-                          placeholder="Total transport cost"
-                        />
-                      </div>
+                      <Input
+                        type="number"
+                        value={transportCost}
+                        onChange={(e) => setTransportCost(Number(e.target.value))}
+                        placeholder="Total transport budget"
+                      />
                     </div>
                     <div>
                       <Label>Food Allowance (₹)</Label>
-                      <div className="flex items-center gap-2">
-                        <IndianRupee className="h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          value={foodAllowance}
-                          onChange={(e) => setFoodAllowance(Number(e.target.value))}
-                          placeholder="Total food allowance"
-                        />
-                      </div>
+                      <Input
+                        type="number"
+                        value={foodAllowance}
+                        onChange={(e) => setFoodAllowance(Number(e.target.value))}
+                        placeholder="Total food budget"
+                      />
                     </div>
                     <div>
                       <Label>Accommodation Cost (₹)</Label>
-                      <div className="flex items-center gap-2">
-                        <IndianRupee className="h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          value={accommodationCost}
-                          onChange={(e) => setAccommodationCost(Number(e.target.value))}
-                          placeholder="Initial accommodation cost"
-                        />
-                      </div>
+                      <Input
+                        type="number"
+                        value={accommodationCost}
+                        onChange={(e) => setAccommodationCost(Number(e.target.value))}
+                        placeholder="Total accommodation budget"
+                      />
                     </div>
                     <div>
                       <Label>Documentation Cost (₹)</Label>
-                      <div className="flex items-center gap-2">
-                        <IndianRupee className="h-4 w-4 text-muted-foreground" />
-                        <Input
-                          type="number"
-                          value={documentationCost}
-                          onChange={(e) => setDocumentationCost(Number(e.target.value))}
-                          placeholder="Documentation & processing"
-                        />
-                      </div>
+                      <Input
+                        type="number"
+                        value={documentationCost}
+                        onChange={(e) => setDocumentationCost(Number(e.target.value))}
+                        placeholder="Total documentation budget"
+                      />
                     </div>
                   </div>
-                  
-                  <div className="bg-muted/50 p-3 rounded flex justify-between items-center">
-                    <span className="text-sm">Per Candidate Migration Cost</span>
-                    <span className="font-semibold">{formatCurrency(perCandidateMigration)}</span>
+
+                  <div className="bg-green-100 dark:bg-green-900/30 p-4 rounded-lg text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Per Candidate Migration Cost (for {workOrderTarget.toLocaleString()} candidates)
+                    </p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(perCandidateMigration)}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -647,16 +763,13 @@ export const CreateBudgetDialog: React.FC<CreateBudgetDialogProps> = ({
           </ScrollArea>
         </Tabs>
 
-        <DialogFooter className="flex justify-between items-center">
-          <div className="text-sm text-muted-foreground">
-            Formula: Total Budget ÷ Target = Cost/Candidate
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={handleSubmit}>
-              {existingBudget ? 'Update Budget' : 'Create Budget'}
-            </Button>
-          </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit}>
+            {existingBudget ? 'Update Budget' : 'Create Budget'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

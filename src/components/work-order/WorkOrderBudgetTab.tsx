@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
   Users, Car, Calendar, MapPin, IndianRupee, Calculator,
-  Plus, Edit, FileText, TrendingUp, PieChart, Upload, RefreshCw
+  Plus, Edit, FileText, TrendingUp, PieChart, Upload, RefreshCw,
+  CheckCircle, Loader2
 } from 'lucide-react';
 import { CreateBudgetDialog } from './CreateBudgetDialog';
 import { BulkExpenseUploadDialog } from './BulkExpenseUploadDialog';
+import { ExpenseApprovalDialog } from './ExpenseApprovalDialog';
+import { toast } from '@/hooks/use-toast';
+import * as budgetApi from '@/services/budgetApi';
 
 export interface HigherAuthorityAllocation {
   role: string;
@@ -83,72 +87,56 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
 }) => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
-  const [budget, setBudget] = useState<WorkOrderBudget | null>({
-    id: 'BUD001',
-    workOrderId: workOrderId,
-    teamSalary: {
-      totalFixedSalary: 425000,
-      higherAuthorityAllocations: [
-        { role: 'Regional Director', employeeName: 'Mr. Vikram Mehta', baseSalary: 150000, allocationPercentage: 10, allocatedAmount: 15000 },
-        { role: 'Zonal Manager', employeeName: 'Ms. Kavita Sharma', baseSalary: 100000, allocationPercentage: 15, allocatedAmount: 15000 },
-      ],
-      totalTeamSalaryCost: 455000
-    },
-    travelExpenses: {
-      estimatedBudget: 180000,
-      actualExpenses: 45000,
-      historicalAverage: 165000,
-      lastSyncDate: '2024-01-10'
-    },
-    activityCosts: {
-      rozgaarSabha: { name: 'Rozgaar Sabha', plannedEvents: 8, costPerEvent: 15000, totalCost: 120000, historicalAverage: 14000 },
-      mela: { name: 'Job Mela', plannedEvents: 3, costPerEvent: 50000, totalCost: 150000, historicalAverage: 48000 },
-      autoMicing: { name: 'Auto Mic-ing', plannedEvents: 20, costPerEvent: 2500, totalCost: 50000, historicalAverage: 2200 },
-      otherActivities: [
-        { name: 'Door-to-Door Campaign', plannedEvents: 15, costPerEvent: 3000, totalCost: 45000, historicalAverage: 2800 }
-      ],
-      totalActivityCost: 365000
-    },
-    migrationCosts: {
-      perCandidateEstimate: 3500,
-      totalCandidates: 500,
-      transportCost: 1200000,
-      foodAllowance: 250000,
-      accommodationCost: 200000,
-      documentationCost: 100000,
-      totalMigrationCost: 1750000
-    },
-    totalBudget: 2750000,
-    targetCandidates: 500,
-    costPerCandidate: 5500,
-    status: 'approved',
-    createdDate: '2024-01-01',
-    createdBy: 'Rahul Sharma',
-    approvedDate: '2024-01-03',
-    approvedBy: 'National Head'
-  });
+  const [isExpenseApprovalOpen, setIsExpenseApprovalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [budget, setBudget] = useState<WorkOrderBudget | null>(null);
+  const [teamSalaryData, setTeamSalaryData] = useState<budgetApi.TeamSalaryData | null>(null);
 
-  const handleCreateBudget = (newBudget: Partial<WorkOrderBudget>) => {
-    const totalBudget = 
-      (newBudget.teamSalary?.totalTeamSalaryCost || 0) +
-      (newBudget.travelExpenses?.estimatedBudget || 0) +
-      (newBudget.activityCosts?.totalActivityCost || 0) +
-      (newBudget.migrationCosts?.totalMigrationCost || 0);
+  // Fetch budget and team data on mount
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [budgetData, teamData] = await Promise.all([
+          budgetApi.fetchBudget(workOrderId),
+          budgetApi.fetchTeamSalary(workOrderId),
+        ]);
+        setBudget(budgetData);
+        setTeamSalaryData(teamData);
+      } catch (error) {
+        console.error('Failed to load budget data:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load budget data',
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadData();
+  }, [workOrderId]);
 
-    const costPerCandidate = workOrderTarget > 0 ? Math.round(totalBudget / workOrderTarget) : 0;
-
-    setBudget({
-      ...newBudget,
-      id: `BUD${Date.now()}`,
-      workOrderId,
-      totalBudget,
-      targetCandidates: workOrderTarget,
-      costPerCandidate,
-      status: 'pending_approval',
-      createdDate: new Date().toISOString(),
-      createdBy: 'Current User'
-    } as WorkOrderBudget);
-    setIsCreateDialogOpen(false);
+  const handleCreateBudget = async (newBudget: Partial<WorkOrderBudget>) => {
+    try {
+      const createdBudget = await budgetApi.createBudget({
+        ...newBudget,
+        workOrderId,
+      });
+      setBudget(createdBudget);
+      setIsCreateDialogOpen(false);
+      toast({
+        title: 'Budget Created',
+        description: 'Mobilisation budget has been created successfully',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create budget',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleBulkUpload = (expenses: any[]) => {
@@ -162,8 +150,28 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
           lastSyncDate: new Date().toISOString().split('T')[0]
         }
       });
+      toast({
+        title: 'Expenses Uploaded',
+        description: `${expenses.length} expense records uploaded successfully`,
+      });
     }
     setIsBulkUploadOpen(false);
+  };
+
+  const handleExpenseApproval = (expenseIds: string[], remarks: string) => {
+    toast({
+      title: 'Expenses Approved',
+      description: `${expenseIds.length} expenses approved successfully`,
+    });
+    setIsExpenseApprovalOpen(false);
+  };
+
+  const handleExpenseReject = (expenseIds: string[], reason: string) => {
+    toast({
+      title: 'Expenses Rejected',
+      description: `${expenseIds.length} expenses rejected`,
+    });
+    setIsExpenseApprovalOpen(false);
   };
 
   const formatCurrency = (amount: number) => {
@@ -185,6 +193,17 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
     return <Badge variant={variant}>{label}</Badge>;
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 space-y-4">
+        <Loader2 className="h-12 w-12 text-primary animate-spin" />
+        <p className="text-muted-foreground">Loading budget data...</p>
+      </div>
+    );
+  }
+
+  // Empty state - no budget created
   if (!budget) {
     return (
       <div className="flex flex-col items-center justify-center py-16 space-y-4">
@@ -195,7 +214,35 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
         <p className="text-muted-foreground text-center max-w-md">
           Create a mobilisation budget to track team salary, travel expenses, activity costs, and candidate migration costs.
         </p>
-        <Button onClick={() => setIsCreateDialogOpen(true)} size="lg">
+        
+        {/* Show team salary preview from Assignment */}
+        {teamSalaryData && (
+          <Card className="w-full max-w-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Team Salary (Auto-fetched from Assignment)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Direct Team Members</span>
+                  <span className="font-medium">{teamSalaryData.members.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Total Fixed Salary</span>
+                  <span className="font-bold text-primary">{formatCurrency(teamSalaryData.totalFixedSalary)}</span>
+                </div>
+                <div className="text-xs text-muted-foreground pt-2 border-t">
+                  This data will be auto-populated when you create the budget
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        <Button onClick={() => setIsCreateDialogOpen(true)} size="lg" className="mt-4">
           <Plus className="h-4 w-4 mr-2" />
           Create Budget
         </Button>
@@ -205,6 +252,7 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
           onOpenChange={setIsCreateDialogOpen}
           onSubmit={handleCreateBudget}
           workOrderTarget={workOrderTarget}
+          teamSalaryData={teamSalaryData}
         />
       </div>
     );
@@ -386,6 +434,10 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
                 Team Travel Expenses
               </div>
               <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setIsExpenseApprovalOpen(true)}>
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Approvals
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => setIsBulkUploadOpen(true)}>
                   <Upload className="h-3 w-3 mr-1" />
                   Bulk Upload
@@ -438,15 +490,17 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
             {[budget.activityCosts.rozgaarSabha, budget.activityCosts.mela, budget.activityCosts.autoMicing, ...budget.activityCosts.otherActivities].map((activity, index) => (
               <div key={index} className="flex justify-between items-center p-2 bg-muted/50 rounded">
                 <div>
-                  <p className="font-medium">{activity.name}</p>
+                  <p className="font-medium text-sm">{activity.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {activity.plannedEvents} events × {formatCurrency(activity.costPerEvent)}/event
                   </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">{formatCurrency(activity.totalCost)}</p>
                   <p className="text-xs text-muted-foreground">
-                    Historical avg: {formatCurrency(activity.historicalAverage)}/event
+                    Hist. avg: {formatCurrency(activity.historicalAverage)}/event
                   </p>
                 </div>
-                <span className="font-semibold">{formatCurrency(activity.totalCost)}</span>
               </div>
             ))}
             
@@ -467,57 +521,54 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
           </CardHeader>
           <CardContent className="pt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-muted/50 p-3 rounded">
-                <p className="text-xs text-muted-foreground">Transport Cost</p>
+              <div className="p-2 bg-muted/50 rounded">
+                <p className="text-xs text-muted-foreground">Transport</p>
                 <p className="font-semibold">{formatCurrency(budget.migrationCosts.transportCost)}</p>
               </div>
-              <div className="bg-muted/50 p-3 rounded">
+              <div className="p-2 bg-muted/50 rounded">
                 <p className="text-xs text-muted-foreground">Food Allowance</p>
                 <p className="font-semibold">{formatCurrency(budget.migrationCosts.foodAllowance)}</p>
               </div>
-              <div className="bg-muted/50 p-3 rounded">
+              <div className="p-2 bg-muted/50 rounded">
                 <p className="text-xs text-muted-foreground">Accommodation</p>
                 <p className="font-semibold">{formatCurrency(budget.migrationCosts.accommodationCost)}</p>
               </div>
-              <div className="bg-muted/50 p-3 rounded">
+              <div className="p-2 bg-muted/50 rounded">
                 <p className="text-xs text-muted-foreground">Documentation</p>
                 <p className="font-semibold">{formatCurrency(budget.migrationCosts.documentationCost)}</p>
               </div>
             </div>
             
-            <div className="flex justify-between items-center text-sm pt-2">
-              <span className="text-muted-foreground">Per Candidate Estimate</span>
-              <span>{formatCurrency(budget.migrationCosts.perCandidateEstimate)}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Total Candidates</span>
-              <span>{budget.migrationCosts.totalCandidates.toLocaleString()}</span>
+            <div className="bg-green-100 dark:bg-green-900/30 p-3 rounded text-center">
+              <p className="text-sm text-muted-foreground">Per Candidate Migration Cost</p>
+              <p className="text-xl font-bold text-green-600">{formatCurrency(budget.migrationCosts.perCandidateEstimate)}</p>
             </div>
             
             <div className="flex justify-between items-center pt-3 border-t font-semibold">
-              <span>Total Migration Cost</span>
+              <span>Total Migration Cost ({budget.migrationCosts.totalCandidates} candidates)</span>
               <span className="text-green-600">{formatCurrency(budget.migrationCosts.totalMigrationCost)}</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Final Calculation */}
+      {/* Cost Per Candidate Formula */}
       <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-primary/20">
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-center md:text-left">
-              <p className="text-sm text-muted-foreground mb-1">Budget Calculation Formula</p>
-              <p className="text-lg font-mono">
-                Mobilisation Budget ÷ Number of Targets = <strong>Cost Per Candidate</strong>
-              </p>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Budget</p>
+              <p className="text-2xl font-bold">{formatCurrency(budget.totalBudget)}</p>
             </div>
-            <div className="flex items-center gap-2 text-lg font-mono bg-background px-4 py-2 rounded-lg border">
-              <span>{formatCurrency(budget.totalBudget)}</span>
-              <span>÷</span>
-              <span>{budget.targetCandidates.toLocaleString()}</span>
-              <span>=</span>
-              <span className="text-primary font-bold">{formatCurrency(budget.costPerCandidate)}</span>
+            <span className="text-2xl text-muted-foreground">÷</span>
+            <div>
+              <p className="text-sm text-muted-foreground">Target Candidates</p>
+              <p className="text-2xl font-bold">{budget.targetCandidates.toLocaleString()}</p>
+            </div>
+            <span className="text-2xl text-muted-foreground">=</span>
+            <div className="bg-primary text-primary-foreground px-6 py-3 rounded-lg">
+              <p className="text-sm opacity-80">Cost Per Candidate</p>
+              <p className="text-3xl font-bold">{formatCurrency(budget.costPerCandidate)}</p>
             </div>
           </div>
         </CardContent>
@@ -530,12 +581,22 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
         onSubmit={handleCreateBudget}
         workOrderTarget={workOrderTarget}
         existingBudget={budget}
+        teamSalaryData={teamSalaryData}
       />
       
       <BulkExpenseUploadDialog
         open={isBulkUploadOpen}
         onOpenChange={setIsBulkUploadOpen}
         onUpload={handleBulkUpload}
+      />
+
+      <ExpenseApprovalDialog
+        open={isExpenseApprovalOpen}
+        onOpenChange={setIsExpenseApprovalOpen}
+        teamMembers={[]}
+        onApprove={handleExpenseApproval}
+        onReject={handleExpenseReject}
+        currentUserLevel={2}
       />
     </div>
   );
