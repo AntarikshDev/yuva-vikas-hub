@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Archive, Download, FileSpreadsheet, Layers, MapPin, Briefcase, FileText, ChevronRight, FileDown, Loader2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Archive, Download, FileSpreadsheet, Layers, MapPin, Briefcase, FileText, ChevronRight, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MasterDataActionDialog } from '@/components/dialogs/MasterDataActionDialog';
@@ -17,7 +17,7 @@ import { DirectorJobRoleForm } from '@/components/forms/DirectorJobRoleForm';
 import { DirectorDocumentForm } from '@/components/forms/DirectorDocumentForm';
 import { downloadLocationTemplate } from '@/utils/locationTemplates';
 import { LocationBulkUploadDialog } from '@/components/dialogs/LocationBulkUploadDialog';
-import { usePrograms, useLocations } from '@/hooks/useMasterData';
+import { usePrograms, useLocations, useSectors, useJobRoles, useDocumentTypes } from '@/hooks/useMasterData';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LocationType } from '@/types/location';
 
@@ -45,13 +45,13 @@ const DirectorMasterDataManagement = () => {
     type: 'archive' | 'delete';
     itemName: string;
     itemId: string;
-    category: string;
+    category: MasterDataCategory;
   }>({
     open: false,
     type: 'archive',
     itemName: '',
     itemId: '',
-    category: ''
+    category: 'programs'
   });
 
   // Search states
@@ -63,45 +63,12 @@ const DirectorMasterDataManagement = () => {
     documents: ''
   });
 
-  // RTK Query hooks for Programs
-  const { 
-    programs, 
-    isLoading: programsLoading, 
-    deleteProgram 
-  } = usePrograms({ search: searchQueries.programs });
-
-  // RTK Query hooks for Locations
-  const { 
-    locations, 
-    isLoading: locationsLoading,
-    deleteState,
-  } = useLocations(locationSubType, { search: searchQueries.locations });
-
-  // Local state for non-RTK data (sectors, job roles, documents)
-  const [sectors] = useState([
-    { id: '1', code: 'SEC001', name: 'IT-ITES', ssc: 'NASSCOM', jobRoles: 15, status: 'active' },
-    { id: '2', code: 'SEC002', name: 'Retail', ssc: 'RASCI', jobRoles: 12, status: 'active' },
-    { id: '3', code: 'SEC003', name: 'Healthcare', ssc: 'HSSC', jobRoles: 18, status: 'active' },
-    { id: '4', code: 'SEC004', name: 'Hospitality', ssc: 'THSC', jobRoles: 10, status: 'active' },
-    { id: '5', code: 'SEC005', name: 'Banking & Finance', ssc: 'BFSI SSC', jobRoles: 8, status: 'inactive' },
-  ]);
-
-  const [jobRoles] = useState([
-    { id: '1', code: 'JR001', title: 'Customer Service Executive', sector: 'IT-ITES', nsqfLevel: 4, hours: 400, status: 'active' },
-    { id: '2', code: 'JR002', title: 'Field Sales Executive', sector: 'Retail', nsqfLevel: 3, hours: 350, status: 'active' },
-    { id: '3', code: 'JR003', title: 'General Duty Assistant', sector: 'Healthcare', nsqfLevel: 4, hours: 450, status: 'active' },
-    { id: '4', code: 'JR004', title: 'F&B Service Steward', sector: 'Hospitality', nsqfLevel: 4, hours: 380, status: 'active' },
-    { id: '5', code: 'JR005', title: 'Business Correspondent', sector: 'Banking & Finance', nsqfLevel: 4, hours: 400, status: 'inactive' },
-  ]);
-
-  const [documents] = useState([
-    { id: '1', code: 'DOC001', name: 'Aadhaar Card', category: 'Identity Proof', required: true, formats: 'PDF, JPG', status: 'active' },
-    { id: '2', code: 'DOC002', name: 'PAN Card', category: 'Identity Proof', required: false, formats: 'PDF, JPG', status: 'active' },
-    { id: '3', code: 'DOC003', name: 'Bank Passbook', category: 'Banking', required: true, formats: 'PDF, JPG', status: 'active' },
-    { id: '4', code: 'DOC004', name: '10th Marksheet', category: 'Education', required: true, formats: 'PDF', status: 'active' },
-    { id: '5', code: 'DOC005', name: 'Caste Certificate', category: 'Category Proof', required: false, formats: 'PDF', status: 'active' },
-    { id: '6', code: 'DOC006', name: 'Income Certificate', category: 'Income Proof', required: false, formats: 'PDF', status: 'inactive' },
-  ]);
+  // RTK Query hooks
+  const { programs, isLoading: programsLoading, deleteProgram } = usePrograms({ search: searchQueries.programs });
+  const { locations, isLoading: locationsLoading, deleteState } = useLocations(locationSubType, { search: searchQueries.locations });
+  const { sectors, isLoading: sectorsLoading, deleteSector } = useSectors({ search: searchQueries.sectors });
+  const { jobRoles, isLoading: jobRolesLoading, deleteJobRole } = useJobRoles({ search: searchQueries.jobroles });
+  const { documentTypes, isLoading: documentsLoading, deleteDocumentType } = useDocumentTypes({ search: searchQueries.documents });
 
   const handleSearchChange = (category: string, value: string) => {
     setSearchQueries({ ...searchQueries, [category]: value });
@@ -124,7 +91,7 @@ const DirectorMasterDataManagement = () => {
       type,
       itemName: item.name || item.title || item.code,
       itemId: item.id,
-      category: getCategoryName(category)
+      category
     });
   };
 
@@ -141,11 +108,22 @@ const DirectorMasterDataManagement = () => {
 
   const handleActionConfirm = async () => {
     try {
-      // Handle delete based on category
-      if (actionDialog.category === 'Program') {
-        await deleteProgram(actionDialog.itemId);
-      } else if (actionDialog.category === 'Location') {
-        await deleteState(actionDialog.itemId);
+      switch (actionDialog.category) {
+        case 'programs':
+          await deleteProgram(actionDialog.itemId);
+          break;
+        case 'locations':
+          await deleteState(actionDialog.itemId);
+          break;
+        case 'sectors':
+          await deleteSector(actionDialog.itemId);
+          break;
+        case 'jobroles':
+          await deleteJobRole(actionDialog.itemId);
+          break;
+        case 'documents':
+          await deleteDocumentType(actionDialog.itemId);
+          break;
       }
       
       toast({
@@ -179,52 +157,26 @@ const DirectorMasterDataManagement = () => {
     }
   };
 
-  // Filter functions for local data
-  const filteredSectors = useMemo(() => sectors.filter(s =>
-    !searchQueries.sectors ||
-    s.name.toLowerCase().includes(searchQueries.sectors.toLowerCase()) ||
-    s.ssc.toLowerCase().includes(searchQueries.sectors.toLowerCase())
-  ), [sectors, searchQueries.sectors]);
-
-  const filteredJobRoles = useMemo(() => jobRoles.filter(j =>
-    !searchQueries.jobroles ||
-    j.title.toLowerCase().includes(searchQueries.jobroles.toLowerCase()) ||
-    j.sector.toLowerCase().includes(searchQueries.jobroles.toLowerCase())
-  ), [jobRoles, searchQueries.jobroles]);
-
-  const filteredDocuments = useMemo(() => documents.filter(d =>
-    !searchQueries.documents ||
-    d.name.toLowerCase().includes(searchQueries.documents.toLowerCase()) ||
-    d.category.toLowerCase().includes(searchQueries.documents.toLowerCase())
-  ), [documents, searchQueries.documents]);
+  const renderLoadingSkeleton = () => (
+    <div className="space-y-3">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-12 w-full" />
+      ))}
+    </div>
+  );
 
   const renderLocationTable = () => {
-    if (locationsLoading) {
-      return (
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
-      );
-    }
+    if (locationsLoading) return renderLoadingSkeleton();
 
     const getColumns = () => {
       switch (locationSubType) {
-        case 'state':
-          return ['Code', 'Name', 'Districts', 'Status', 'Actions'];
-        case 'district':
-          return ['Name', 'State', 'Blocks', 'Status', 'Actions'];
-        case 'block':
-          return ['Name', 'District', 'Panchayats', 'Status', 'Actions'];
-        case 'panchayat':
-          return ['Name', 'Block', 'Villages', 'Status', 'Actions'];
-        case 'village':
-          return ['Name', 'Panchayat', 'Pincode', 'Status', 'Actions'];
-        case 'pincode':
-          return ['Pincode', 'Area', 'District', 'State', 'Status', 'Actions'];
-        default:
-          return ['Code', 'Name', 'Status', 'Actions'];
+        case 'state': return ['Code', 'Name', 'Districts', 'Status', 'Actions'];
+        case 'district': return ['Name', 'State', 'Blocks', 'Status', 'Actions'];
+        case 'block': return ['Name', 'District', 'Panchayats', 'Status', 'Actions'];
+        case 'panchayat': return ['Name', 'Block', 'Villages', 'Status', 'Actions'];
+        case 'village': return ['Name', 'Panchayat', 'Pincode', 'Status', 'Actions'];
+        case 'pincode': return ['Pincode', 'Area', 'District', 'State', 'Status', 'Actions'];
+        default: return ['Code', 'Name', 'Status', 'Actions'];
       }
     };
 
@@ -304,15 +256,7 @@ const DirectorMasterDataManagement = () => {
   };
 
   const renderProgramsTable = () => {
-    if (programsLoading) {
-      return (
-        <div className="space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </div>
-      );
-    }
+    if (programsLoading) return renderLoadingSkeleton();
 
     return (
       <Table>
@@ -345,6 +289,161 @@ const DirectorMasterDataManagement = () => {
                     <Archive className="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => handleActionClick('programs', 'delete', program)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
+
+  const renderSectorsTable = () => {
+    if (sectorsLoading) return renderLoadingSkeleton();
+
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Code</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Sector Skill Council</TableHead>
+            <TableHead>Job Roles</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sectors.map((sector: any) => (
+            <TableRow key={sector.id}>
+              <TableCell className="font-medium">{sector.code}</TableCell>
+              <TableCell className="font-semibold">{sector.name}</TableCell>
+              <TableCell>{sector.ssc}</TableCell>
+              <TableCell>
+                <Badge variant="outline">{sector.jobRolesCount || 0} roles</Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant={sector.isActive ? 'default' : 'secondary'}>
+                  {sector.isActive ? 'active' : 'inactive'}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => handleEdit('sectors', sector.id)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleActionClick('sectors', 'archive', sector)}>
+                    <Archive className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleActionClick('sectors', 'delete', sector)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
+
+  const renderJobRolesTable = () => {
+    if (jobRolesLoading) return renderLoadingSkeleton();
+
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Code</TableHead>
+            <TableHead>Title</TableHead>
+            <TableHead>Sector</TableHead>
+            <TableHead>NSQF Level</TableHead>
+            <TableHead>Training Hours</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {jobRoles.map((role: any) => (
+            <TableRow key={role.id}>
+              <TableCell className="font-medium">{role.code}</TableCell>
+              <TableCell className="font-semibold">{role.title}</TableCell>
+              <TableCell>{role.sectorName}</TableCell>
+              <TableCell>
+                <Badge variant="outline">Level {role.nsqfLevel}</Badge>
+              </TableCell>
+              <TableCell>{role.trainingHours} hrs</TableCell>
+              <TableCell>
+                <Badge variant={role.isActive ? 'default' : 'secondary'}>
+                  {role.isActive ? 'active' : 'inactive'}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => handleEdit('jobroles', role.id)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleActionClick('jobroles', 'archive', role)}>
+                    <Archive className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleActionClick('jobroles', 'delete', role)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
+
+  const renderDocumentsTable = () => {
+    if (documentsLoading) return renderLoadingSkeleton();
+
+    return (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Code</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead>Required</TableHead>
+            <TableHead>Formats</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {documentTypes.map((doc: any) => (
+            <TableRow key={doc.id}>
+              <TableCell className="font-medium">{doc.code}</TableCell>
+              <TableCell className="font-semibold">{doc.name}</TableCell>
+              <TableCell>{doc.category}</TableCell>
+              <TableCell>
+                <Badge variant={doc.isRequired ? 'default' : 'outline'}>
+                  {doc.isRequired ? 'Required' : 'Optional'}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-muted-foreground">
+                {Array.isArray(doc.allowedFormats) ? doc.allowedFormats.join(', ') : doc.allowedFormats}
+              </TableCell>
+              <TableCell>
+                <Badge variant={doc.isActive ? 'default' : 'secondary'}>
+                  {doc.isActive ? 'active' : 'inactive'}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => handleEdit('documents', doc.id)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleActionClick('documents', 'archive', doc)}>
+                    <Archive className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleActionClick('documents', 'delete', doc)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
@@ -440,7 +539,6 @@ const DirectorMasterDataManagement = () => {
                     </div>
                   </div>
                   
-                  {/* Controls Row - Responsive */}
                   <div className="flex flex-wrap items-center gap-2">
                     <Select value={locationSubType} onValueChange={(v) => setLocationSubType(v as LocationSubType)}>
                       <SelectTrigger className="w-[130px]">
@@ -486,7 +584,6 @@ const DirectorMasterDataManagement = () => {
                     </div>
                   </div>
                   
-                  {/* Hierarchy Breadcrumb - Hidden on mobile */}
                   <div className="hidden md:flex items-center gap-1 text-xs text-muted-foreground">
                     <span className={locationSubType === 'state' ? 'font-medium text-foreground' : ''}>State</span>
                     <ChevronRight className="h-3 w-3" />
@@ -539,48 +636,7 @@ const DirectorMasterDataManagement = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Sector Skill Council</TableHead>
-                      <TableHead>Job Roles</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredSectors.map((sector) => (
-                      <TableRow key={sector.id}>
-                        <TableCell className="font-medium">{sector.code}</TableCell>
-                        <TableCell className="font-semibold">{sector.name}</TableCell>
-                        <TableCell>{sector.ssc}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{sector.jobRoles} roles</Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={sector.status === 'active' ? 'default' : 'secondary'}>
-                            {sector.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => handleEdit('sectors', sector.id)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleActionClick('sectors', 'archive', sector)}>
-                              <Archive className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleActionClick('sectors', 'delete', sector)}>
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {renderSectorsTable()}
               </CardContent>
             </Card>
           </TabsContent>
@@ -616,50 +672,7 @@ const DirectorMasterDataManagement = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Sector</TableHead>
-                      <TableHead>NSQF Level</TableHead>
-                      <TableHead>Training Hours</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredJobRoles.map((role) => (
-                      <TableRow key={role.id}>
-                        <TableCell className="font-medium">{role.code}</TableCell>
-                        <TableCell className="font-semibold">{role.title}</TableCell>
-                        <TableCell>{role.sector}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">Level {role.nsqfLevel}</Badge>
-                        </TableCell>
-                        <TableCell>{role.hours} hrs</TableCell>
-                        <TableCell>
-                          <Badge variant={role.status === 'active' ? 'default' : 'secondary'}>
-                            {role.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => handleEdit('jobroles', role.id)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleActionClick('jobroles', 'archive', role)}>
-                              <Archive className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleActionClick('jobroles', 'delete', role)}>
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {renderJobRolesTable()}
               </CardContent>
             </Card>
           </TabsContent>
@@ -695,52 +708,7 @@ const DirectorMasterDataManagement = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Required</TableHead>
-                      <TableHead>Formats</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredDocuments.map((doc) => (
-                      <TableRow key={doc.id}>
-                        <TableCell className="font-medium">{doc.code}</TableCell>
-                        <TableCell className="font-semibold">{doc.name}</TableCell>
-                        <TableCell>{doc.category}</TableCell>
-                        <TableCell>
-                          <Badge variant={doc.required ? 'default' : 'outline'}>
-                            {doc.required ? 'Required' : 'Optional'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{doc.formats}</TableCell>
-                        <TableCell>
-                          <Badge variant={doc.status === 'active' ? 'default' : 'secondary'}>
-                            {doc.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => handleEdit('documents', doc.id)}>
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleActionClick('documents', 'archive', doc)}>
-                              <Archive className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleActionClick('documents', 'delete', doc)}>
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                {renderDocumentsTable()}
               </CardContent>
             </Card>
           </TabsContent>
@@ -779,7 +747,7 @@ const DirectorMasterDataManagement = () => {
           open={actionDialog.open}
           onOpenChange={(open) => setActionDialog({ ...actionDialog, open })}
           itemName={actionDialog.itemName}
-          category={actionDialog.category}
+          category={getCategoryName(actionDialog.category)}
           onConfirm={handleActionConfirm}
         />
 

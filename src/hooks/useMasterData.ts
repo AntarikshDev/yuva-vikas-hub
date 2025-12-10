@@ -22,8 +22,29 @@ import {
   useCreatePincodeMutation,
   useBulkUploadLocationsMutation,
 } from '@/store/api/locationsApi';
-import type { LocationType, LocationsQueryParams } from '@/types/location';
+import {
+  useGetSectorsQuery,
+  useCreateSectorMutation,
+  useUpdateSectorMutation,
+  useDeleteSectorMutation,
+} from '@/store/api/sectorsApi';
+import {
+  useGetJobRolesQuery,
+  useCreateJobRoleMutation,
+  useUpdateJobRoleMutation,
+  useDeleteJobRoleMutation,
+} from '@/store/api/jobRolesApi';
+import {
+  useGetDocumentTypesQuery,
+  useCreateDocumentTypeMutation,
+  useUpdateDocumentTypeMutation,
+  useDeleteDocumentTypeMutation,
+} from '@/store/api/documentTypesApi';
+import type { LocationType } from '@/types/location';
 import type { ProgramsQueryParams } from '@/types/program';
+import type { SectorsQueryParams } from '@/types/sector';
+import type { JobRolesQueryParams } from '@/types/jobRole';
+import type { DocumentTypesQueryParams } from '@/types/documentType';
 
 // Mock data for development (used when API is not available)
 const mockPrograms = [
@@ -113,6 +134,31 @@ const mockPincodes = [
   { id: '6', code: '411001', area: 'Pune City', districtId: '2', districtName: 'Pune', stateName: 'Maharashtra', isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   { id: '7', code: '560001', area: 'Bangalore GPO', districtId: '6', districtName: 'Bangalore Urban', stateName: 'Karnataka', isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   { id: '8', code: '600001', area: 'Chennai GPO', districtId: '9', districtName: 'Chennai', stateName: 'Tamil Nadu', isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+];
+
+const mockSectors = [
+  { id: '1', code: 'SEC001', name: 'IT-ITES', ssc: 'NASSCOM', jobRolesCount: 15, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '2', code: 'SEC002', name: 'Retail', ssc: 'RASCI', jobRolesCount: 12, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '3', code: 'SEC003', name: 'Healthcare', ssc: 'HSSC', jobRolesCount: 18, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '4', code: 'SEC004', name: 'Hospitality', ssc: 'THSC', jobRolesCount: 10, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '5', code: 'SEC005', name: 'Banking & Finance', ssc: 'BFSI SSC', jobRolesCount: 8, isActive: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+];
+
+const mockJobRoles = [
+  { id: '1', code: 'JR001', title: 'Customer Service Executive', sectorId: '1', sectorName: 'IT-ITES', nsqfLevel: 4, trainingHours: 400, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '2', code: 'JR002', title: 'Field Sales Executive', sectorId: '2', sectorName: 'Retail', nsqfLevel: 3, trainingHours: 350, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '3', code: 'JR003', title: 'General Duty Assistant', sectorId: '3', sectorName: 'Healthcare', nsqfLevel: 4, trainingHours: 450, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '4', code: 'JR004', title: 'F&B Service Steward', sectorId: '4', sectorName: 'Hospitality', nsqfLevel: 4, trainingHours: 380, isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '5', code: 'JR005', title: 'Business Correspondent', sectorId: '5', sectorName: 'Banking & Finance', nsqfLevel: 4, trainingHours: 400, isActive: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+];
+
+const mockDocumentTypes = [
+  { id: '1', code: 'DOC001', name: 'Aadhaar Card', category: 'Identity Proof', isRequired: true, allowedFormats: ['PDF', 'JPG'], isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '2', code: 'DOC002', name: 'PAN Card', category: 'Identity Proof', isRequired: false, allowedFormats: ['PDF', 'JPG'], isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '3', code: 'DOC003', name: 'Bank Passbook', category: 'Banking', isRequired: true, allowedFormats: ['PDF', 'JPG'], isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '4', code: 'DOC004', name: '10th Marksheet', category: 'Education', isRequired: true, allowedFormats: ['PDF'], isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '5', code: 'DOC005', name: 'Caste Certificate', category: 'Category Proof', isRequired: false, allowedFormats: ['PDF'], isActive: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: '6', code: 'DOC006', name: 'Income Certificate', category: 'Income Proof', isRequired: false, allowedFormats: ['PDF'], isActive: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
 // Custom hook for Programs with mock fallback
@@ -238,5 +284,128 @@ export function useLocations(locationType: LocationType, params: { search?: stri
     createVillage,
     createPincode,
     bulkUploadLocations,
+  };
+}
+
+// Custom hook for Sectors with mock fallback
+export function useSectors(params: SectorsQueryParams = {}) {
+  const { data, isLoading, error, refetch } = useGetSectorsQuery(params);
+  const [createSector, { isLoading: isCreating }] = useCreateSectorMutation();
+  const [updateSector, { isLoading: isUpdating }] = useUpdateSectorMutation();
+  const [deleteSector, { isLoading: isDeleting }] = useDeleteSectorMutation();
+
+  const sectors = useMemo(() => {
+    if (error || !data) {
+      let filtered = mockSectors;
+      if (params.search) {
+        const search = params.search.toLowerCase();
+        filtered = filtered.filter(s => 
+          s.name.toLowerCase().includes(search) || 
+          s.ssc.toLowerCase().includes(search)
+        );
+      }
+      if (params.status && params.status !== 'all') {
+        filtered = filtered.filter(s => s.isActive === (params.status === 'active'));
+      }
+      return filtered;
+    }
+    return data;
+  }, [data, error, params.search, params.status]);
+
+  return {
+    sectors,
+    isLoading,
+    error,
+    refetch,
+    createSector,
+    updateSector,
+    deleteSector,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  };
+}
+
+// Custom hook for Job Roles with mock fallback
+export function useJobRoles(params: JobRolesQueryParams = {}) {
+  const { data, isLoading, error, refetch } = useGetJobRolesQuery(params);
+  const [createJobRole, { isLoading: isCreating }] = useCreateJobRoleMutation();
+  const [updateJobRole, { isLoading: isUpdating }] = useUpdateJobRoleMutation();
+  const [deleteJobRole, { isLoading: isDeleting }] = useDeleteJobRoleMutation();
+
+  const jobRoles = useMemo(() => {
+    if (error || !data) {
+      let filtered = mockJobRoles;
+      if (params.search) {
+        const search = params.search.toLowerCase();
+        filtered = filtered.filter(j => 
+          j.title.toLowerCase().includes(search) || 
+          j.sectorName?.toLowerCase().includes(search)
+        );
+      }
+      if (params.sectorId) {
+        filtered = filtered.filter(j => j.sectorId === params.sectorId);
+      }
+      if (params.status && params.status !== 'all') {
+        filtered = filtered.filter(j => j.isActive === (params.status === 'active'));
+      }
+      return filtered;
+    }
+    return data;
+  }, [data, error, params.search, params.sectorId, params.status]);
+
+  return {
+    jobRoles,
+    isLoading,
+    error,
+    refetch,
+    createJobRole,
+    updateJobRole,
+    deleteJobRole,
+    isCreating,
+    isUpdating,
+    isDeleting,
+  };
+}
+
+// Custom hook for Document Types with mock fallback
+export function useDocumentTypes(params: DocumentTypesQueryParams = {}) {
+  const { data, isLoading, error, refetch } = useGetDocumentTypesQuery(params);
+  const [createDocumentType, { isLoading: isCreating }] = useCreateDocumentTypeMutation();
+  const [updateDocumentType, { isLoading: isUpdating }] = useUpdateDocumentTypeMutation();
+  const [deleteDocumentType, { isLoading: isDeleting }] = useDeleteDocumentTypeMutation();
+
+  const documentTypes = useMemo(() => {
+    if (error || !data) {
+      let filtered = mockDocumentTypes;
+      if (params.search) {
+        const search = params.search.toLowerCase();
+        filtered = filtered.filter(d => 
+          d.name.toLowerCase().includes(search) || 
+          d.category.toLowerCase().includes(search)
+        );
+      }
+      if (params.category) {
+        filtered = filtered.filter(d => d.category === params.category);
+      }
+      if (params.status && params.status !== 'all') {
+        filtered = filtered.filter(d => d.isActive === (params.status === 'active'));
+      }
+      return filtered;
+    }
+    return data;
+  }, [data, error, params.search, params.category, params.status]);
+
+  return {
+    documentTypes,
+    isLoading,
+    error,
+    refetch,
+    createDocumentType,
+    updateDocumentType,
+    deleteDocumentType,
+    isCreating,
+    isUpdating,
+    isDeleting,
   };
 }
