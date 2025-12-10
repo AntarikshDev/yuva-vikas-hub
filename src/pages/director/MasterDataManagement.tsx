@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Edit, Trash2, Archive, Download, FileSpreadsheet, Layers, MapPin, Briefcase, FileText, ChevronRight, Filter } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Archive, Download, FileSpreadsheet, Layers, MapPin, Briefcase, FileText, ChevronRight, Filter, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MasterDataActionDialog } from '@/components/dialogs/MasterDataActionDialog';
@@ -15,6 +15,7 @@ import { SectorForm } from '@/components/forms/SectorForm';
 import { DirectorLocationForm } from '@/components/forms/DirectorLocationForm';
 import { DirectorJobRoleForm } from '@/components/forms/DirectorJobRoleForm';
 import { DirectorDocumentForm } from '@/components/forms/DirectorDocumentForm';
+import { downloadLocationTemplate, getLocationTypeName } from '@/utils/locationTemplates';
 
 type MasterDataCategory = 'programs' | 'locations' | 'sectors' | 'jobroles' | 'documents';
 type LocationSubType = 'state' | 'district' | 'block' | 'panchayat' | 'village' | 'pincode';
@@ -450,6 +451,10 @@ const DirectorMasterDataManagement = () => {
                         onChange={(e) => handleSearchChange('locations', e.target.value)}
                       />
                     </div>
+                    <Button variant="outline" onClick={() => downloadLocationTemplate(locationSubType)}>
+                      <FileDown className="h-4 w-4 mr-2" />
+                      Download Template
+                    </Button>
                     <Button variant="outline" onClick={() => handleBulkUpload('locations')}>
                       <FileSpreadsheet className="h-4 w-4 mr-2" />
                       Bulk Upload
