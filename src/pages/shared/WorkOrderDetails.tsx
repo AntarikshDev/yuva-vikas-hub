@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Calendar, Target, Building2, FileText, MapPin } from "lucide-react";
+import { ArrowLeft, Play, Calendar, Target, Building2, FileText, MapPin, IndianRupee } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import CentreStatusTab from "@/components/work-order/CentreStatusTab";
 import TargetPlanningTab from "@/components/work-order/TargetPlanningTab";
 import DistrictAdoptionTab from "@/components/work-order/DistrictAdoptionTab";
 import WorkOrderAssignmentTab from "@/components/work-order/WorkOrderAssignmentTab";
+import { WorkOrderBudgetTab } from "@/components/work-order/WorkOrderBudgetTab";
 
 interface WorkOrderDetailsProps {
   role: 'director' | 'national-head';
@@ -189,7 +190,7 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
             <span className="hidden sm:inline">Assignment</span>
           </TabsTrigger>
           <TabsTrigger value="budget" className="gap-2">
-            <FileText className="h-4 w-4" />
+            <IndianRupee className="h-4 w-4" />
             <span className="hidden sm:inline">Budget</span>
           </TabsTrigger>
         </TabsList>
@@ -228,13 +229,10 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
         </TabsContent>
 
         <TabsContent value="budget">
-          <Card>
-            <CardContent className="py-16 text-center">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">Work Order Budget</h3>
-              <p className="text-muted-foreground">Coming Soon</p>
-            </CardContent>
-          </Card>
+          <WorkOrderBudgetTab 
+            workOrderId={id || ""} 
+            workOrderTarget={workOrder.totalTarget}
+          />
         </TabsContent>
       </Tabs>
     </div>
