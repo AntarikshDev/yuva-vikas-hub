@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -118,12 +119,18 @@ const currentUserId = 'nh-001';
 
 export const WorkOrders: React.FC<WorkOrdersProps> = ({ role }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingWorkOrder, setEditingWorkOrder] = useState<typeof mockWorkOrders[0] | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [workOrderToDelete, setWorkOrderToDelete] = useState<string | null>(null);
   const [workOrders, setWorkOrders] = useState(mockWorkOrders);
+
+  const handleViewDetails = (workOrderId: string) => {
+    const basePath = role === 'director' ? '/director' : '/national-head';
+    navigate(`${basePath}/work-orders/${workOrderId}`);
+  };
 
   // RBAC: Check permissions based on role
   const canCreate = role === 'director';
@@ -340,7 +347,7 @@ export const WorkOrders: React.FC<WorkOrdersProps> = ({ role }) => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-white">
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleViewDetails(workOrder.id)}>
                                 <Eye className="mr-2 h-4 w-4" />
                                 View Details
                               </DropdownMenuItem>

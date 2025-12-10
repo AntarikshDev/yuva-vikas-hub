@@ -58,6 +58,7 @@ import NationalHeadProfile from "./pages/national-head/Profile";
 
 // Shared Work Orders page
 import WorkOrders from "./pages/shared/WorkOrders";
+import WorkOrderDetails from "./pages/shared/WorkOrderDetails";
 
 // Mobilizer App Routes
 import MobilizerNewCandidate from "./pages/mobilizer/NewCandidate";
@@ -223,6 +224,7 @@ const App = () => {
             <Route path="/director/target-management" element={<DirectorTargetManagement />} />
             <Route path="/director/master-data" element={<DirectorMasterDataManagement />} />
             <Route path="/director/work-orders" element={<WorkOrders role="director" />} />
+            <Route path="/director/work-orders/:id" element={<WorkOrderDetails role="director" />} />
             
             {/* National Head Routes */}
             <Route path="/national-head/dashboard" element={<NationalHeadDashboard />} />
@@ -230,6 +232,7 @@ const App = () => {
             <Route path="/national-head/team-management" element={<NationalHeadTeamManagement />} />
             <Route path="/national-head/profile" element={<NationalHeadProfile />} />
             <Route path="/national-head/work-orders" element={<WorkOrders role="national-head" />} />
+            <Route path="/national-head/work-orders/:id" element={<WorkOrderDetails role="national-head" />} />
             
             {/* Mobilizer App Routes */}
             <Route path="/mobilizer/new" element={<MobilizerNewCandidate />} />
