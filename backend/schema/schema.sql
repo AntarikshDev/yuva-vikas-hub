@@ -1,0 +1,226 @@
+-- Master Data Management Database Schema
+-- PostgreSQL
+
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =============================================
+-- 1. PROGRAMS TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS programs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT,
+    start_date DATE,
+    end_date DATE,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'archived')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_programs_code ON programs(code);
+CREATE INDEX idx_programs_status ON programs(status);
+
+-- =============================================
+-- 2. SECTORS TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS sectors (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    ssc VARCHAR(255),
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_sectors_code ON sectors(code);
+CREATE INDEX idx_sectors_is_active ON sectors(is_active);
+
+-- =============================================
+-- 3. JOB ROLES TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS job_roles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    sector_id UUID REFERENCES sectors(id) ON DELETE SET NULL,
+    qp_code VARCHAR(100),
+    nsqf_level INTEGER CHECK (nsqf_level BETWEEN 1 AND 10),
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_job_roles_code ON job_roles(code);
+CREATE INDEX idx_job_roles_sector_id ON job_roles(sector_id);
+CREATE INDEX idx_job_roles_is_active ON job_roles(is_active);
+
+-- =============================================
+-- 4. DOCUMENT TYPES TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS document_types (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    category VARCHAR(100),
+    is_mandatory BOOLEAN DEFAULT false,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_document_types_code ON document_types(code);
+CREATE INDEX idx_document_types_category ON document_types(category);
+CREATE INDEX idx_document_types_is_active ON document_types(is_active);
+
+-- =============================================
+-- 5. STATES TABLE (Location Hierarchy Level 1)
+-- =============================================
+CREATE TABLE IF NOT EXISTS states (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(10) UNIQUE NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_states_code ON states(code);
+CREATE INDEX idx_states_is_active ON states(is_active);
+
+-- =============================================
+-- 6. DISTRICTS TABLE (Location Hierarchy Level 2)
+-- =============================================
+CREATE TABLE IF NOT EXISTS districts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(20) UNIQUE NOT NULL,
+    state_id UUID NOT NULL REFERENCES states(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_districts_code ON districts(code);
+CREATE INDEX idx_districts_state_id ON districts(state_id);
+CREATE INDEX idx_districts_is_active ON districts(is_active);
+
+-- =============================================
+-- 7. BLOCKS TABLE (Location Hierarchy Level 3)
+-- =============================================
+CREATE TABLE IF NOT EXISTS blocks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(30) UNIQUE NOT NULL,
+    district_id UUID NOT NULL REFERENCES districts(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_blocks_code ON blocks(code);
+CREATE INDEX idx_blocks_district_id ON blocks(district_id);
+CREATE INDEX idx_blocks_is_active ON blocks(is_active);
+
+-- =============================================
+-- 8. PANCHAYATS TABLE (Location Hierarchy Level 4)
+-- =============================================
+CREATE TABLE IF NOT EXISTS panchayats (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(40) UNIQUE NOT NULL,
+    block_id UUID NOT NULL REFERENCES blocks(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_panchayats_code ON panchayats(code);
+CREATE INDEX idx_panchayats_block_id ON panchayats(block_id);
+CREATE INDEX idx_panchayats_is_active ON panchayats(is_active);
+
+-- =============================================
+-- 9. VILLAGES TABLE (Location Hierarchy Level 5)
+-- =============================================
+CREATE TABLE IF NOT EXISTS villages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    code VARCHAR(50) UNIQUE NOT NULL,
+    panchayat_id UUID NOT NULL REFERENCES panchayats(id) ON DELETE CASCADE,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_villages_code ON villages(code);
+CREATE INDEX idx_villages_panchayat_id ON villages(panchayat_id);
+CREATE INDEX idx_villages_is_active ON villages(is_active);
+
+-- =============================================
+-- 10. PINCODES TABLE (Location Hierarchy Level 6)
+-- =============================================
+CREATE TABLE IF NOT EXISTS pincodes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    pincode VARCHAR(10) NOT NULL,
+    area_name VARCHAR(255),
+    village_id UUID REFERENCES villages(id) ON DELETE SET NULL,
+    district_id UUID REFERENCES districts(id) ON DELETE SET NULL,
+    state_id UUID REFERENCES states(id) ON DELETE SET NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_pincodes_pincode ON pincodes(pincode);
+CREATE INDEX idx_pincodes_village_id ON pincodes(village_id);
+CREATE INDEX idx_pincodes_district_id ON pincodes(district_id);
+CREATE INDEX idx_pincodes_is_active ON pincodes(is_active);
+
+-- =============================================
+-- UPDATE TIMESTAMP TRIGGER FUNCTION
+-- =============================================
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Apply trigger to all tables
+CREATE TRIGGER update_programs_updated_at BEFORE UPDATE ON programs FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_sectors_updated_at BEFORE UPDATE ON sectors FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_job_roles_updated_at BEFORE UPDATE ON job_roles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_document_types_updated_at BEFORE UPDATE ON document_types FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_states_updated_at BEFORE UPDATE ON states FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_districts_updated_at BEFORE UPDATE ON districts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_blocks_updated_at BEFORE UPDATE ON blocks FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_panchayats_updated_at BEFORE UPDATE ON panchayats FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_villages_updated_at BEFORE UPDATE ON villages FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_pincodes_updated_at BEFORE UPDATE ON pincodes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =============================================
+-- SAMPLE DATA (Optional)
+-- =============================================
+-- Insert sample states
+INSERT INTO states (name, code) VALUES 
+    ('Maharashtra', 'MH'),
+    ('Karnataka', 'KA'),
+    ('Tamil Nadu', 'TN'),
+    ('Gujarat', 'GJ'),
+    ('Rajasthan', 'RJ')
+ON CONFLICT (code) DO NOTHING;
+
+-- Insert sample sectors
+INSERT INTO sectors (name, code, ssc, description) VALUES 
+    ('Information Technology', 'IT', 'NASSCOM', 'IT and ITES sector'),
+    ('Healthcare', 'HC', 'HSSC', 'Healthcare and allied services'),
+    ('Retail', 'RT', 'RASCI', 'Retail sector skills'),
+    ('Agriculture', 'AG', 'ASCI', 'Agriculture and allied sectors'),
+    ('Electronics', 'EL', 'ESSCI', 'Electronics manufacturing')
+ON CONFLICT (code) DO NOTHING;
