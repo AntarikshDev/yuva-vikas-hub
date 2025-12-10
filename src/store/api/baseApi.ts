@@ -27,6 +27,9 @@ export const baseApi = createApi({
     'Panchayat',
     'Village',
     'Pincode',
+    'Sector',
+    'JobRole',
+    'DocumentType',
   ],
   endpoints: () => ({}),
 });
