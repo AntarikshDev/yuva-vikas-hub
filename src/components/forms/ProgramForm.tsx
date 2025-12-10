@@ -17,6 +17,102 @@ import { useGetStatesQuery } from '@/store/api/locationsApi';
 import { useGetCentresQuery } from '@/store/api/programsApi';
 import { useGetDocumentTypesQuery } from '@/store/api/documentTypesApi';
 
+// Mock data for states with centres (fallback when API not available)
+const mockStatesWithCentres = [
+  {
+    id: 'state_1',
+    name: 'Maharashtra',
+    centres: [
+      { id: 'centre_mh_1', name: 'Mumbai Training Centre', stateId: 'state_1' },
+      { id: 'centre_mh_2', name: 'Pune Skill Development Centre', stateId: 'state_1' },
+      { id: 'centre_mh_3', name: 'Nagpur Vocational Institute', stateId: 'state_1' },
+      { id: 'centre_mh_4', name: 'Nashik Employment Hub', stateId: 'state_1' },
+    ],
+  },
+  {
+    id: 'state_2',
+    name: 'Karnataka',
+    centres: [
+      { id: 'centre_ka_1', name: 'Bangalore Tech Training Hub', stateId: 'state_2' },
+      { id: 'centre_ka_2', name: 'Mysore Skill Centre', stateId: 'state_2' },
+      { id: 'centre_ka_3', name: 'Hubli Industrial Training', stateId: 'state_2' },
+    ],
+  },
+  {
+    id: 'state_3',
+    name: 'Tamil Nadu',
+    centres: [
+      { id: 'centre_tn_1', name: 'Chennai Central Training', stateId: 'state_3' },
+      { id: 'centre_tn_2', name: 'Coimbatore Skill Development', stateId: 'state_3' },
+      { id: 'centre_tn_3', name: 'Madurai Vocational Centre', stateId: 'state_3' },
+      { id: 'centre_tn_4', name: 'Trichy Employment Training', stateId: 'state_3' },
+    ],
+  },
+  {
+    id: 'state_4',
+    name: 'Uttar Pradesh',
+    centres: [
+      { id: 'centre_up_1', name: 'Lucknow Main Training Centre', stateId: 'state_4' },
+      { id: 'centre_up_2', name: 'Noida IT & Software Training', stateId: 'state_4' },
+      { id: 'centre_up_3', name: 'Kanpur Industrial Skills', stateId: 'state_4' },
+      { id: 'centre_up_4', name: 'Varanasi Craft Centre', stateId: 'state_4' },
+      { id: 'centre_up_5', name: 'Agra Tourism Training Hub', stateId: 'state_4' },
+    ],
+  },
+  {
+    id: 'state_5',
+    name: 'Gujarat',
+    centres: [
+      { id: 'centre_gj_1', name: 'Ahmedabad Skill Academy', stateId: 'state_5' },
+      { id: 'centre_gj_2', name: 'Surat Textile Training', stateId: 'state_5' },
+      { id: 'centre_gj_3', name: 'Vadodara Technical Institute', stateId: 'state_5' },
+    ],
+  },
+  {
+    id: 'state_6',
+    name: 'Rajasthan',
+    centres: [
+      { id: 'centre_rj_1', name: 'Jaipur Central Hub', stateId: 'state_6' },
+      { id: 'centre_rj_2', name: 'Jodhpur Desert Crafts Centre', stateId: 'state_6' },
+      { id: 'centre_rj_3', name: 'Udaipur Heritage Skills', stateId: 'state_6' },
+    ],
+  },
+  {
+    id: 'state_7',
+    name: 'West Bengal',
+    centres: [
+      { id: 'centre_wb_1', name: 'Kolkata Metropolitan Training', stateId: 'state_7' },
+      { id: 'centre_wb_2', name: 'Howrah Industrial Centre', stateId: 'state_7' },
+      { id: 'centre_wb_3', name: 'Siliguri North Bengal Hub', stateId: 'state_7' },
+    ],
+  },
+  {
+    id: 'state_8',
+    name: 'Kerala',
+    centres: [
+      { id: 'centre_kl_1', name: 'Thiruvananthapuram Skill Centre', stateId: 'state_8' },
+      { id: 'centre_kl_2', name: 'Kochi Marine Training', stateId: 'state_8' },
+      { id: 'centre_kl_3', name: 'Kozhikode Tourism Training', stateId: 'state_8' },
+    ],
+  },
+];
+
+// Mock data for document types (fallback when API not available)
+const mockDocuments = [
+  { id: 'doc_1', code: 'DOC001', name: 'Aadhaar Card', category: 'Identity Proof', isRequired: true, allowedFormats: ['PDF', 'JPG'], isActive: true },
+  { id: 'doc_2', code: 'DOC002', name: 'PAN Card', category: 'Identity Proof', isRequired: false, allowedFormats: ['PDF', 'JPG'], isActive: true },
+  { id: 'doc_3', code: 'DOC003', name: 'Bank Passbook / Cancelled Cheque', category: 'Banking', isRequired: true, allowedFormats: ['PDF', 'JPG'], isActive: true },
+  { id: 'doc_4', code: 'DOC004', name: '10th Marksheet', category: 'Education', isRequired: true, allowedFormats: ['PDF'], isActive: true },
+  { id: 'doc_5', code: 'DOC005', name: '12th Marksheet', category: 'Education', isRequired: false, allowedFormats: ['PDF'], isActive: true },
+  { id: 'doc_6', code: 'DOC006', name: 'Caste Certificate (SC/ST/OBC)', category: 'Category Proof', isRequired: false, allowedFormats: ['PDF'], isActive: true },
+  { id: 'doc_7', code: 'DOC007', name: 'Income Certificate', category: 'Income Proof', isRequired: true, allowedFormats: ['PDF'], isActive: true },
+  { id: 'doc_8', code: 'DOC008', name: 'Domicile Certificate', category: 'Address Proof', isRequired: true, allowedFormats: ['PDF'], isActive: true },
+  { id: 'doc_9', code: 'DOC009', name: 'Passport Size Photo', category: 'Other', isRequired: true, allowedFormats: ['JPG', 'PNG'], isActive: true },
+  { id: 'doc_10', code: 'DOC010', name: 'Parent/Guardian Consent Form', category: 'Other', isRequired: true, allowedFormats: ['PDF'], isActive: true },
+  { id: 'doc_11', code: 'DOC011', name: 'Voter ID Card', category: 'Identity Proof', isRequired: false, allowedFormats: ['PDF', 'JPG'], isActive: true },
+  { id: 'doc_12', code: 'DOC012', name: 'Driving License', category: 'Identity Proof', isRequired: false, allowedFormats: ['PDF', 'JPG'], isActive: true },
+];
+
 const formSchema = z.object({
   code: z.string().min(1, 'Code is required').max(10, 'Code must be 10 characters or less'),
   name: z.string().min(1, 'Name is required').max(20, 'Name must be 20 characters or less'),
@@ -39,21 +135,35 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
   const isEditing = itemId !== null && itemId !== undefined;
   const [expandedStates, setExpandedStates] = useState<string[]>([]);
 
-  // RTK Query hooks for fetching data
-  const { data: statesData, isLoading: isLoadingStates } = useGetStatesQuery({});
-  const { data: centresData, isLoading: isLoadingCentres } = useGetCentresQuery({});
-  const { data: documentsData, isLoading: isLoadingDocuments } = useGetDocumentTypesQuery({});
+  // RTK Query hooks for fetching data (with fallback to mock data)
+  const { data: statesData, isLoading: isLoadingStates, error: statesError } = useGetStatesQuery({});
+  const { data: centresData, isLoading: isLoadingCentres, error: centresError } = useGetCentresQuery({});
+  const { data: documentsData, isLoading: isLoadingDocuments, error: documentsError } = useGetDocumentTypesQuery({});
 
-  // Group centres by state
+  // Use mock data as fallback when API fails or returns no data
   const statesWithCentres = useMemo(() => {
-    if (!statesData || !centresData) return [];
+    // If API data is available, use it
+    if (statesData && centresData && !statesError && !centresError) {
+      const grouped = statesData.map(state => ({
+        id: state.id,
+        name: state.name,
+        centres: centresData.filter(centre => centre.stateId === state.id),
+      })).filter(state => state.centres.length > 0);
+      
+      if (grouped.length > 0) return grouped;
+    }
     
-    return statesData.map(state => ({
-      id: state.id,
-      name: state.name,
-      centres: centresData.filter(centre => centre.stateId === state.id),
-    })).filter(state => state.centres.length > 0);
-  }, [statesData, centresData]);
+    // Otherwise use mock data
+    return mockStatesWithCentres;
+  }, [statesData, centresData, statesError, centresError]);
+
+  // Use mock documents as fallback
+  const documents = useMemo(() => {
+    if (documentsData && !documentsError && documentsData.length > 0) {
+      return documentsData;
+    }
+    return mockDocuments;
+  }, [documentsData, documentsError]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -76,8 +186,8 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
         code: 'PRG001',
         name: 'DDU-GKY',
         fullName: 'Deen Dayal Upadhyaya Grameen Kaushalya Yojana',
-        selectedCentres: ['centre_1_1', 'centre_1_2', 'centre_2_1'],
-        requiredDocuments: ['doc_1', 'doc_2'],
+        selectedCentres: ['centre_mh_1', 'centre_mh_2', 'centre_ka_1'],
+        requiredDocuments: ['doc_1', 'doc_3', 'doc_4', 'doc_7', 'doc_8', 'doc_9', 'doc_10'],
         isActive: true,
       });
       setExpandedStates(['state_1', 'state_2']);
@@ -151,9 +261,7 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
   };
 
   const selectAllDocuments = () => {
-    if (documentsData) {
-      form.setValue('requiredDocuments', documentsData.map(d => d.id));
-    }
+    form.setValue('requiredDocuments', documents.map(d => d.id));
   };
 
   const clearAllDocuments = () => {
@@ -248,7 +356,6 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                           size="sm"
                           onClick={selectAllCentres}
                           className="text-xs h-7"
-                          disabled={isLoading}
                         >
                           Select All
                         </Button>
@@ -258,7 +365,6 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                           size="sm"
                           onClick={clearAllCentres}
                           className="text-xs h-7"
-                          disabled={isLoading}
                         >
                           Clear All
                         </Button>
@@ -276,12 +382,6 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                               <Skeleton className="h-4 w-32" />
                             </div>
                           ))}
-                        </div>
-                      ) : statesWithCentres.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                          <MapPin className="h-8 w-8 mb-2 opacity-50" />
-                          <p className="text-sm">No states or centres available</p>
-                          <p className="text-xs">Add locations in Master Data first</p>
                         </div>
                       ) : (
                         <div className="space-y-1">
@@ -317,14 +417,11 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                                     <div
                                       key={centre.id}
                                       className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                                      onClick={() => toggleCentreSelection(centre.id)}
                                     >
                                       <Checkbox
                                         checked={selectedCentres.includes(centre.id)}
-                                        onCheckedChange={(checked) => {
-                                          if (checked !== 'indeterminate') {
-                                            toggleCentreSelection(centre.id);
-                                          }
-                                        }}
+                                        onCheckedChange={() => toggleCentreSelection(centre.id)}
                                         onClick={(e) => e.stopPropagation()}
                                       />
                                       <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
@@ -358,7 +455,6 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                           size="sm"
                           onClick={selectAllDocuments}
                           className="text-xs h-7"
-                          disabled={isLoading}
                         >
                           Select All
                         </Button>
@@ -368,7 +464,6 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                           size="sm"
                           onClick={clearAllDocuments}
                           className="text-xs h-7"
-                          disabled={isLoading}
                         >
                           Clear All
                         </Button>
@@ -379,7 +474,7 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                         ? `${selectedDocuments.length} documents selected` 
                         : 'No documents selected'}
                     </div>
-                    <ScrollArea className="h-[150px] rounded-md border p-3 bg-muted/30">
+                    <ScrollArea className="h-[180px] rounded-md border p-3 bg-muted/30">
                       {isLoadingDocuments ? (
                         <div className="space-y-2">
                           {[1, 2, 3].map((i) => (
@@ -389,15 +484,9 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                             </div>
                           ))}
                         </div>
-                      ) : !documentsData || documentsData.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                          <FileText className="h-8 w-8 mb-2 opacity-50" />
-                          <p className="text-sm">No document types available</p>
-                          <p className="text-xs">Add documents in Master Data first</p>
-                        </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-2">
-                          {documentsData.map((doc) => (
+                          {documents.map((doc) => (
                             <div
                               key={doc.id}
                               className="flex items-center gap-2 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer border border-transparent hover:border-muted"
@@ -408,17 +497,15 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                                 onCheckedChange={() => toggleDocumentSelection(doc.id)}
                                 onClick={(e) => e.stopPropagation()}
                               />
-                              <FileText className="h-4 w-4 text-primary" />
+                              <FileText className="h-4 w-4 text-primary flex-shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <span className="text-sm font-medium block truncate">{doc.name}</span>
-                                {doc.category && (
-                                  <span className="text-xs text-muted-foreground block truncate">
-                                    {doc.category}
-                                  </span>
-                                )}
+                                <span className="text-xs text-muted-foreground block truncate">
+                                  {doc.category}
+                                </span>
                               </div>
                               {doc.isRequired && (
-                                <span className="text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded">
+                                <span className="text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded flex-shrink-0">
                                   Required
                                 </span>
                               )}
