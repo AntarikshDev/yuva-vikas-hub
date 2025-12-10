@@ -277,3 +277,44 @@ INSERT INTO sectors (name, code, ssc, description) VALUES
     ('Agriculture', 'AG', 'ASCI', 'Agriculture and allied sectors'),
     ('Electronics', 'EL', 'ESSCI', 'Electronics manufacturing')
 ON CONFLICT (code) DO NOTHING;
+
+-- =============================================
+-- 14. WORK ORDERS TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS work_orders (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    work_order_no VARCHAR(50) UNIQUE NOT NULL,
+    program_id UUID NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+    assigned_date DATE NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    total_target INTEGER NOT NULL,
+    
+    -- Category-wise targets (optional)
+    target_sc INTEGER DEFAULT 0,
+    target_st INTEGER DEFAULT 0,
+    target_obc INTEGER DEFAULT 0,
+    target_general INTEGER DEFAULT 0,
+    target_minority INTEGER DEFAULT 0,
+    
+    -- Location (optional)
+    state_id UUID REFERENCES states(id) ON DELETE SET NULL,
+    district_id UUID REFERENCES districts(id) ON DELETE SET NULL,
+    
+    -- Assigned National Head (from user management)
+    assigned_national_head_id UUID,
+    assigned_national_head_name VARCHAR(255),
+    
+    status VARCHAR(20) DEFAULT 'active',
+    created_by UUID,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_work_orders_work_order_no ON work_orders(work_order_no);
+CREATE INDEX idx_work_orders_program_id ON work_orders(program_id);
+CREATE INDEX idx_work_orders_state_id ON work_orders(state_id);
+CREATE INDEX idx_work_orders_assigned_national_head_id ON work_orders(assigned_national_head_id);
+CREATE INDEX idx_work_orders_status ON work_orders(status);
+
+CREATE TRIGGER update_work_orders_updated_at BEFORE UPDATE ON work_orders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
