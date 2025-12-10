@@ -13,9 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { useToast } from '@/hooks/use-toast';
 import { ChevronRight, ChevronDown, Building2, MapPin, FileText, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useGetStatesQuery } from '@/store/api/locationsApi';
-import { useGetCentresQuery } from '@/store/api/programsApi';
-import { useGetDocumentTypesQuery } from '@/store/api/documentTypesApi';
+import { useGetStatesQuery, useGetCentresQuery, useGetDocumentTypesQuery } from '@/store/api/apiSlice';
 
 // Mock data for states with centres (fallback when API not available)
 const mockStatesWithCentres = [
