@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import CentreStatusTab from "@/components/work-order/CentreStatusTab";
 import TargetPlanningTab from "@/components/work-order/TargetPlanningTab";
 import DistrictAdoptionTab from "@/components/work-order/DistrictAdoptionTab";
+import WorkOrderAssignmentTab from "@/components/work-order/WorkOrderAssignmentTab";
 
 interface WorkOrderDetailsProps {
   role: 'director' | 'national-head';
@@ -219,13 +220,11 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
         </TabsContent>
 
         <TabsContent value="assignment">
-          <Card>
-            <CardContent className="py-16 text-center">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">Work Order Assignment</h3>
-              <p className="text-muted-foreground">Coming Soon</p>
-            </CardContent>
-          </Card>
+          <WorkOrderAssignmentTab 
+            workOrderId={id || ""} 
+            role={role}
+            isStarted={workOrder.status !== 'active'}
+          />
         </TabsContent>
 
         <TabsContent value="budget">
