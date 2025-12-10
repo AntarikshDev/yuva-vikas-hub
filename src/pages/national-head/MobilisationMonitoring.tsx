@@ -7,6 +7,10 @@ import { fetchNHMobilisation, setSelectedKPI, toggleProgram, toggleWorkOrder } f
 import { MobilisationKPICard } from '@/components/national-head/MobilisationKPICard';
 import { ProgramWorkOrderFilter } from '@/components/national-head/ProgramWorkOrderFilter';
 import { MobilisationPerformanceTable } from '@/components/national-head/MobilisationPerformanceTable';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 
 const NationalHeadMobilisationMonitoring = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -38,11 +42,14 @@ const NationalHeadMobilisationMonitoring = () => {
         { label: 'Target Blocks', value: 125 },
         { label: 'Current Blocks', value: 120 },
       ],
-      mobilisation_cost: [
+      mobilisation_cost_candidate: [
         { label: 'Target cost/candidate', value: '₹1,000' },
         { label: 'Actual cost/candidate', value: '₹1,200' },
-        { label: 'Mobilisation Budget', value: '₹15,00,000' },
+      ],
+      mobilisation_budget: [
+        { label: 'Total Budget', value: '₹15,00,000' },
         { label: 'Budget Consumed', value: '₹7,50,000' },
+        { label: 'Utilization', value: '50%' },
       ],
       ofr_target: [
         { label: 'OFR Target', value: 300 },
@@ -66,6 +73,14 @@ const NationalHeadMobilisationMonitoring = () => {
       ],
     };
   }, [filteredProjects]);
+
+  // Budget breakdown data
+  const budgetBreakdown = [
+    { category: 'Team Salary', planned: 500000, consumed: 450000 },
+    { category: 'Travel Expenses', planned: 300000, consumed: 280000 },
+    { category: 'Activity Costs', planned: 400000, consumed: 350000 },
+    { category: 'Migration Costs', planned: 300000, consumed: 170000 },
+  ];
 
   const handleProgramToggle = (program: string) => {
     dispatch(toggleProgram(program));
@@ -97,7 +112,7 @@ const NationalHeadMobilisationMonitoring = () => {
         />
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           <MobilisationKPICard
             title="Mobilisation Team Matrix"
             metrics={kpiMetrics.team_matrix}
@@ -111,10 +126,16 @@ const NationalHeadMobilisationMonitoring = () => {
             onClick={() => handleKPIClick('district_block_matrix')}
           />
           <MobilisationKPICard
-            title="Mobilisation Cost"
-            metrics={kpiMetrics.mobilisation_cost}
-            isSelected={selectedKPI === 'mobilisation_cost'}
-            onClick={() => handleKPIClick('mobilisation_cost')}
+            title="Mobilisation Cost/Candidate"
+            metrics={kpiMetrics.mobilisation_cost_candidate}
+            isSelected={selectedKPI === 'mobilisation_cost_candidate'}
+            onClick={() => handleKPIClick('mobilisation_cost_candidate')}
+          />
+          <MobilisationKPICard
+            title="Mobilisation Budget"
+            metrics={kpiMetrics.mobilisation_budget}
+            isSelected={selectedKPI === 'mobilisation_budget'}
+            onClick={() => handleKPIClick('mobilisation_budget')}
           />
           <MobilisationKPICard
             title="OFR Target"
@@ -141,6 +162,68 @@ const NationalHeadMobilisationMonitoring = () => {
             onClick={() => handleKPIClick('enrolment_target')}
           />
         </div>
+
+        {/* Budget Breakdown Table - shows when budget KPI is selected */}
+        {(selectedKPI === 'mobilisation_budget' || selectedKPI === 'mobilisation_cost_candidate') && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Budget Breakdown</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-right">Planned (₹)</TableHead>
+                    <TableHead className="text-right">Consumed (₹)</TableHead>
+                    <TableHead className="text-right">Remaining (₹)</TableHead>
+                    <TableHead>Utilization</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {budgetBreakdown.map((item) => {
+                    const remaining = item.planned - item.consumed;
+                    const utilization = Math.round((item.consumed / item.planned) * 100);
+                    const isOverspent = item.consumed > item.planned;
+                    const isNearLimit = utilization >= 80 && utilization <= 100;
+                    
+                    return (
+                      <TableRow key={item.category}>
+                        <TableCell className="font-medium">{item.category}</TableCell>
+                        <TableCell className="text-right">₹{item.planned.toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="text-right">₹{item.consumed.toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="text-right">
+                          <span className={isOverspent ? 'text-destructive' : ''}>
+                            {isOverspent ? '-' : ''}₹{Math.abs(remaining).toLocaleString('en-IN')}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress 
+                              value={Math.min(utilization, 100)} 
+                              className={`h-2 w-20 ${isOverspent ? '[&>div]:bg-destructive' : isNearLimit ? '[&>div]:bg-yellow-500' : ''}`}
+                            />
+                            <span className="text-sm">{utilization}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {isOverspent ? (
+                            <Badge variant="destructive">Overspent</Badge>
+                          ) : isNearLimit ? (
+                            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Near Limit</Badge>
+                          ) : (
+                            <Badge variant="outline" className="border-green-500 text-green-600">On Track</Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Dynamic Performance Table */}
         <MobilisationPerformanceTable

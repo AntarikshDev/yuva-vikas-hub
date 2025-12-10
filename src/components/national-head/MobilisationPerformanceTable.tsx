@@ -9,7 +9,7 @@ import { Sparklines, SparklinesLine, SparklinesBars } from "react-sparklines";
 import { EmployeePerformanceDialog } from "./EmployeePerformanceDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export type KPIType = "team_matrix" | "district_block_matrix" | "enrolment_target" | "mobilisation_cost" | "ofr_target" | "approved_ofr_target" | "migration_target";
+export type KPIType = "team_matrix" | "district_block_matrix" | "enrolment_target" | "mobilisation_cost_candidate" | "mobilisation_budget" | "ofr_target" | "approved_ofr_target" | "migration_target";
 type ViewMode = "monthly" | "quarterly" | "halfyearly" | "annual";
 
 interface MobiliserData {
@@ -129,7 +129,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
 
   const isManpowerKPI = selectedKPI === "team_matrix" || selectedKPI === "district_block_matrix";
   const showPeriods = ["team_matrix", "district_block_matrix", "enrolment_target", "training_completion"].includes(selectedKPI);
-  const showCostPeriods = ["mobilisation_cost", "conversion_pe", "conversion_rp"].includes(selectedKPI);
+  const showCostPeriods = ["mobilisation_cost_candidate", "mobilisation_budget", "conversion_pe", "conversion_rp"].includes(selectedKPI);
 
   // Get period columns based on view mode
   const getPeriodColumns = () => {
@@ -390,8 +390,10 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
         return 'District & Block Matrix Analysis';
       case 'enrolment_target':
         return 'Enrolment Target Matrix Analysis';
-      case 'mobilisation_cost':
-        return 'Mobilisation Cost Analysis';
+      case 'mobilisation_cost_candidate':
+        return 'Mobilisation Cost/Candidate Analysis';
+      case 'mobilisation_budget':
+        return 'Mobilisation Budget Analysis';
       case 'ofr_target':
         return 'OFR Target Analysis';
       case 'approved_ofr_target':
@@ -470,7 +472,7 @@ export const MobilisationPerformanceTable: React.FC<MobilisationPerformanceTable
                   }
                 };
 
-                const isCostKPI = selectedKPI === 'mobilisation_cost';
+                const isCostKPI = selectedKPI === 'mobilisation_cost_candidate' || selectedKPI === 'mobilisation_budget';
                 const displayValue = showCostPeriods ? getCostValue(ytdValue) : ytdValue;
                 const displayTarget = showCostPeriods ? getCostValue(project.totalTarget) : project.totalTarget;
                 
