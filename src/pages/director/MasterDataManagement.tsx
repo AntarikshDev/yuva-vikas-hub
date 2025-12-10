@@ -131,27 +131,8 @@ const DirectorMasterDataManagement = () => {
           await deleteProgram(actionDialog.itemId);
           break;
         case 'locations':
-          // Use appropriate delete mutation based on location sub-type
-          switch (locationSubType) {
-            case 'state':
-              await deleteState(actionDialog.itemId);
-              break;
-            case 'district':
-              await deleteDistrict(actionDialog.itemId);
-              break;
-            case 'block':
-              await deleteBlock(actionDialog.itemId);
-              break;
-            case 'panchayat':
-              await deletePanchayat(actionDialog.itemId);
-              break;
-            case 'village':
-              await deleteVillage(actionDialog.itemId);
-              break;
-            case 'pincode':
-              await deletePincode(actionDialog.itemId);
-              break;
-          }
+          // Use the unified location mutations delete function
+          await locationMutations.delete(actionDialog.itemId);
           break;
         case 'sectors':
           await deleteSector(actionDialog.itemId);
