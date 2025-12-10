@@ -25,12 +25,12 @@ exports.getAllJobRoles = async (req, res, next) => {
     }
 
     if (search) {
-      sql += ` AND (jr.name ILIKE $${paramIndex} OR jr.code ILIKE $${paramIndex} OR jr.qp_code ILIKE $${paramIndex})`;
+      sql += ` AND (jr.title ILIKE $${paramIndex} OR jr.code ILIKE $${paramIndex} OR jr.qp_code ILIKE $${paramIndex})`;
       params.push(`%${search}%`);
       paramIndex++;
     }
 
-    sql += ` ORDER BY jr.name ASC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
+    sql += ` ORDER BY jr.title ASC LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
     params.push(parseInt(limit), parseInt(offset));
 
     const result = await query(sql, params);
@@ -75,7 +75,7 @@ exports.getJobRolesBySector = async (req, res, next) => {
   try {
     const { sectorId } = req.params;
     const result = await query(
-      'SELECT * FROM job_roles WHERE sector_id = $1 AND is_active = true ORDER BY name ASC',
+      'SELECT * FROM job_roles WHERE sector_id = $1 AND is_active = true ORDER BY title ASC',
       [sectorId]
     );
     
@@ -85,20 +85,20 @@ exports.getJobRolesBySector = async (req, res, next) => {
   }
 };
 
-// Create job role
+// Create job role - UI params: code, title, sector, nsqfLevel, trainingHours, isActive
 exports.createJobRole = async (req, res, next) => {
   try {
-    const { name, code, sector_id, qp_code, nsqf_level, description, is_active = true } = req.body;
+    const { code, title, sector, nsqfLevel, trainingHours, isActive = true } = req.body;
 
-    if (!name || !code) {
-      return res.status(400).json({ success: false, message: 'Name and code are required' });
+    if (!title || !code) {
+      return res.status(400).json({ success: false, message: 'Title and code are required' });
     }
 
     const result = await query(
-      `INSERT INTO job_roles (name, code, sector_id, qp_code, nsqf_level, description, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO job_roles (code, title, sector_id, nsqf_level, training_hours, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [name, code, sector_id, qp_code, nsqf_level, description, is_active]
+      [code, title, sector || null, nsqfLevel || null, trainingHours || 0, isActive]
     );
 
     res.status(201).json({ success: true, data: result.rows[0], message: 'Job role created successfully' });
@@ -114,20 +114,19 @@ exports.createJobRole = async (req, res, next) => {
 exports.updateJobRole = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, code, sector_id, qp_code, nsqf_level, description, is_active } = req.body;
+    const { code, title, sector, nsqfLevel, trainingHours, isActive } = req.body;
 
     const result = await query(
       `UPDATE job_roles 
-       SET name = COALESCE($1, name),
-           code = COALESCE($2, code),
+       SET code = COALESCE($1, code),
+           title = COALESCE($2, title),
            sector_id = COALESCE($3, sector_id),
-           qp_code = COALESCE($4, qp_code),
-           nsqf_level = COALESCE($5, nsqf_level),
-           description = COALESCE($6, description),
-           is_active = COALESCE($7, is_active)
-       WHERE id = $8
+           nsqf_level = COALESCE($4, nsqf_level),
+           training_hours = COALESCE($5, training_hours),
+           is_active = COALESCE($6, is_active)
+       WHERE id = $7
        RETURNING *`,
-      [name, code, sector_id, qp_code, nsqf_level, description, is_active, id]
+      [code, title, sector, nsqfLevel, trainingHours, isActive, id]
     );
 
     if (result.rows.length === 0) {
@@ -175,17 +174,16 @@ exports.bulkUploadJobRoles = async (req, res, next) => {
       for (const role of jobRoles) {
         try {
           const result = await client.query(
-            `INSERT INTO job_roles (name, code, sector_id, qp_code, nsqf_level, description, is_active)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)
+            `INSERT INTO job_roles (code, title, sector_id, nsqf_level, training_hours, is_active)
+             VALUES ($1, $2, $3, $4, $5, $6)
              ON CONFLICT (code) DO UPDATE SET
-               name = EXCLUDED.name,
+               title = EXCLUDED.title,
                sector_id = EXCLUDED.sector_id,
-               qp_code = EXCLUDED.qp_code,
                nsqf_level = EXCLUDED.nsqf_level,
-               description = EXCLUDED.description,
+               training_hours = EXCLUDED.training_hours,
                is_active = EXCLUDED.is_active
              RETURNING *`,
-            [role.name, role.code, role.sector_id, role.qp_code, role.nsqf_level, role.description, role.is_active ?? true]
+            [role.code, role.title, role.sector || null, role.nsqfLevel || null, role.trainingHours || 0, role.isActive ?? true]
           );
           inserted.push(result.rows[0]);
         } catch (err) {
