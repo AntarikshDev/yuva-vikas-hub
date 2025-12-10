@@ -184,8 +184,21 @@ const DirectorMasterDataManagement = () => {
     </div>
   );
 
+  const renderEmptyState = (category: string) => (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+        <FileText className="h-6 w-6 text-muted-foreground" />
+      </div>
+      <h3 className="text-lg font-medium">No {category} found</h3>
+      <p className="text-muted-foreground text-sm mt-1">
+        Get started by adding your first {category.toLowerCase()}.
+      </p>
+    </div>
+  );
+
   const renderLocationTable = () => {
     if (locationsLoading) return renderLoadingSkeleton();
+    if (!locations || locations.length === 0) return renderEmptyState('Locations');
 
     const getColumns = () => {
       switch (locationSubType) {
@@ -276,6 +289,7 @@ const DirectorMasterDataManagement = () => {
 
   const renderProgramsTable = () => {
     if (programsLoading) return renderLoadingSkeleton();
+    if (!programs || programs.length === 0) return renderEmptyState('Programs');
 
     return (
       <Table>
@@ -321,6 +335,7 @@ const DirectorMasterDataManagement = () => {
 
   const renderSectorsTable = () => {
     if (sectorsLoading) return renderLoadingSkeleton();
+    if (!sectors || sectors.length === 0) return renderEmptyState('Sectors');
 
     return (
       <Table>
@@ -370,6 +385,7 @@ const DirectorMasterDataManagement = () => {
 
   const renderJobRolesTable = () => {
     if (jobRolesLoading) return renderLoadingSkeleton();
+    if (!jobRoles || jobRoles.length === 0) return renderEmptyState('Job Roles');
 
     return (
       <Table>
@@ -421,6 +437,7 @@ const DirectorMasterDataManagement = () => {
 
   const renderDocumentsTable = () => {
     if (documentsLoading) return renderLoadingSkeleton();
+    if (!documentTypes || documentTypes.length === 0) return renderEmptyState('Documents');
 
     return (
       <Table>
