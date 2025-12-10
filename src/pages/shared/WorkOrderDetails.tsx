@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Calendar, Target, Building2, FileText, MapPin, IndianRupee } from "lucide-react";
+import { ArrowLeft, Play, Calendar, Target, Building2, FileText, MapPin, IndianRupee, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import TargetPlanningTab from "@/components/work-order/TargetPlanningTab";
 import DistrictAdoptionTab from "@/components/work-order/DistrictAdoptionTab";
 import WorkOrderAssignmentTab from "@/components/work-order/WorkOrderAssignmentTab";
 import { WorkOrderBudgetTab } from "@/components/work-order/WorkOrderBudgetTab";
-
+import WorkOrderStatusTab from "@/components/work-order/WorkOrderStatusTab";
 interface WorkOrderDetailsProps {
   role: 'director' | 'national-head';
 }
@@ -172,7 +172,7 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="centre-status" className="gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">Centre Status</span>
@@ -192,6 +192,10 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
           <TabsTrigger value="budget" className="gap-2">
             <IndianRupee className="h-4 w-4" />
             <span className="hidden sm:inline">Budget</span>
+          </TabsTrigger>
+          <TabsTrigger value="status" className="gap-2">
+            <Activity className="h-4 w-4" />
+            <span className="hidden sm:inline">WO Status</span>
           </TabsTrigger>
         </TabsList>
 
@@ -232,6 +236,14 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
           <WorkOrderBudgetTab 
             workOrderId={id || ""} 
             workOrderTarget={workOrder.totalTarget}
+          />
+        </TabsContent>
+
+        <TabsContent value="status">
+          <WorkOrderStatusTab 
+            workOrderId={id || ""} 
+            role={role}
+            totalTarget={workOrder.totalTarget}
           />
         </TabsContent>
       </Tabs>
