@@ -3,7 +3,7 @@ const { query, transaction } = require('../config/db');
 // Get all document types
 exports.getAllDocumentTypes = async (req, res, next) => {
   try {
-    const { is_active, category, is_mandatory, search, limit = 50, offset = 0 } = req.query;
+    const { is_active, category, is_required, search, limit = 50, offset = 0 } = req.query;
     
     let sql = 'SELECT * FROM document_types WHERE 1=1';
     const params = [];
@@ -19,9 +19,9 @@ exports.getAllDocumentTypes = async (req, res, next) => {
       params.push(category);
     }
 
-    if (is_mandatory !== undefined) {
-      sql += ` AND is_mandatory = $${paramIndex++}`;
-      params.push(is_mandatory === 'true');
+    if (is_required !== undefined) {
+      sql += ` AND is_required = $${paramIndex++}`;
+      params.push(is_required === 'true');
     }
 
     if (search) {
@@ -79,20 +79,25 @@ exports.getDocumentTypesByCategory = async (req, res, next) => {
   }
 };
 
-// Create document type
+// Create document type - UI params: code, name, category, isRequired, allowedFormats, maxSizeKb, isActive
 exports.createDocumentType = async (req, res, next) => {
   try {
-    const { name, code, category, is_mandatory = false, description, is_active = true } = req.body;
+    const { code, name, category, isRequired = false, allowedFormats, maxSizeKb = 5120, isActive = true } = req.body;
 
     if (!name || !code) {
       return res.status(400).json({ success: false, message: 'Name and code are required' });
     }
 
+    // Convert allowedFormats to PostgreSQL array format
+    const formatsArray = allowedFormats && allowedFormats.length > 0 
+      ? allowedFormats 
+      : ['pdf', 'jpg', 'png'];
+
     const result = await query(
-      `INSERT INTO document_types (name, code, category, is_mandatory, description, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO document_types (code, name, category, is_required, allowed_formats, max_size_kb, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
-      [name, code, category, is_mandatory, description, is_active]
+      [code, name, category, isRequired, formatsArray, maxSizeKb, isActive]
     );
 
     res.status(201).json({ success: true, data: result.rows[0], message: 'Document type created successfully' });
@@ -108,19 +113,20 @@ exports.createDocumentType = async (req, res, next) => {
 exports.updateDocumentType = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, code, category, is_mandatory, description, is_active } = req.body;
+    const { code, name, category, isRequired, allowedFormats, maxSizeKb, isActive } = req.body;
 
     const result = await query(
       `UPDATE document_types 
-       SET name = COALESCE($1, name),
-           code = COALESCE($2, code),
+       SET code = COALESCE($1, code),
+           name = COALESCE($2, name),
            category = COALESCE($3, category),
-           is_mandatory = COALESCE($4, is_mandatory),
-           description = COALESCE($5, description),
-           is_active = COALESCE($6, is_active)
-       WHERE id = $7
+           is_required = COALESCE($4, is_required),
+           allowed_formats = COALESCE($5, allowed_formats),
+           max_size_kb = COALESCE($6, max_size_kb),
+           is_active = COALESCE($7, is_active)
+       WHERE id = $8
        RETURNING *`,
-      [name, code, category, is_mandatory, description, is_active, id]
+      [code, name, category, isRequired, allowedFormats, maxSizeKb, isActive, id]
     );
 
     if (result.rows.length === 0) {
@@ -167,17 +173,22 @@ exports.bulkUploadDocumentTypes = async (req, res, next) => {
 
       for (const doc of documentTypes) {
         try {
+          const formatsArray = doc.allowedFormats && doc.allowedFormats.length > 0 
+            ? doc.allowedFormats 
+            : ['pdf', 'jpg', 'png'];
+
           const result = await client.query(
-            `INSERT INTO document_types (name, code, category, is_mandatory, description, is_active)
-             VALUES ($1, $2, $3, $4, $5, $6)
+            `INSERT INTO document_types (code, name, category, is_required, allowed_formats, max_size_kb, is_active)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
              ON CONFLICT (code) DO UPDATE SET
                name = EXCLUDED.name,
                category = EXCLUDED.category,
-               is_mandatory = EXCLUDED.is_mandatory,
-               description = EXCLUDED.description,
+               is_required = EXCLUDED.is_required,
+               allowed_formats = EXCLUDED.allowed_formats,
+               max_size_kb = EXCLUDED.max_size_kb,
                is_active = EXCLUDED.is_active
              RETURNING *`,
-            [doc.name, doc.code, doc.category, doc.is_mandatory ?? false, doc.description, doc.is_active ?? true]
+            [doc.code, doc.name, doc.category, doc.isRequired ?? false, formatsArray, doc.maxSizeKb ?? 5120, doc.isActive ?? true]
           );
           inserted.push(result.rows[0]);
         } catch (err) {

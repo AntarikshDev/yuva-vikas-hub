@@ -39,15 +39,16 @@ exports.getStateById = async (req, res, next) => {
   }
 };
 
+// UI params: name, code, isActive
 exports.createState = async (req, res, next) => {
   try {
-    const { name, code, is_active = true } = req.body;
+    const { name, code, isActive = true } = req.body;
     if (!name || !code) {
       return res.status(400).json({ success: false, message: 'Name and code are required' });
     }
     const result = await query(
       'INSERT INTO states (name, code, is_active) VALUES ($1, $2, $3) RETURNING *',
-      [name, code, is_active]
+      [name, code, isActive]
     );
     res.status(201).json({ success: true, data: result.rows[0], message: 'State created successfully' });
   } catch (error) {
@@ -60,10 +61,10 @@ exports.createState = async (req, res, next) => {
 
 exports.updateState = async (req, res, next) => {
   try {
-    const { name, code, is_active } = req.body;
+    const { name, code, isActive } = req.body;
     const result = await query(
       `UPDATE states SET name = COALESCE($1, name), code = COALESCE($2, code), is_active = COALESCE($3, is_active) WHERE id = $4 RETURNING *`,
-      [name, code, is_active, req.params.id]
+      [name, code, isActive, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'State not found' });
@@ -97,7 +98,7 @@ exports.bulkUploadStates = async (req, res, next) => {
       for (const state of states) {
         const result = await client.query(
           'INSERT INTO states (name, code, is_active) VALUES ($1, $2, $3) ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, is_active = EXCLUDED.is_active RETURNING *',
-          [state.name, state.code, state.is_active ?? true]
+          [state.name, state.code, state.isActive ?? true]
         );
         inserted.push(result.rows[0]);
       }
@@ -167,15 +168,16 @@ exports.getDistrictsByState = async (req, res, next) => {
   }
 };
 
+// UI params: name, code, stateId, isActive
 exports.createDistrict = async (req, res, next) => {
   try {
-    const { name, code, state_id, is_active = true } = req.body;
-    if (!name || !code || !state_id) {
-      return res.status(400).json({ success: false, message: 'Name, code, and state_id are required' });
+    const { name, code, stateId, isActive = true } = req.body;
+    if (!name || !code || !stateId) {
+      return res.status(400).json({ success: false, message: 'Name, code, and stateId are required' });
     }
     const result = await query(
       'INSERT INTO districts (name, code, state_id, is_active) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, code, state_id, is_active]
+      [name, code, stateId, isActive]
     );
     res.status(201).json({ success: true, data: result.rows[0], message: 'District created successfully' });
   } catch (error) {
@@ -188,10 +190,10 @@ exports.createDistrict = async (req, res, next) => {
 
 exports.updateDistrict = async (req, res, next) => {
   try {
-    const { name, code, state_id, is_active } = req.body;
+    const { name, code, stateId, isActive } = req.body;
     const result = await query(
       `UPDATE districts SET name = COALESCE($1, name), code = COALESCE($2, code), state_id = COALESCE($3, state_id), is_active = COALESCE($4, is_active) WHERE id = $5 RETURNING *`,
-      [name, code, state_id, is_active, req.params.id]
+      [name, code, stateId, isActive, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'District not found' });
@@ -225,7 +227,7 @@ exports.bulkUploadDistricts = async (req, res, next) => {
       for (const district of districts) {
         const result = await client.query(
           'INSERT INTO districts (name, code, state_id, is_active) VALUES ($1, $2, $3, $4) ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, state_id = EXCLUDED.state_id, is_active = EXCLUDED.is_active RETURNING *',
-          [district.name, district.code, district.state_id, district.is_active ?? true]
+          [district.name, district.code, district.stateId, district.isActive ?? true]
         );
         inserted.push(result.rows[0]);
       }
@@ -295,15 +297,16 @@ exports.getBlocksByDistrict = async (req, res, next) => {
   }
 };
 
+// UI params: name, code, districtId, isActive
 exports.createBlock = async (req, res, next) => {
   try {
-    const { name, code, district_id, is_active = true } = req.body;
-    if (!name || !code || !district_id) {
-      return res.status(400).json({ success: false, message: 'Name, code, and district_id are required' });
+    const { name, code, districtId, isActive = true } = req.body;
+    if (!name || !code || !districtId) {
+      return res.status(400).json({ success: false, message: 'Name, code, and districtId are required' });
     }
     const result = await query(
       'INSERT INTO blocks (name, code, district_id, is_active) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, code, district_id, is_active]
+      [name, code, districtId, isActive]
     );
     res.status(201).json({ success: true, data: result.rows[0], message: 'Block created successfully' });
   } catch (error) {
@@ -316,10 +319,10 @@ exports.createBlock = async (req, res, next) => {
 
 exports.updateBlock = async (req, res, next) => {
   try {
-    const { name, code, district_id, is_active } = req.body;
+    const { name, code, districtId, isActive } = req.body;
     const result = await query(
       `UPDATE blocks SET name = COALESCE($1, name), code = COALESCE($2, code), district_id = COALESCE($3, district_id), is_active = COALESCE($4, is_active) WHERE id = $5 RETURNING *`,
-      [name, code, district_id, is_active, req.params.id]
+      [name, code, districtId, isActive, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Block not found' });
@@ -353,7 +356,7 @@ exports.bulkUploadBlocks = async (req, res, next) => {
       for (const block of blocks) {
         const result = await client.query(
           'INSERT INTO blocks (name, code, district_id, is_active) VALUES ($1, $2, $3, $4) ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, district_id = EXCLUDED.district_id, is_active = EXCLUDED.is_active RETURNING *',
-          [block.name, block.code, block.district_id, block.is_active ?? true]
+          [block.name, block.code, block.districtId, block.isActive ?? true]
         );
         inserted.push(result.rows[0]);
       }
@@ -423,15 +426,16 @@ exports.getPanchayatsByBlock = async (req, res, next) => {
   }
 };
 
+// UI params: name, code, blockId, isActive
 exports.createPanchayat = async (req, res, next) => {
   try {
-    const { name, code, block_id, is_active = true } = req.body;
-    if (!name || !code || !block_id) {
-      return res.status(400).json({ success: false, message: 'Name, code, and block_id are required' });
+    const { name, code, blockId, isActive = true } = req.body;
+    if (!name || !code || !blockId) {
+      return res.status(400).json({ success: false, message: 'Name, code, and blockId are required' });
     }
     const result = await query(
       'INSERT INTO panchayats (name, code, block_id, is_active) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, code, block_id, is_active]
+      [name, code, blockId, isActive]
     );
     res.status(201).json({ success: true, data: result.rows[0], message: 'Panchayat created successfully' });
   } catch (error) {
@@ -444,10 +448,10 @@ exports.createPanchayat = async (req, res, next) => {
 
 exports.updatePanchayat = async (req, res, next) => {
   try {
-    const { name, code, block_id, is_active } = req.body;
+    const { name, code, blockId, isActive } = req.body;
     const result = await query(
       `UPDATE panchayats SET name = COALESCE($1, name), code = COALESCE($2, code), block_id = COALESCE($3, block_id), is_active = COALESCE($4, is_active) WHERE id = $5 RETURNING *`,
-      [name, code, block_id, is_active, req.params.id]
+      [name, code, blockId, isActive, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Panchayat not found' });
@@ -481,7 +485,7 @@ exports.bulkUploadPanchayats = async (req, res, next) => {
       for (const panchayat of panchayats) {
         const result = await client.query(
           'INSERT INTO panchayats (name, code, block_id, is_active) VALUES ($1, $2, $3, $4) ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, block_id = EXCLUDED.block_id, is_active = EXCLUDED.is_active RETURNING *',
-          [panchayat.name, panchayat.code, panchayat.block_id, panchayat.is_active ?? true]
+          [panchayat.name, panchayat.code, panchayat.blockId, panchayat.isActive ?? true]
         );
         inserted.push(result.rows[0]);
       }
@@ -551,15 +555,16 @@ exports.getVillagesByPanchayat = async (req, res, next) => {
   }
 };
 
+// UI params: name, code, panchayatId, isActive
 exports.createVillage = async (req, res, next) => {
   try {
-    const { name, code, panchayat_id, is_active = true } = req.body;
-    if (!name || !code || !panchayat_id) {
-      return res.status(400).json({ success: false, message: 'Name, code, and panchayat_id are required' });
+    const { name, code, panchayatId, isActive = true } = req.body;
+    if (!name || !code || !panchayatId) {
+      return res.status(400).json({ success: false, message: 'Name, code, and panchayatId are required' });
     }
     const result = await query(
       'INSERT INTO villages (name, code, panchayat_id, is_active) VALUES ($1, $2, $3, $4) RETURNING *',
-      [name, code, panchayat_id, is_active]
+      [name, code, panchayatId, isActive]
     );
     res.status(201).json({ success: true, data: result.rows[0], message: 'Village created successfully' });
   } catch (error) {
@@ -572,10 +577,10 @@ exports.createVillage = async (req, res, next) => {
 
 exports.updateVillage = async (req, res, next) => {
   try {
-    const { name, code, panchayat_id, is_active } = req.body;
+    const { name, code, panchayatId, isActive } = req.body;
     const result = await query(
       `UPDATE villages SET name = COALESCE($1, name), code = COALESCE($2, code), panchayat_id = COALESCE($3, panchayat_id), is_active = COALESCE($4, is_active) WHERE id = $5 RETURNING *`,
-      [name, code, panchayat_id, is_active, req.params.id]
+      [name, code, panchayatId, isActive, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Village not found' });
@@ -609,7 +614,7 @@ exports.bulkUploadVillages = async (req, res, next) => {
       for (const village of villages) {
         const result = await client.query(
           'INSERT INTO villages (name, code, panchayat_id, is_active) VALUES ($1, $2, $3, $4) ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name, panchayat_id = EXCLUDED.panchayat_id, is_active = EXCLUDED.is_active RETURNING *',
-          [village.name, village.code, village.panchayat_id, village.is_active ?? true]
+          [village.name, village.code, village.panchayatId, village.isActive ?? true]
         );
         inserted.push(result.rows[0]);
       }
@@ -644,10 +649,10 @@ exports.getAllPincodes = async (req, res, next) => {
       params.push(is_active === 'true');
     }
     if (search) {
-      sql += ` AND (pincode ILIKE $${paramIndex} OR area_name ILIKE $${paramIndex})`;
+      sql += ` AND (code ILIKE $${paramIndex} OR area ILIKE $${paramIndex})`;
       params.push(`%${search}%`);
     }
-    sql += ' ORDER BY pincode ASC';
+    sql += ' ORDER BY code ASC';
 
     const result = await query(sql, params);
     res.json({ success: true, data: result.rows });
@@ -671,7 +676,7 @@ exports.getPincodeById = async (req, res, next) => {
 exports.searchByPincode = async (req, res, next) => {
   try {
     const result = await query(
-      'SELECT * FROM pincodes WHERE pincode = $1 AND is_active = true',
+      'SELECT * FROM pincodes WHERE code = $1 AND is_active = true',
       [req.params.pincode]
     );
     res.json({ success: true, data: result.rows });
@@ -680,15 +685,16 @@ exports.searchByPincode = async (req, res, next) => {
   }
 };
 
+// UI params: code, area, villageId, districtId, stateId, isActive
 exports.createPincode = async (req, res, next) => {
   try {
-    const { pincode, area_name, village_id, district_id, state_id, is_active = true } = req.body;
-    if (!pincode) {
-      return res.status(400).json({ success: false, message: 'Pincode is required' });
+    const { code, area, villageId, districtId, stateId, isActive = true } = req.body;
+    if (!code) {
+      return res.status(400).json({ success: false, message: 'Pincode code is required' });
     }
     const result = await query(
-      'INSERT INTO pincodes (pincode, area_name, village_id, district_id, state_id, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [pincode, area_name, village_id, district_id, state_id, is_active]
+      'INSERT INTO pincodes (code, area, village_id, district_id, state_id, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [code, area, villageId, districtId, stateId, isActive]
     );
     res.status(201).json({ success: true, data: result.rows[0], message: 'Pincode created successfully' });
   } catch (error) {
@@ -698,10 +704,10 @@ exports.createPincode = async (req, res, next) => {
 
 exports.updatePincode = async (req, res, next) => {
   try {
-    const { pincode, area_name, village_id, district_id, state_id, is_active } = req.body;
+    const { code, area, villageId, districtId, stateId, isActive } = req.body;
     const result = await query(
-      `UPDATE pincodes SET pincode = COALESCE($1, pincode), area_name = COALESCE($2, area_name), village_id = COALESCE($3, village_id), district_id = COALESCE($4, district_id), state_id = COALESCE($5, state_id), is_active = COALESCE($6, is_active) WHERE id = $7 RETURNING *`,
-      [pincode, area_name, village_id, district_id, state_id, is_active, req.params.id]
+      `UPDATE pincodes SET code = COALESCE($1, code), area = COALESCE($2, area), village_id = COALESCE($3, village_id), district_id = COALESCE($4, district_id), state_id = COALESCE($5, state_id), is_active = COALESCE($6, is_active) WHERE id = $7 RETURNING *`,
+      [code, area, villageId, districtId, stateId, isActive, req.params.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Pincode not found' });
@@ -734,8 +740,8 @@ exports.bulkUploadPincodes = async (req, res, next) => {
       const inserted = [];
       for (const pin of pincodes) {
         const result = await client.query(
-          'INSERT INTO pincodes (pincode, area_name, village_id, district_id, state_id, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-          [pin.pincode, pin.area_name, pin.village_id, pin.district_id, pin.state_id, pin.is_active ?? true]
+          'INSERT INTO pincodes (code, area, village_id, district_id, state_id, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+          [pin.code, pin.area, pin.villageId, pin.districtId, pin.stateId, pin.isActive ?? true]
         );
         inserted.push(result.rows[0]);
       }
