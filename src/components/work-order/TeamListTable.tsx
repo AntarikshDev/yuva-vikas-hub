@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, UserMinus, ArrowUpDown, Search } from "lucide-react";
+import { Eye, UserMinus, UserCog, ArrowUpDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MobilisationTeamMember } from "./WorkOrderAssignmentTab";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +32,7 @@ interface TeamListTableProps {
   members: MobilisationTeamMember[];
   onViewProfile: (member: MobilisationTeamMember) => void;
   onRemove?: (memberId: string) => void;
+  onReplace?: (member: MobilisationTeamMember) => void;
   canEdit: boolean;
 }
 
@@ -47,7 +55,7 @@ const statusBadges: Record<string, { variant: "default" | "secondary" | "destruc
 type SortField = 'employeeId' | 'name' | 'role' | 'salary' | 'status';
 type SortOrder = 'asc' | 'desc';
 
-const TeamListTable = ({ members, onViewProfile, onRemove, canEdit }: TeamListTableProps) => {
+const TeamListTable = ({ members, onViewProfile, onRemove, onReplace, canEdit }: TeamListTableProps) => {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -206,27 +214,37 @@ const TeamListTable = ({ members, onViewProfile, onRemove, canEdit }: TeamListTa
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onViewProfile(member)}
-                        title="View Profile"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      {canEdit && onRemove && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onRemove(member.id)}
-                          title="Remove"
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <UserMinus className="h-4 w-4" />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          Actions
                         </Button>
-                      )}
-                    </div>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onViewProfile(member)}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Profile
+                        </DropdownMenuItem>
+                        {canEdit && onReplace && (
+                          <DropdownMenuItem onClick={() => onReplace(member)}>
+                            <UserCog className="h-4 w-4 mr-2" />
+                            Replace
+                          </DropdownMenuItem>
+                        )}
+                        {canEdit && onRemove && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => onRemove(member.id)}
+                              className="text-destructive"
+                            >
+                              <UserMinus className="h-4 w-4 mr-2" />
+                              Remove
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))
