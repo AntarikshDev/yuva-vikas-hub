@@ -48,6 +48,7 @@ import DirectorMobilisationMonitoring from "./pages/director/MobilisationMonitor
 import DirectorActivitiesMonitoring from "./pages/director/ActivitiesMonitoring";
 import DirectorOFRMonitoring from "./pages/director/OFRMonitoring";
 import DirectorTargetManagement from "./pages/director/TargetManagement";
+import DirectorMasterDataManagement from "./pages/director/MasterDataManagement";
 
 // National Head Routes
 import NationalHeadDashboard from "./pages/national-head/Dashboard";
@@ -217,6 +218,7 @@ const App = () => {
             <Route path="/director/activities-monitoring" element={<DirectorActivitiesMonitoring />} />
             <Route path="/director/ofr-monitoring" element={<DirectorOFRMonitoring />} />
             <Route path="/director/target-management" element={<DirectorTargetManagement />} />
+            <Route path="/director/master-data" element={<DirectorMasterDataManagement />} />
             
             {/* National Head Routes */}
             <Route path="/national-head/dashboard" element={<NationalHeadDashboard />} />
