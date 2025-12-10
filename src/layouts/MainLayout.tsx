@@ -520,8 +520,13 @@ function getNavigationByRole(role: MainLayoutProps['role']): NavGroup[] {
         ]
       },
       {
-        label: 'Settings',
+        label: 'Administration',
         items: [
+          { 
+            name: 'Master Data Management', 
+            path: '/director/master-data', 
+            icon: ({ className }) => <span className={className || ''}>🗂️</span>
+          },
           { name: 'Profile', path: '/director/profile', icon: User },
           { name: 'System Settings', path: '/director/settings', icon: Settings },
         ]
