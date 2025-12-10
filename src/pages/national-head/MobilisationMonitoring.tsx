@@ -111,8 +111,8 @@ const NationalHeadMobilisationMonitoring = () => {
           onWorkOrderToggle={handleWorkOrderToggle}
         />
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        {/* KPI Cards - Row 1 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <MobilisationKPICard
             title="Mobilisation Team Matrix"
             metrics={kpiMetrics.team_matrix}
@@ -137,6 +137,10 @@ const NationalHeadMobilisationMonitoring = () => {
             isSelected={selectedKPI === 'mobilisation_budget'}
             onClick={() => handleKPIClick('mobilisation_budget')}
           />
+        </div>
+
+        {/* KPI Cards - Row 2 */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <MobilisationKPICard
             title="OFR Target"
             metrics={kpiMetrics.ofr_target}
