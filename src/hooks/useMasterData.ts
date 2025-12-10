@@ -244,8 +244,8 @@ export function useLocations(params: LocationsParams) {
   const villagesQuery = useGetVillagesQuery({ search, panchayatId }, { skip: type !== 'village' });
   const pincodesQuery = useGetPincodesQuery({ search, districtId }, { skip: type !== 'pincode' });
 
-  const locations = useMemo(() => {
-    const getMockData = () => {
+  const locations: any[] = useMemo(() => {
+    const getMockData = (): any[] => {
       switch (type) {
         case 'state': return mockStates;
         case 'district': return mockDistricts;
@@ -257,7 +257,7 @@ export function useLocations(params: LocationsParams) {
       }
     };
 
-    const getApiData = () => {
+    const getApiData = (): any[] | undefined => {
       switch (type) {
         case 'state': return statesQuery.data;
         case 'district': return districtsQuery.data;
