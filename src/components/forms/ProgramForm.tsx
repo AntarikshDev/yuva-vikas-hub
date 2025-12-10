@@ -302,7 +302,6 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                               </CollapsibleTrigger>
                               <Checkbox
                                 checked={isStateFullySelected(state)}
-                                ref={undefined}
                                 onCheckedChange={() => toggleStateSelection(state)}
                                 className={isStatePartiallySelected(state) ? 'data-[state=checked]:bg-primary/50' : ''}
                               />
