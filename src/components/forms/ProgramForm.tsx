@@ -301,9 +301,8 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                                 </Button>
                               </CollapsibleTrigger>
                               <Checkbox
-                                checked={isStateFullySelected(state)}
+                                checked={isStateFullySelected(state) ? true : isStatePartiallySelected(state) ? 'indeterminate' : false}
                                 onCheckedChange={() => toggleStateSelection(state)}
-                                className={isStatePartiallySelected(state) ? 'data-[state=checked]:bg-primary/50' : ''}
                               />
                               <MapPin className="h-4 w-4 text-primary" />
                               <span className="font-medium text-sm">{state.name}</span>
@@ -317,11 +316,15 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                                   <div
                                     key={centre.id}
                                     className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
-                                    onClick={() => toggleCentreSelection(centre.id)}
                                   >
                                     <Checkbox
                                       checked={selectedCentres.includes(centre.id)}
-                                      onCheckedChange={() => toggleCentreSelection(centre.id)}
+                                      onCheckedChange={(checked) => {
+                                        if (checked !== 'indeterminate') {
+                                          toggleCentreSelection(centre.id);
+                                        }
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
                                     />
                                     <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                                     <span className="text-sm">{centre.name}</span>
