@@ -9,6 +9,7 @@ const locationRoutes = require('./routes/locationRoutes');
 const sectorRoutes = require('./routes/sectorRoutes');
 const jobRoleRoutes = require('./routes/jobRoleRoutes');
 const documentTypeRoutes = require('./routes/documentTypeRoutes');
+const workOrderRoutes = require('./routes/workOrderRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -34,6 +35,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/sectors', sectorRoutes);
 app.use('/api/job-roles', jobRoleRoutes);
 app.use('/api/document-types', documentTypeRoutes);
+app.use('/api/work-orders', workOrderRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
