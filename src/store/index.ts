@@ -5,9 +5,11 @@ import mobilisationSlice from './slices/mobilisationSlice';
 import directorSlice from './slices/directorSlice';
 import nationalHeadSlice from './slices/nationalHeadSlice';
 import targetManagementSlice from './slices/targetManagementSlice';
+import { baseApi } from './api/baseApi';
 
 export const store = configureStore({
   reducer: {
+    [baseApi.reducerPath]: baseApi.reducer,
     auth: authSlice,
     dashboard: dashboardSlice,
     mobilisation: mobilisationSlice,
@@ -20,7 +22,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: ['persist/PERSIST'],
       },
-    }),
+    }).concat(baseApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
