@@ -1,13 +1,17 @@
 import { useMemo } from 'react';
 import { 
   useGetProgramsQuery, 
+  useGetProgramByIdQuery,
   useCreateProgramMutation, 
   useUpdateProgramMutation, 
-  useDeleteProgramMutation 
+  useDeleteProgramMutation,
+  useBulkUploadProgramsMutation,
 } from '@/store/api/programsApi';
 import {
   useGetStatesQuery,
+  useGetStateByIdQuery,
   useGetDistrictsQuery,
+  useGetDistrictByIdQuery,
   useGetBlocksQuery,
   useGetPanchayatsQuery,
   useGetVillagesQuery,
@@ -16,29 +20,45 @@ import {
   useUpdateStateMutation,
   useDeleteStateMutation,
   useCreateDistrictMutation,
+  useUpdateDistrictMutation,
+  useDeleteDistrictMutation,
   useCreateBlockMutation,
+  useUpdateBlockMutation,
+  useDeleteBlockMutation,
   useCreatePanchayatMutation,
+  useUpdatePanchayatMutation,
+  useDeletePanchayatMutation,
   useCreateVillageMutation,
+  useUpdateVillageMutation,
+  useDeleteVillageMutation,
   useCreatePincodeMutation,
+  useUpdatePincodeMutation,
+  useDeletePincodeMutation,
   useBulkUploadLocationsMutation,
 } from '@/store/api/locationsApi';
 import {
   useGetSectorsQuery,
+  useGetSectorByIdQuery,
   useCreateSectorMutation,
   useUpdateSectorMutation,
   useDeleteSectorMutation,
+  useBulkUploadSectorsMutation,
 } from '@/store/api/sectorsApi';
 import {
   useGetJobRolesQuery,
+  useGetJobRoleByIdQuery,
   useCreateJobRoleMutation,
   useUpdateJobRoleMutation,
   useDeleteJobRoleMutation,
+  useBulkUploadJobRolesMutation,
 } from '@/store/api/jobRolesApi';
 import {
   useGetDocumentTypesQuery,
+  useGetDocumentTypeByIdQuery,
   useCreateDocumentTypeMutation,
   useUpdateDocumentTypeMutation,
   useDeleteDocumentTypeMutation,
+  useBulkUploadDocumentTypesMutation,
 } from '@/store/api/documentTypesApi';
 import type { LocationType } from '@/types/location';
 import type { ProgramsQueryParams } from '@/types/program';
@@ -161,14 +181,10 @@ const mockDocumentTypes = [
   { id: '6', code: 'DOC006', name: 'Income Certificate', category: 'Income Proof', isRequired: false, allowedFormats: ['PDF'], isActive: false, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
-// Custom hook for Programs with mock fallback
+// ============ PROGRAMS HOOKS ============
 export function usePrograms(params: ProgramsQueryParams = {}) {
   const { data, isLoading, error, refetch } = useGetProgramsQuery(params);
-  const [createProgram, { isLoading: isCreating }] = useCreateProgramMutation();
-  const [updateProgram, { isLoading: isUpdating }] = useUpdateProgramMutation();
-  const [deleteProgram, { isLoading: isDeleting }] = useDeleteProgramMutation();
 
-  // Use mock data if API fails or returns no data
   const programs = useMemo(() => {
     if (error || !data) {
       let filtered = mockPrograms;
@@ -187,23 +203,43 @@ export function usePrograms(params: ProgramsQueryParams = {}) {
     return data;
   }, [data, error, params.search, params.status]);
 
+  return { programs, isLoading, error, refetch };
+}
+
+export function useProgramById(id: string) {
+  const { data, isLoading, error } = useGetProgramByIdQuery(id, { skip: !id });
+  return { program: data, isLoading, error };
+}
+
+export function useProgramMutations() {
+  const [createProgram, { isLoading: isCreating }] = useCreateProgramMutation();
+  const [updateProgram, { isLoading: isUpdating }] = useUpdateProgramMutation();
+  const [deleteProgram, { isLoading: isDeleting }] = useDeleteProgramMutation();
+  const [bulkUploadPrograms, { isLoading: isBulkUploading }] = useBulkUploadProgramsMutation();
+
   return {
-    programs,
-    isLoading,
-    error,
-    refetch,
     createProgram,
     updateProgram,
     deleteProgram,
+    bulkUploadPrograms,
     isCreating,
     isUpdating,
     isDeleting,
+    isBulkUploading,
   };
 }
 
-// Custom hook for Locations with mock fallback
-export function useLocations(locationType: LocationType, params: { search?: string; stateId?: string; districtId?: string; blockId?: string; panchayatId?: string } = {}) {
-  // Fetch data based on location type
+// ============ LOCATIONS HOOKS ============
+interface LocationsParams {
+  search?: string;
+  status?: 'active' | 'inactive' | 'all';
+  stateId?: string;
+  districtId?: string;
+  blockId?: string;
+  panchayatId?: string;
+}
+
+export function useLocations(locationType: LocationType, params: LocationsParams = {}) {
   const statesQuery = useGetStatesQuery(params, { skip: locationType !== 'state' });
   const districtsQuery = useGetDistrictsQuery(params, { skip: locationType !== 'district' });
   const blocksQuery = useGetBlocksQuery(params, { skip: locationType !== 'block' });
@@ -211,19 +247,35 @@ export function useLocations(locationType: LocationType, params: { search?: stri
   const villagesQuery = useGetVillagesQuery(params, { skip: locationType !== 'village' });
   const pincodesQuery = useGetPincodesQuery(params, { skip: locationType !== 'pincode' });
 
-  // Mutations
-  const [createState] = useCreateStateMutation();
-  const [updateState] = useUpdateStateMutation();
-  const [deleteState] = useDeleteStateMutation();
-  const [createDistrict] = useCreateDistrictMutation();
-  const [createBlock] = useCreateBlockMutation();
-  const [createPanchayat] = useCreatePanchayatMutation();
-  const [createVillage] = useCreateVillageMutation();
-  const [createPincode] = useCreatePincodeMutation();
-  const [bulkUploadLocations] = useBulkUploadLocationsMutation();
+  const getMockData = () => {
+    switch (locationType) {
+      case 'state': return mockStates;
+      case 'district': return mockDistricts;
+      case 'block': return mockBlocks;
+      case 'panchayat': return mockPanchayats;
+      case 'village': return mockVillages;
+      case 'pincode': return mockPincodes;
+      default: return [];
+    }
+  };
 
-  // Get current query based on type
-  const getCurrentQuery = () => {
+  const filterMockData = (data: any[]) => {
+    let filtered = [...data];
+    if (params.search) {
+      const search = params.search.toLowerCase();
+      filtered = filtered.filter(item => 
+        (item.name?.toLowerCase().includes(search)) ||
+        (item.code?.toLowerCase().includes(search)) ||
+        (item.area?.toLowerCase().includes(search))
+      );
+    }
+    if (params.status && params.status !== 'all') {
+      filtered = filtered.filter(item => item.isActive === (params.status === 'active'));
+    }
+    return filtered;
+  };
+
+  const getQueryResult = () => {
     switch (locationType) {
       case 'state': return statesQuery;
       case 'district': return districtsQuery;
@@ -235,64 +287,84 @@ export function useLocations(locationType: LocationType, params: { search?: stri
     }
   };
 
-  const currentQuery = getCurrentQuery();
-
-  // Get mock data based on type
-  const getMockData = () => {
-    let mockData: any[];
-    switch (locationType) {
-      case 'state': mockData = mockStates; break;
-      case 'district': mockData = mockDistricts; break;
-      case 'block': mockData = mockBlocks; break;
-      case 'panchayat': mockData = mockPanchayats; break;
-      case 'village': mockData = mockVillages; break;
-      case 'pincode': mockData = mockPincodes; break;
-      default: mockData = [];
-    }
-
-    // Apply search filter
-    if (params.search) {
-      const search = params.search.toLowerCase();
-      mockData = mockData.filter((item: any) => 
-        item.name?.toLowerCase().includes(search) ||
-        item.code?.toLowerCase().includes(search) ||
-        item.area?.toLowerCase().includes(search)
-      );
-    }
-
-    return mockData;
-  };
+  const { data, isLoading, error, refetch } = getQueryResult();
 
   const locations = useMemo(() => {
-    if (currentQuery.error || !currentQuery.data) {
-      return getMockData();
+    if (error || !data) {
+      return filterMockData(getMockData());
     }
-    return currentQuery.data;
-  }, [currentQuery.data, currentQuery.error, locationType, params.search]);
+    return data;
+  }, [data, error, locationType, params.search, params.status]);
 
-  return {
-    locations,
-    isLoading: currentQuery.isLoading,
-    error: currentQuery.error,
-    refetch: currentQuery.refetch,
-    createState,
-    updateState,
-    deleteState,
-    createDistrict,
-    createBlock,
-    createPanchayat,
-    createVillage,
-    createPincode,
-    bulkUploadLocations,
-  };
+  return { locations, isLoading, error, refetch };
 }
 
-// Custom hook for Sectors with mock fallback
+export function useStateById(id: string) {
+  const { data, isLoading, error } = useGetStateByIdQuery(id, { skip: !id });
+  return { state: data, isLoading, error };
+}
+
+export function useDistrictById(id: string) {
+  const { data, isLoading, error } = useGetDistrictByIdQuery(id, { skip: !id });
+  return { district: data, isLoading, error };
+}
+
+export function useStateMutations() {
+  const [createState, { isLoading: isCreating }] = useCreateStateMutation();
+  const [updateState, { isLoading: isUpdating }] = useUpdateStateMutation();
+  const [deleteState, { isLoading: isDeleting }] = useDeleteStateMutation();
+
+  return { createState, updateState, deleteState, isCreating, isUpdating, isDeleting };
+}
+
+export function useDistrictMutations() {
+  const [createDistrict, { isLoading: isCreating }] = useCreateDistrictMutation();
+  const [updateDistrict, { isLoading: isUpdating }] = useUpdateDistrictMutation();
+  const [deleteDistrict, { isLoading: isDeleting }] = useDeleteDistrictMutation();
+
+  return { createDistrict, updateDistrict, deleteDistrict, isCreating, isUpdating, isDeleting };
+}
+
+export function useBlockMutations() {
+  const [createBlock, { isLoading: isCreating }] = useCreateBlockMutation();
+  const [updateBlock, { isLoading: isUpdating }] = useUpdateBlockMutation();
+  const [deleteBlock, { isLoading: isDeleting }] = useDeleteBlockMutation();
+
+  return { createBlock, updateBlock, deleteBlock, isCreating, isUpdating, isDeleting };
+}
+
+export function usePanchayatMutations() {
+  const [createPanchayat, { isLoading: isCreating }] = useCreatePanchayatMutation();
+  const [updatePanchayat, { isLoading: isUpdating }] = useUpdatePanchayatMutation();
+  const [deletePanchayat, { isLoading: isDeleting }] = useDeletePanchayatMutation();
+
+  return { createPanchayat, updatePanchayat, deletePanchayat, isCreating, isUpdating, isDeleting };
+}
+
+export function useVillageMutations() {
+  const [createVillage, { isLoading: isCreating }] = useCreateVillageMutation();
+  const [updateVillage, { isLoading: isUpdating }] = useUpdateVillageMutation();
+  const [deleteVillage, { isLoading: isDeleting }] = useDeleteVillageMutation();
+
+  return { createVillage, updateVillage, deleteVillage, isCreating, isUpdating, isDeleting };
+}
+
+export function usePincodeMutations() {
+  const [createPincode, { isLoading: isCreating }] = useCreatePincodeMutation();
+  const [updatePincode, { isLoading: isUpdating }] = useUpdatePincodeMutation();
+  const [deletePincode, { isLoading: isDeleting }] = useDeletePincodeMutation();
+
+  return { createPincode, updatePincode, deletePincode, isCreating, isUpdating, isDeleting };
+}
+
+export function useLocationBulkUpload() {
+  const [bulkUploadLocations, { isLoading }] = useBulkUploadLocationsMutation();
+  return { bulkUploadLocations, isLoading };
+}
+
+// ============ SECTORS HOOKS ============
 export function useSectors(params: SectorsQueryParams = {}) {
   const { data, isLoading, error, refetch } = useGetSectorsQuery(params);
-  const [createSector, { isLoading: isCreating }] = useCreateSectorMutation();
-  const [updateSector, { isLoading: isUpdating }] = useUpdateSectorMutation();
-  const [deleteSector, { isLoading: isDeleting }] = useDeleteSectorMutation();
 
   const sectors = useMemo(() => {
     if (error || !data) {
@@ -312,26 +384,35 @@ export function useSectors(params: SectorsQueryParams = {}) {
     return data;
   }, [data, error, params.search, params.status]);
 
+  return { sectors, isLoading, error, refetch };
+}
+
+export function useSectorById(id: string) {
+  const { data, isLoading, error } = useGetSectorByIdQuery(id, { skip: !id });
+  return { sector: data, isLoading, error };
+}
+
+export function useSectorMutations() {
+  const [createSector, { isLoading: isCreating }] = useCreateSectorMutation();
+  const [updateSector, { isLoading: isUpdating }] = useUpdateSectorMutation();
+  const [deleteSector, { isLoading: isDeleting }] = useDeleteSectorMutation();
+  const [bulkUploadSectors, { isLoading: isBulkUploading }] = useBulkUploadSectorsMutation();
+
   return {
-    sectors,
-    isLoading,
-    error,
-    refetch,
     createSector,
     updateSector,
     deleteSector,
+    bulkUploadSectors,
     isCreating,
     isUpdating,
     isDeleting,
+    isBulkUploading,
   };
 }
 
-// Custom hook for Job Roles with mock fallback
+// ============ JOB ROLES HOOKS ============
 export function useJobRoles(params: JobRolesQueryParams = {}) {
   const { data, isLoading, error, refetch } = useGetJobRolesQuery(params);
-  const [createJobRole, { isLoading: isCreating }] = useCreateJobRoleMutation();
-  const [updateJobRole, { isLoading: isUpdating }] = useUpdateJobRoleMutation();
-  const [deleteJobRole, { isLoading: isDeleting }] = useDeleteJobRoleMutation();
 
   const jobRoles = useMemo(() => {
     if (error || !data) {
@@ -340,11 +421,8 @@ export function useJobRoles(params: JobRolesQueryParams = {}) {
         const search = params.search.toLowerCase();
         filtered = filtered.filter(j => 
           j.title.toLowerCase().includes(search) || 
-          j.sectorName?.toLowerCase().includes(search)
+          j.sectorName.toLowerCase().includes(search)
         );
-      }
-      if (params.sectorId) {
-        filtered = filtered.filter(j => j.sectorId === params.sectorId);
       }
       if (params.status && params.status !== 'all') {
         filtered = filtered.filter(j => j.isActive === (params.status === 'active'));
@@ -352,28 +430,37 @@ export function useJobRoles(params: JobRolesQueryParams = {}) {
       return filtered;
     }
     return data;
-  }, [data, error, params.search, params.sectorId, params.status]);
+  }, [data, error, params.search, params.status]);
+
+  return { jobRoles, isLoading, error, refetch };
+}
+
+export function useJobRoleById(id: string) {
+  const { data, isLoading, error } = useGetJobRoleByIdQuery(id, { skip: !id });
+  return { jobRole: data, isLoading, error };
+}
+
+export function useJobRoleMutations() {
+  const [createJobRole, { isLoading: isCreating }] = useCreateJobRoleMutation();
+  const [updateJobRole, { isLoading: isUpdating }] = useUpdateJobRoleMutation();
+  const [deleteJobRole, { isLoading: isDeleting }] = useDeleteJobRoleMutation();
+  const [bulkUploadJobRoles, { isLoading: isBulkUploading }] = useBulkUploadJobRolesMutation();
 
   return {
-    jobRoles,
-    isLoading,
-    error,
-    refetch,
     createJobRole,
     updateJobRole,
     deleteJobRole,
+    bulkUploadJobRoles,
     isCreating,
     isUpdating,
     isDeleting,
+    isBulkUploading,
   };
 }
 
-// Custom hook for Document Types with mock fallback
+// ============ DOCUMENT TYPES HOOKS ============
 export function useDocumentTypes(params: DocumentTypesQueryParams = {}) {
   const { data, isLoading, error, refetch } = useGetDocumentTypesQuery(params);
-  const [createDocumentType, { isLoading: isCreating }] = useCreateDocumentTypeMutation();
-  const [updateDocumentType, { isLoading: isUpdating }] = useUpdateDocumentTypeMutation();
-  const [deleteDocumentType, { isLoading: isDeleting }] = useDeleteDocumentTypeMutation();
 
   const documentTypes = useMemo(() => {
     if (error || !data) {
@@ -385,27 +472,36 @@ export function useDocumentTypes(params: DocumentTypesQueryParams = {}) {
           d.category.toLowerCase().includes(search)
         );
       }
-      if (params.category) {
-        filtered = filtered.filter(d => d.category === params.category);
-      }
       if (params.status && params.status !== 'all') {
         filtered = filtered.filter(d => d.isActive === (params.status === 'active'));
       }
       return filtered;
     }
     return data;
-  }, [data, error, params.search, params.category, params.status]);
+  }, [data, error, params.search, params.status]);
+
+  return { documentTypes, isLoading, error, refetch };
+}
+
+export function useDocumentTypeById(id: string) {
+  const { data, isLoading, error } = useGetDocumentTypeByIdQuery(id, { skip: !id });
+  return { documentType: data, isLoading, error };
+}
+
+export function useDocumentTypeMutations() {
+  const [createDocumentType, { isLoading: isCreating }] = useCreateDocumentTypeMutation();
+  const [updateDocumentType, { isLoading: isUpdating }] = useUpdateDocumentTypeMutation();
+  const [deleteDocumentType, { isLoading: isDeleting }] = useDeleteDocumentTypeMutation();
+  const [bulkUploadDocumentTypes, { isLoading: isBulkUploading }] = useBulkUploadDocumentTypesMutation();
 
   return {
-    documentTypes,
-    isLoading,
-    error,
-    refetch,
     createDocumentType,
     updateDocumentType,
     deleteDocumentType,
+    bulkUploadDocumentTypes,
     isCreating,
     isUpdating,
     isDeleting,
+    isBulkUploading,
   };
 }

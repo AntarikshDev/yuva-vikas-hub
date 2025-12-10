@@ -17,7 +17,23 @@ import { DirectorJobRoleForm } from '@/components/forms/DirectorJobRoleForm';
 import { DirectorDocumentForm } from '@/components/forms/DirectorDocumentForm';
 import { downloadLocationTemplate } from '@/utils/locationTemplates';
 import { LocationBulkUploadDialog } from '@/components/dialogs/LocationBulkUploadDialog';
-import { usePrograms, useLocations, useSectors, useJobRoles, useDocumentTypes } from '@/hooks/useMasterData';
+import { 
+  usePrograms, 
+  useProgramMutations,
+  useLocations, 
+  useStateMutations,
+  useDistrictMutations,
+  useBlockMutations,
+  usePanchayatMutations,
+  useVillageMutations,
+  usePincodeMutations,
+  useSectors, 
+  useSectorMutations,
+  useJobRoles, 
+  useJobRoleMutations,
+  useDocumentTypes,
+  useDocumentTypeMutations,
+} from '@/hooks/useMasterData';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { LocationType } from '@/types/location';
 
@@ -63,12 +79,24 @@ const DirectorMasterDataManagement = () => {
     documents: ''
   });
 
-  // RTK Query hooks
-  const { programs, isLoading: programsLoading, deleteProgram } = usePrograms({ search: searchQueries.programs });
-  const { locations, isLoading: locationsLoading, deleteState } = useLocations(locationSubType, { search: searchQueries.locations });
-  const { sectors, isLoading: sectorsLoading, deleteSector } = useSectors({ search: searchQueries.sectors });
-  const { jobRoles, isLoading: jobRolesLoading, deleteJobRole } = useJobRoles({ search: searchQueries.jobroles });
-  const { documentTypes, isLoading: documentsLoading, deleteDocumentType } = useDocumentTypes({ search: searchQueries.documents });
+  // RTK Query hooks for fetching data
+  const { programs, isLoading: programsLoading } = usePrograms({ search: searchQueries.programs });
+  const { locations, isLoading: locationsLoading } = useLocations(locationSubType, { search: searchQueries.locations });
+  const { sectors, isLoading: sectorsLoading } = useSectors({ search: searchQueries.sectors });
+  const { jobRoles, isLoading: jobRolesLoading } = useJobRoles({ search: searchQueries.jobroles });
+  const { documentTypes, isLoading: documentsLoading } = useDocumentTypes({ search: searchQueries.documents });
+
+  // RTK Query mutation hooks for CRUD operations
+  const { deleteProgram } = useProgramMutations();
+  const { deleteState } = useStateMutations();
+  const { deleteDistrict } = useDistrictMutations();
+  const { deleteBlock } = useBlockMutations();
+  const { deletePanchayat } = usePanchayatMutations();
+  const { deleteVillage } = useVillageMutations();
+  const { deletePincode } = usePincodeMutations();
+  const { deleteSector } = useSectorMutations();
+  const { deleteJobRole } = useJobRoleMutations();
+  const { deleteDocumentType } = useDocumentTypeMutations();
 
   const handleSearchChange = (category: string, value: string) => {
     setSearchQueries({ ...searchQueries, [category]: value });
@@ -113,7 +141,27 @@ const DirectorMasterDataManagement = () => {
           await deleteProgram(actionDialog.itemId);
           break;
         case 'locations':
-          await deleteState(actionDialog.itemId);
+          // Use appropriate delete mutation based on location sub-type
+          switch (locationSubType) {
+            case 'state':
+              await deleteState(actionDialog.itemId);
+              break;
+            case 'district':
+              await deleteDistrict(actionDialog.itemId);
+              break;
+            case 'block':
+              await deleteBlock(actionDialog.itemId);
+              break;
+            case 'panchayat':
+              await deletePanchayat(actionDialog.itemId);
+              break;
+            case 'village':
+              await deleteVillage(actionDialog.itemId);
+              break;
+            case 'pincode':
+              await deletePincode(actionDialog.itemId);
+              break;
+          }
           break;
         case 'sectors':
           await deleteSector(actionDialog.itemId);

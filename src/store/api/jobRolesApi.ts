@@ -66,6 +66,16 @@ export const jobRolesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'JobRole', id: 'LIST' }],
     }),
+
+    // Bulk upload job roles
+    bulkUploadJobRoles: builder.mutation<{ success: boolean; created: number; updated: number; errors: { row: number; message: string }[] }, FormData>({
+      query: (formData) => ({
+        url: 'job-roles/bulk-upload',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: [{ type: 'JobRole', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -75,4 +85,5 @@ export const {
   useCreateJobRoleMutation,
   useUpdateJobRoleMutation,
   useDeleteJobRoleMutation,
+  useBulkUploadJobRolesMutation,
 } = jobRolesApi;
