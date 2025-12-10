@@ -21,12 +21,7 @@ import {
   usePrograms, 
   useProgramMutations,
   useLocations, 
-  useStateMutations,
-  useDistrictMutations,
-  useBlockMutations,
-  usePanchayatMutations,
-  useVillageMutations,
-  usePincodeMutations,
+  useLocationMutations,
   useSectors, 
   useSectorMutations,
   useJobRoles, 
@@ -81,19 +76,14 @@ const DirectorMasterDataManagement = () => {
 
   // RTK Query hooks for fetching data
   const { programs, isLoading: programsLoading } = usePrograms({ search: searchQueries.programs });
-  const { locations, isLoading: locationsLoading } = useLocations(locationSubType, { search: searchQueries.locations });
+  const { locations, isLoading: locationsLoading } = useLocations({ type: locationSubType, search: searchQueries.locations });
   const { sectors, isLoading: sectorsLoading } = useSectors({ search: searchQueries.sectors });
   const { jobRoles, isLoading: jobRolesLoading } = useJobRoles({ search: searchQueries.jobroles });
   const { documentTypes, isLoading: documentsLoading } = useDocumentTypes({ search: searchQueries.documents });
 
   // RTK Query mutation hooks for CRUD operations
   const { deleteProgram } = useProgramMutations();
-  const { deleteState } = useStateMutations();
-  const { deleteDistrict } = useDistrictMutations();
-  const { deleteBlock } = useBlockMutations();
-  const { deletePanchayat } = usePanchayatMutations();
-  const { deleteVillage } = useVillageMutations();
-  const { deletePincode } = usePincodeMutations();
+  const locationMutations = useLocationMutations(locationSubType);
   const { deleteSector } = useSectorMutations();
   const { deleteJobRole } = useJobRoleMutations();
   const { deleteDocumentType } = useDocumentTypeMutations();

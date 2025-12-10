@@ -1,65 +1,68 @@
 import { useMemo } from 'react';
 import { 
+  // Programs
   useGetProgramsQuery, 
   useGetProgramByIdQuery,
   useCreateProgramMutation, 
   useUpdateProgramMutation, 
   useDeleteProgramMutation,
   useBulkUploadProgramsMutation,
-} from '@/store/api/programsApi';
-import {
+  // Locations - States
   useGetStatesQuery,
   useGetStateByIdQuery,
-  useGetDistrictsQuery,
-  useGetDistrictByIdQuery,
-  useGetBlocksQuery,
-  useGetPanchayatsQuery,
-  useGetVillagesQuery,
-  useGetPincodesQuery,
   useCreateStateMutation,
   useUpdateStateMutation,
   useDeleteStateMutation,
+  // Locations - Districts
+  useGetDistrictsQuery,
+  useGetDistrictByIdQuery,
   useCreateDistrictMutation,
   useUpdateDistrictMutation,
   useDeleteDistrictMutation,
+  // Locations - Blocks
+  useGetBlocksQuery,
   useCreateBlockMutation,
   useUpdateBlockMutation,
   useDeleteBlockMutation,
+  // Locations - Panchayats
+  useGetPanchayatsQuery,
   useCreatePanchayatMutation,
   useUpdatePanchayatMutation,
   useDeletePanchayatMutation,
+  // Locations - Villages
+  useGetVillagesQuery,
   useCreateVillageMutation,
   useUpdateVillageMutation,
   useDeleteVillageMutation,
+  // Locations - Pincodes
+  useGetPincodesQuery,
   useCreatePincodeMutation,
   useUpdatePincodeMutation,
   useDeletePincodeMutation,
+  // Locations - Bulk
   useBulkUploadLocationsMutation,
-} from '@/store/api/locationsApi';
-import {
+  // Sectors
   useGetSectorsQuery,
   useGetSectorByIdQuery,
   useCreateSectorMutation,
   useUpdateSectorMutation,
   useDeleteSectorMutation,
   useBulkUploadSectorsMutation,
-} from '@/store/api/sectorsApi';
-import {
+  // Job Roles
   useGetJobRolesQuery,
   useGetJobRoleByIdQuery,
   useCreateJobRoleMutation,
   useUpdateJobRoleMutation,
   useDeleteJobRoleMutation,
   useBulkUploadJobRolesMutation,
-} from '@/store/api/jobRolesApi';
-import {
+  // Document Types
   useGetDocumentTypesQuery,
   useGetDocumentTypeByIdQuery,
   useCreateDocumentTypeMutation,
   useUpdateDocumentTypeMutation,
   useDeleteDocumentTypeMutation,
   useBulkUploadDocumentTypesMutation,
-} from '@/store/api/documentTypesApi';
+} from '@/store/api/apiSlice';
 import type { LocationType } from '@/types/location';
 import type { ProgramsQueryParams } from '@/types/program';
 import type { SectorsQueryParams } from '@/types/sector';
@@ -192,174 +195,216 @@ export function usePrograms(params: ProgramsQueryParams = {}) {
         const search = params.search.toLowerCase();
         filtered = filtered.filter(p => 
           p.name.toLowerCase().includes(search) || 
-          p.fullName.toLowerCase().includes(search)
+          p.code.toLowerCase().includes(search)
         );
-      }
-      if (params.status && params.status !== 'all') {
-        filtered = filtered.filter(p => p.isActive === (params.status === 'active'));
       }
       return filtered;
     }
     return data;
-  }, [data, error, params.search, params.status]);
+  }, [data, error, params.search]);
 
   return { programs, isLoading, error, refetch };
 }
 
-export function useProgramById(id: string) {
-  const { data, isLoading, error } = useGetProgramByIdQuery(id, { skip: !id });
-  return { program: data, isLoading, error };
-}
-
 export function useProgramMutations() {
-  const [createProgram, { isLoading: isCreating }] = useCreateProgramMutation();
-  const [updateProgram, { isLoading: isUpdating }] = useUpdateProgramMutation();
-  const [deleteProgram, { isLoading: isDeleting }] = useDeleteProgramMutation();
-  const [bulkUploadPrograms, { isLoading: isBulkUploading }] = useBulkUploadProgramsMutation();
+  const [createProgram, createState] = useCreateProgramMutation();
+  const [updateProgram, updateState] = useUpdateProgramMutation();
+  const [deleteProgram, deleteState] = useDeleteProgramMutation();
+  const [bulkUpload, bulkUploadState] = useBulkUploadProgramsMutation();
 
   return {
     createProgram,
     updateProgram,
     deleteProgram,
-    bulkUploadPrograms,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    isBulkUploading,
+    bulkUpload,
+    isCreating: createState.isLoading,
+    isUpdating: updateState.isLoading,
+    isDeleting: deleteState.isLoading,
+    isBulkUploading: bulkUploadState.isLoading,
   };
 }
 
 // ============ LOCATIONS HOOKS ============
 interface LocationsParams {
+  type: LocationType;
   search?: string;
-  status?: 'active' | 'inactive' | 'all';
   stateId?: string;
   districtId?: string;
   blockId?: string;
   panchayatId?: string;
 }
 
-export function useLocations(locationType: LocationType, params: LocationsParams = {}) {
-  const statesQuery = useGetStatesQuery(params, { skip: locationType !== 'state' });
-  const districtsQuery = useGetDistrictsQuery(params, { skip: locationType !== 'district' });
-  const blocksQuery = useGetBlocksQuery(params, { skip: locationType !== 'block' });
-  const panchayatsQuery = useGetPanchayatsQuery(params, { skip: locationType !== 'panchayat' });
-  const villagesQuery = useGetVillagesQuery(params, { skip: locationType !== 'village' });
-  const pincodesQuery = useGetPincodesQuery(params, { skip: locationType !== 'pincode' });
+export function useLocations(params: LocationsParams) {
+  const { type, search, stateId, districtId, blockId, panchayatId } = params;
 
-  const getMockData = () => {
-    switch (locationType) {
-      case 'state': return mockStates;
-      case 'district': return mockDistricts;
-      case 'block': return mockBlocks;
-      case 'panchayat': return mockPanchayats;
-      case 'village': return mockVillages;
-      case 'pincode': return mockPincodes;
-      default: return [];
-    }
-  };
-
-  const filterMockData = (data: any[]) => {
-    let filtered = [...data];
-    if (params.search) {
-      const search = params.search.toLowerCase();
-      filtered = filtered.filter(item => 
-        (item.name?.toLowerCase().includes(search)) ||
-        (item.code?.toLowerCase().includes(search)) ||
-        (item.area?.toLowerCase().includes(search))
-      );
-    }
-    if (params.status && params.status !== 'all') {
-      filtered = filtered.filter(item => item.isActive === (params.status === 'active'));
-    }
-    return filtered;
-  };
-
-  const getQueryResult = () => {
-    switch (locationType) {
-      case 'state': return statesQuery;
-      case 'district': return districtsQuery;
-      case 'block': return blocksQuery;
-      case 'panchayat': return panchayatsQuery;
-      case 'village': return villagesQuery;
-      case 'pincode': return pincodesQuery;
-      default: return statesQuery;
-    }
-  };
-
-  const { data, isLoading, error, refetch } = getQueryResult();
+  const statesQuery = useGetStatesQuery({ search }, { skip: type !== 'state' });
+  const districtsQuery = useGetDistrictsQuery({ search, stateId }, { skip: type !== 'district' });
+  const blocksQuery = useGetBlocksQuery({ search, districtId }, { skip: type !== 'block' });
+  const panchayatsQuery = useGetPanchayatsQuery({ search, blockId }, { skip: type !== 'panchayat' });
+  const villagesQuery = useGetVillagesQuery({ search, panchayatId }, { skip: type !== 'village' });
+  const pincodesQuery = useGetPincodesQuery({ search, districtId }, { skip: type !== 'pincode' });
 
   const locations = useMemo(() => {
-    if (error || !data) {
-      return filterMockData(getMockData());
+    const getMockData = () => {
+      switch (type) {
+        case 'state': return mockStates;
+        case 'district': return mockDistricts;
+        case 'block': return mockBlocks;
+        case 'panchayat': return mockPanchayats;
+        case 'village': return mockVillages;
+        case 'pincode': return mockPincodes;
+        default: return [];
+      }
+    };
+
+    const getApiData = () => {
+      switch (type) {
+        case 'state': return statesQuery.data;
+        case 'district': return districtsQuery.data;
+        case 'block': return blocksQuery.data;
+        case 'panchayat': return panchayatsQuery.data;
+        case 'village': return villagesQuery.data;
+        case 'pincode': return pincodesQuery.data;
+        default: return undefined;
+      }
+    };
+
+    const apiData = getApiData();
+    if (apiData) return apiData;
+
+    let mockData = getMockData();
+    if (search) {
+      const searchLower = search.toLowerCase();
+      mockData = mockData.filter((item: { name?: string; code?: string }) => 
+        item.name?.toLowerCase().includes(searchLower) || 
+        item.code?.toLowerCase().includes(searchLower)
+      );
     }
-    return data;
-  }, [data, error, locationType, params.search, params.status]);
+    return mockData;
+  }, [type, search, statesQuery.data, districtsQuery.data, blocksQuery.data, panchayatsQuery.data, villagesQuery.data, pincodesQuery.data]);
 
-  return { locations, isLoading, error, refetch };
+  const isLoading = 
+    statesQuery.isLoading || 
+    districtsQuery.isLoading || 
+    blocksQuery.isLoading || 
+    panchayatsQuery.isLoading || 
+    villagesQuery.isLoading || 
+    pincodesQuery.isLoading;
+
+  const refetch = () => {
+    switch (type) {
+      case 'state': return statesQuery.refetch();
+      case 'district': return districtsQuery.refetch();
+      case 'block': return blocksQuery.refetch();
+      case 'panchayat': return panchayatsQuery.refetch();
+      case 'village': return villagesQuery.refetch();
+      case 'pincode': return pincodesQuery.refetch();
+    }
+  };
+
+  return { locations, isLoading, refetch };
 }
 
-export function useStateById(id: string) {
-  const { data, isLoading, error } = useGetStateByIdQuery(id, { skip: !id });
-  return { state: data, isLoading, error };
-}
+export function useLocationMutations(type: LocationType) {
+  // States
+  const [createState, createStateStatus] = useCreateStateMutation();
+  const [updateState, updateStateStatus] = useUpdateStateMutation();
+  const [deleteState, deleteStateStatus] = useDeleteStateMutation();
+  
+  // Districts
+  const [createDistrict, createDistrictStatus] = useCreateDistrictMutation();
+  const [updateDistrict, updateDistrictStatus] = useUpdateDistrictMutation();
+  const [deleteDistrict, deleteDistrictStatus] = useDeleteDistrictMutation();
+  
+  // Blocks
+  const [createBlock, createBlockStatus] = useCreateBlockMutation();
+  const [updateBlock, updateBlockStatus] = useUpdateBlockMutation();
+  const [deleteBlock, deleteBlockStatus] = useDeleteBlockMutation();
+  
+  // Panchayats
+  const [createPanchayat, createPanchayatStatus] = useCreatePanchayatMutation();
+  const [updatePanchayat, updatePanchayatStatus] = useUpdatePanchayatMutation();
+  const [deletePanchayat, deletePanchayatStatus] = useDeletePanchayatMutation();
+  
+  // Villages
+  const [createVillage, createVillageStatus] = useCreateVillageMutation();
+  const [updateVillage, updateVillageStatus] = useUpdateVillageMutation();
+  const [deleteVillage, deleteVillageStatus] = useDeleteVillageMutation();
+  
+  // Pincodes
+  const [createPincode, createPincodeStatus] = useCreatePincodeMutation();
+  const [updatePincode, updatePincodeStatus] = useUpdatePincodeMutation();
+  const [deletePincode, deletePincodeStatus] = useDeletePincodeMutation();
+  
+  // Bulk upload
+  const [bulkUpload, bulkUploadStatus] = useBulkUploadLocationsMutation();
 
-export function useDistrictById(id: string) {
-  const { data, isLoading, error } = useGetDistrictByIdQuery(id, { skip: !id });
-  return { district: data, isLoading, error };
-}
+  const getMutations = () => {
+    switch (type) {
+      case 'state':
+        return {
+          create: createState,
+          update: updateState,
+          delete: deleteState,
+          isCreating: createStateStatus.isLoading,
+          isUpdating: updateStateStatus.isLoading,
+          isDeleting: deleteStateStatus.isLoading,
+        };
+      case 'district':
+        return {
+          create: createDistrict,
+          update: updateDistrict,
+          delete: deleteDistrict,
+          isCreating: createDistrictStatus.isLoading,
+          isUpdating: updateDistrictStatus.isLoading,
+          isDeleting: deleteDistrictStatus.isLoading,
+        };
+      case 'block':
+        return {
+          create: createBlock,
+          update: updateBlock,
+          delete: deleteBlock,
+          isCreating: createBlockStatus.isLoading,
+          isUpdating: updateBlockStatus.isLoading,
+          isDeleting: deleteBlockStatus.isLoading,
+        };
+      case 'panchayat':
+        return {
+          create: createPanchayat,
+          update: updatePanchayat,
+          delete: deletePanchayat,
+          isCreating: createPanchayatStatus.isLoading,
+          isUpdating: updatePanchayatStatus.isLoading,
+          isDeleting: deletePanchayatStatus.isLoading,
+        };
+      case 'village':
+        return {
+          create: createVillage,
+          update: updateVillage,
+          delete: deleteVillage,
+          isCreating: createVillageStatus.isLoading,
+          isUpdating: updateVillageStatus.isLoading,
+          isDeleting: deleteVillageStatus.isLoading,
+        };
+      case 'pincode':
+        return {
+          create: createPincode,
+          update: updatePincode,
+          delete: deletePincode,
+          isCreating: createPincodeStatus.isLoading,
+          isUpdating: updatePincodeStatus.isLoading,
+          isDeleting: deletePincodeStatus.isLoading,
+        };
+      default:
+        throw new Error(`Unknown location type: ${type}`);
+    }
+  };
 
-export function useStateMutations() {
-  const [createState, { isLoading: isCreating }] = useCreateStateMutation();
-  const [updateState, { isLoading: isUpdating }] = useUpdateStateMutation();
-  const [deleteState, { isLoading: isDeleting }] = useDeleteStateMutation();
-
-  return { createState, updateState, deleteState, isCreating, isUpdating, isDeleting };
-}
-
-export function useDistrictMutations() {
-  const [createDistrict, { isLoading: isCreating }] = useCreateDistrictMutation();
-  const [updateDistrict, { isLoading: isUpdating }] = useUpdateDistrictMutation();
-  const [deleteDistrict, { isLoading: isDeleting }] = useDeleteDistrictMutation();
-
-  return { createDistrict, updateDistrict, deleteDistrict, isCreating, isUpdating, isDeleting };
-}
-
-export function useBlockMutations() {
-  const [createBlock, { isLoading: isCreating }] = useCreateBlockMutation();
-  const [updateBlock, { isLoading: isUpdating }] = useUpdateBlockMutation();
-  const [deleteBlock, { isLoading: isDeleting }] = useDeleteBlockMutation();
-
-  return { createBlock, updateBlock, deleteBlock, isCreating, isUpdating, isDeleting };
-}
-
-export function usePanchayatMutations() {
-  const [createPanchayat, { isLoading: isCreating }] = useCreatePanchayatMutation();
-  const [updatePanchayat, { isLoading: isUpdating }] = useUpdatePanchayatMutation();
-  const [deletePanchayat, { isLoading: isDeleting }] = useDeletePanchayatMutation();
-
-  return { createPanchayat, updatePanchayat, deletePanchayat, isCreating, isUpdating, isDeleting };
-}
-
-export function useVillageMutations() {
-  const [createVillage, { isLoading: isCreating }] = useCreateVillageMutation();
-  const [updateVillage, { isLoading: isUpdating }] = useUpdateVillageMutation();
-  const [deleteVillage, { isLoading: isDeleting }] = useDeleteVillageMutation();
-
-  return { createVillage, updateVillage, deleteVillage, isCreating, isUpdating, isDeleting };
-}
-
-export function usePincodeMutations() {
-  const [createPincode, { isLoading: isCreating }] = useCreatePincodeMutation();
-  const [updatePincode, { isLoading: isUpdating }] = useUpdatePincodeMutation();
-  const [deletePincode, { isLoading: isDeleting }] = useDeletePincodeMutation();
-
-  return { createPincode, updatePincode, deletePincode, isCreating, isUpdating, isDeleting };
-}
-
-export function useLocationBulkUpload() {
-  const [bulkUploadLocations, { isLoading }] = useBulkUploadLocationsMutation();
-  return { bulkUploadLocations, isLoading };
+  return {
+    ...getMutations(),
+    bulkUpload: (formData: FormData) => bulkUpload({ type, formData }),
+    isBulkUploading: bulkUploadStatus.isLoading,
+  };
 }
 
 // ============ SECTORS HOOKS ============
@@ -373,40 +418,32 @@ export function useSectors(params: SectorsQueryParams = {}) {
         const search = params.search.toLowerCase();
         filtered = filtered.filter(s => 
           s.name.toLowerCase().includes(search) || 
-          s.ssc.toLowerCase().includes(search)
+          s.code.toLowerCase().includes(search)
         );
-      }
-      if (params.status && params.status !== 'all') {
-        filtered = filtered.filter(s => s.isActive === (params.status === 'active'));
       }
       return filtered;
     }
     return data;
-  }, [data, error, params.search, params.status]);
+  }, [data, error, params.search]);
 
   return { sectors, isLoading, error, refetch };
 }
 
-export function useSectorById(id: string) {
-  const { data, isLoading, error } = useGetSectorByIdQuery(id, { skip: !id });
-  return { sector: data, isLoading, error };
-}
-
 export function useSectorMutations() {
-  const [createSector, { isLoading: isCreating }] = useCreateSectorMutation();
-  const [updateSector, { isLoading: isUpdating }] = useUpdateSectorMutation();
-  const [deleteSector, { isLoading: isDeleting }] = useDeleteSectorMutation();
-  const [bulkUploadSectors, { isLoading: isBulkUploading }] = useBulkUploadSectorsMutation();
+  const [createSector, createStatus] = useCreateSectorMutation();
+  const [updateSector, updateStatus] = useUpdateSectorMutation();
+  const [deleteSector, deleteStatus] = useDeleteSectorMutation();
+  const [bulkUpload, bulkUploadStatus] = useBulkUploadSectorsMutation();
 
   return {
     createSector,
     updateSector,
     deleteSector,
-    bulkUploadSectors,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    isBulkUploading,
+    bulkUpload,
+    isCreating: createStatus.isLoading,
+    isUpdating: updateStatus.isLoading,
+    isDeleting: deleteStatus.isLoading,
+    isBulkUploading: bulkUploadStatus.isLoading,
   };
 }
 
@@ -421,40 +458,35 @@ export function useJobRoles(params: JobRolesQueryParams = {}) {
         const search = params.search.toLowerCase();
         filtered = filtered.filter(j => 
           j.title.toLowerCase().includes(search) || 
-          j.sectorName.toLowerCase().includes(search)
+          j.code.toLowerCase().includes(search)
         );
       }
-      if (params.status && params.status !== 'all') {
-        filtered = filtered.filter(j => j.isActive === (params.status === 'active'));
+      if (params.sectorId) {
+        filtered = filtered.filter(j => j.sectorId === params.sectorId);
       }
       return filtered;
     }
     return data;
-  }, [data, error, params.search, params.status]);
+  }, [data, error, params.search, params.sectorId]);
 
   return { jobRoles, isLoading, error, refetch };
 }
 
-export function useJobRoleById(id: string) {
-  const { data, isLoading, error } = useGetJobRoleByIdQuery(id, { skip: !id });
-  return { jobRole: data, isLoading, error };
-}
-
 export function useJobRoleMutations() {
-  const [createJobRole, { isLoading: isCreating }] = useCreateJobRoleMutation();
-  const [updateJobRole, { isLoading: isUpdating }] = useUpdateJobRoleMutation();
-  const [deleteJobRole, { isLoading: isDeleting }] = useDeleteJobRoleMutation();
-  const [bulkUploadJobRoles, { isLoading: isBulkUploading }] = useBulkUploadJobRolesMutation();
+  const [createJobRole, createStatus] = useCreateJobRoleMutation();
+  const [updateJobRole, updateStatus] = useUpdateJobRoleMutation();
+  const [deleteJobRole, deleteStatus] = useDeleteJobRoleMutation();
+  const [bulkUpload, bulkUploadStatus] = useBulkUploadJobRolesMutation();
 
   return {
     createJobRole,
     updateJobRole,
     deleteJobRole,
-    bulkUploadJobRoles,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    isBulkUploading,
+    bulkUpload,
+    isCreating: createStatus.isLoading,
+    isUpdating: updateStatus.isLoading,
+    isDeleting: deleteStatus.isLoading,
+    isBulkUploading: bulkUploadStatus.isLoading,
   };
 }
 
@@ -469,39 +501,100 @@ export function useDocumentTypes(params: DocumentTypesQueryParams = {}) {
         const search = params.search.toLowerCase();
         filtered = filtered.filter(d => 
           d.name.toLowerCase().includes(search) || 
-          d.category.toLowerCase().includes(search)
+          d.code.toLowerCase().includes(search)
         );
       }
-      if (params.status && params.status !== 'all') {
-        filtered = filtered.filter(d => d.isActive === (params.status === 'active'));
+      if (params.category) {
+        filtered = filtered.filter(d => d.category === params.category);
       }
       return filtered;
     }
     return data;
-  }, [data, error, params.search, params.status]);
+  }, [data, error, params.search, params.category]);
 
   return { documentTypes, isLoading, error, refetch };
 }
 
-export function useDocumentTypeById(id: string) {
-  const { data, isLoading, error } = useGetDocumentTypeByIdQuery(id, { skip: !id });
-  return { documentType: data, isLoading, error };
-}
-
 export function useDocumentTypeMutations() {
-  const [createDocumentType, { isLoading: isCreating }] = useCreateDocumentTypeMutation();
-  const [updateDocumentType, { isLoading: isUpdating }] = useUpdateDocumentTypeMutation();
-  const [deleteDocumentType, { isLoading: isDeleting }] = useDeleteDocumentTypeMutation();
-  const [bulkUploadDocumentTypes, { isLoading: isBulkUploading }] = useBulkUploadDocumentTypesMutation();
+  const [createDocumentType, createStatus] = useCreateDocumentTypeMutation();
+  const [updateDocumentType, updateStatus] = useUpdateDocumentTypeMutation();
+  const [deleteDocumentType, deleteStatus] = useDeleteDocumentTypeMutation();
+  const [bulkUpload, bulkUploadStatus] = useBulkUploadDocumentTypesMutation();
 
   return {
     createDocumentType,
     updateDocumentType,
     deleteDocumentType,
-    bulkUploadDocumentTypes,
-    isCreating,
-    isUpdating,
-    isDeleting,
-    isBulkUploading,
+    bulkUpload,
+    isCreating: createStatus.isLoading,
+    isUpdating: updateStatus.isLoading,
+    isDeleting: deleteStatus.isLoading,
+    isBulkUploading: bulkUploadStatus.isLoading,
   };
 }
+
+// Re-export individual hooks for direct usage
+export {
+  // Programs
+  useGetProgramsQuery,
+  useGetProgramByIdQuery,
+  useCreateProgramMutation,
+  useUpdateProgramMutation,
+  useDeleteProgramMutation,
+  useBulkUploadProgramsMutation,
+  // States
+  useGetStatesQuery,
+  useGetStateByIdQuery,
+  useCreateStateMutation,
+  useUpdateStateMutation,
+  useDeleteStateMutation,
+  // Districts
+  useGetDistrictsQuery,
+  useGetDistrictByIdQuery,
+  useCreateDistrictMutation,
+  useUpdateDistrictMutation,
+  useDeleteDistrictMutation,
+  // Blocks
+  useGetBlocksQuery,
+  useCreateBlockMutation,
+  useUpdateBlockMutation,
+  useDeleteBlockMutation,
+  // Panchayats
+  useGetPanchayatsQuery,
+  useCreatePanchayatMutation,
+  useUpdatePanchayatMutation,
+  useDeletePanchayatMutation,
+  // Villages
+  useGetVillagesQuery,
+  useCreateVillageMutation,
+  useUpdateVillageMutation,
+  useDeleteVillageMutation,
+  // Pincodes
+  useGetPincodesQuery,
+  useCreatePincodeMutation,
+  useUpdatePincodeMutation,
+  useDeletePincodeMutation,
+  // Locations Bulk
+  useBulkUploadLocationsMutation,
+  // Sectors
+  useGetSectorsQuery,
+  useGetSectorByIdQuery,
+  useCreateSectorMutation,
+  useUpdateSectorMutation,
+  useDeleteSectorMutation,
+  useBulkUploadSectorsMutation,
+  // Job Roles
+  useGetJobRolesQuery,
+  useGetJobRoleByIdQuery,
+  useCreateJobRoleMutation,
+  useUpdateJobRoleMutation,
+  useDeleteJobRoleMutation,
+  useBulkUploadJobRolesMutation,
+  // Document Types
+  useGetDocumentTypesQuery,
+  useGetDocumentTypeByIdQuery,
+  useCreateDocumentTypeMutation,
+  useUpdateDocumentTypeMutation,
+  useDeleteDocumentTypeMutation,
+  useBulkUploadDocumentTypesMutation,
+};

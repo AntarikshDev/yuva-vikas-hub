@@ -1,4 +1,17 @@
-import { baseApi } from './baseApi';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import type { RootState } from '../index';
+
+// Types - Programs
+import type {
+  Program,
+  CreateProgramDTO,
+  UpdateProgramDTO,
+  ProgramsQueryParams,
+  BulkUploadResponse,
+  Centre,
+} from '@/types/program';
+
+// Types - Locations
 import type {
   State,
   District,
@@ -19,8 +32,140 @@ import type {
   BulkUploadLocationResponse,
 } from '@/types/location';
 
-export const locationsApi = baseApi.injectEndpoints({
+// Types - Sectors
+import type {
+  Sector,
+  CreateSectorDTO,
+  UpdateSectorDTO,
+  SectorsQueryParams,
+} from '@/types/sector';
+
+// Types - Job Roles
+import type {
+  JobRole,
+  CreateJobRoleDTO,
+  UpdateJobRoleDTO,
+  JobRolesQueryParams,
+} from '@/types/jobRole';
+
+// Types - Document Types
+import type {
+  DocumentType,
+  CreateDocumentTypeDTO,
+  UpdateDocumentTypeDTO,
+  DocumentTypesQueryParams,
+} from '@/types/documentType';
+
+// Bulk upload response type
+interface BulkUploadGenericResponse {
+  success: boolean;
+  created: number;
+  updated: number;
+  errors: { row: number; message: string }[];
+}
+
+// Base API configuration for RTK Query
+export const apiSlice = createApi({
+  reducerPath: 'api',
+  baseQuery: fetchBaseQuery({
+    baseUrl: '/api',
+    prepareHeaders: (headers, { getState }) => {
+      const state = getState() as RootState;
+      const token = state.auth?.user ? 'mock-token' : null;
+      
+      if (token) {
+        headers.set('authorization', `Bearer ${token}`);
+      }
+      headers.set('Content-Type', 'application/json');
+      return headers;
+    },
+  }),
+  tagTypes: [
+    'Program',
+    'Centre',
+    'State',
+    'District',
+    'Block',
+    'Panchayat',
+    'Village',
+    'Pincode',
+    'Sector',
+    'JobRole',
+    'DocumentType',
+  ],
   endpoints: (builder) => ({
+    // ==================== PROGRAMS ====================
+    getPrograms: builder.query<Program[], ProgramsQueryParams>({
+      query: (params) => ({
+        url: 'programs',
+        params: {
+          search: params.search,
+          status: params.status,
+          page: params.page,
+          limit: params.limit,
+        },
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'Program' as const, id })),
+              { type: 'Program', id: 'LIST' },
+            ]
+          : [{ type: 'Program', id: 'LIST' }],
+    }),
+
+    getProgramById: builder.query<Program, string>({
+      query: (id) => `programs/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Program', id }],
+    }),
+
+    createProgram: builder.mutation<Program, CreateProgramDTO>({
+      query: (body) => ({
+        url: 'programs',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Program', id: 'LIST' }],
+    }),
+
+    updateProgram: builder.mutation<Program, { id: string; data: UpdateProgramDTO }>({
+      query: ({ id, data }) => ({
+        url: `programs/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Program', id },
+        { type: 'Program', id: 'LIST' },
+      ],
+    }),
+
+    deleteProgram: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `programs/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Program', id: 'LIST' }],
+    }),
+
+    bulkUploadPrograms: builder.mutation<BulkUploadResponse, FormData>({
+      query: (formData) => ({
+        url: 'programs/bulk-upload',
+        method: 'POST',
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: [{ type: 'Program', id: 'LIST' }],
+    }),
+
+    getCentres: builder.query<Centre[], { stateId?: string; search?: string }>({
+      query: (params) => ({
+        url: 'centres',
+        params,
+      }),
+      providesTags: ['Centre'],
+    }),
+
     // ==================== STATES ====================
     getStates: builder.query<State[], LocationsQueryParams>({
       query: (params) => ({
@@ -330,7 +475,7 @@ export const locationsApi = baseApi.injectEndpoints({
       invalidatesTags: ['Pincode'],
     }),
 
-    // ==================== BULK UPLOAD ====================
+    // ==================== LOCATIONS BULK UPLOAD ====================
     bulkUploadLocations: builder.mutation<
       BulkUploadLocationResponse,
       { type: LocationType; formData: FormData }
@@ -342,7 +487,6 @@ export const locationsApi = baseApi.injectEndpoints({
         formData: true,
       }),
       invalidatesTags: (result, error, { type }) => {
-        // Invalidate all related tags based on location type
         switch (type) {
           case 'state':
             return ['State'];
@@ -362,7 +506,7 @@ export const locationsApi = baseApi.injectEndpoints({
       },
     }),
 
-    // ==================== HIERARCHY ====================
+    // ==================== LOCATION HIERARCHY ====================
     getLocationHierarchy: builder.query<
       LocationHierarchy,
       { stateId?: string; districtId?: string; blockId?: string; panchayatId?: string }
@@ -373,10 +517,210 @@ export const locationsApi = baseApi.injectEndpoints({
       }),
       providesTags: ['State', 'District', 'Block', 'Panchayat', 'Village'],
     }),
+
+    // ==================== SECTORS ====================
+    getSectors: builder.query<Sector[], SectorsQueryParams>({
+      query: (params) => ({
+        url: 'sectors',
+        params: {
+          search: params.search,
+          status: params.status,
+          page: params.page,
+          limit: params.limit,
+        },
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'Sector' as const, id })),
+              { type: 'Sector', id: 'LIST' },
+            ]
+          : [{ type: 'Sector', id: 'LIST' }],
+    }),
+
+    getSectorById: builder.query<Sector, string>({
+      query: (id) => `sectors/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Sector', id }],
+    }),
+
+    createSector: builder.mutation<Sector, CreateSectorDTO>({
+      query: (body) => ({
+        url: 'sectors',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'Sector', id: 'LIST' }],
+    }),
+
+    updateSector: builder.mutation<Sector, { id: string; data: UpdateSectorDTO }>({
+      query: ({ id, data }) => ({
+        url: `sectors/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Sector', id },
+        { type: 'Sector', id: 'LIST' },
+      ],
+    }),
+
+    deleteSector: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `sectors/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Sector', id: 'LIST' }],
+    }),
+
+    bulkUploadSectors: builder.mutation<BulkUploadGenericResponse, FormData>({
+      query: (formData) => ({
+        url: 'sectors/bulk-upload',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: [{ type: 'Sector', id: 'LIST' }],
+    }),
+
+    // ==================== JOB ROLES ====================
+    getJobRoles: builder.query<JobRole[], JobRolesQueryParams>({
+      query: (params) => ({
+        url: 'job-roles',
+        params: {
+          search: params.search,
+          sectorId: params.sectorId,
+          status: params.status,
+          page: params.page,
+          limit: params.limit,
+        },
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'JobRole' as const, id })),
+              { type: 'JobRole', id: 'LIST' },
+            ]
+          : [{ type: 'JobRole', id: 'LIST' }],
+    }),
+
+    getJobRoleById: builder.query<JobRole, string>({
+      query: (id) => `job-roles/${id}`,
+      providesTags: (result, error, id) => [{ type: 'JobRole', id }],
+    }),
+
+    createJobRole: builder.mutation<JobRole, CreateJobRoleDTO>({
+      query: (body) => ({
+        url: 'job-roles',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'JobRole', id: 'LIST' }, 'Sector'],
+    }),
+
+    updateJobRole: builder.mutation<JobRole, { id: string; data: UpdateJobRoleDTO }>({
+      query: ({ id, data }) => ({
+        url: `job-roles/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'JobRole', id },
+        { type: 'JobRole', id: 'LIST' },
+      ],
+    }),
+
+    deleteJobRole: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `job-roles/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'JobRole', id: 'LIST' }],
+    }),
+
+    bulkUploadJobRoles: builder.mutation<BulkUploadGenericResponse, FormData>({
+      query: (formData) => ({
+        url: 'job-roles/bulk-upload',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: [{ type: 'JobRole', id: 'LIST' }],
+    }),
+
+    // ==================== DOCUMENT TYPES ====================
+    getDocumentTypes: builder.query<DocumentType[], DocumentTypesQueryParams>({
+      query: (params) => ({
+        url: 'document-types',
+        params: {
+          search: params.search,
+          category: params.category,
+          status: params.status,
+          page: params.page,
+          limit: params.limit,
+        },
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({ type: 'DocumentType' as const, id })),
+              { type: 'DocumentType', id: 'LIST' },
+            ]
+          : [{ type: 'DocumentType', id: 'LIST' }],
+    }),
+
+    getDocumentTypeById: builder.query<DocumentType, string>({
+      query: (id) => `document-types/${id}`,
+      providesTags: (result, error, id) => [{ type: 'DocumentType', id }],
+    }),
+
+    createDocumentType: builder.mutation<DocumentType, CreateDocumentTypeDTO>({
+      query: (body) => ({
+        url: 'document-types',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'DocumentType', id: 'LIST' }],
+    }),
+
+    updateDocumentType: builder.mutation<DocumentType, { id: string; data: UpdateDocumentTypeDTO }>({
+      query: ({ id, data }) => ({
+        url: `document-types/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'DocumentType', id },
+        { type: 'DocumentType', id: 'LIST' },
+      ],
+    }),
+
+    deleteDocumentType: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `document-types/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'DocumentType', id: 'LIST' }],
+    }),
+
+    bulkUploadDocumentTypes: builder.mutation<BulkUploadGenericResponse, FormData>({
+      query: (formData) => ({
+        url: 'document-types/bulk-upload',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: [{ type: 'DocumentType', id: 'LIST' }],
+    }),
   }),
 });
 
+// Export all hooks
 export const {
+  // Programs
+  useGetProgramsQuery,
+  useGetProgramByIdQuery,
+  useCreateProgramMutation,
+  useUpdateProgramMutation,
+  useDeleteProgramMutation,
+  useBulkUploadProgramsMutation,
+  useGetCentresQuery,
   // States
   useGetStatesQuery,
   useGetStateByIdQuery,
@@ -409,8 +753,30 @@ export const {
   useCreatePincodeMutation,
   useUpdatePincodeMutation,
   useDeletePincodeMutation,
-  // Bulk Upload
+  // Locations Bulk & Hierarchy
   useBulkUploadLocationsMutation,
-  // Hierarchy
   useGetLocationHierarchyQuery,
-} = locationsApi;
+  // Sectors
+  useGetSectorsQuery,
+  useGetSectorByIdQuery,
+  useCreateSectorMutation,
+  useUpdateSectorMutation,
+  useDeleteSectorMutation,
+  useBulkUploadSectorsMutation,
+  // Job Roles
+  useGetJobRolesQuery,
+  useGetJobRoleByIdQuery,
+  useCreateJobRoleMutation,
+  useUpdateJobRoleMutation,
+  useDeleteJobRoleMutation,
+  useBulkUploadJobRolesMutation,
+  // Document Types
+  useGetDocumentTypesQuery,
+  useGetDocumentTypeByIdQuery,
+  useCreateDocumentTypeMutation,
+  useUpdateDocumentTypeMutation,
+  useDeleteDocumentTypeMutation,
+  useBulkUploadDocumentTypesMutation,
+} = apiSlice;
+
+export default apiSlice;
