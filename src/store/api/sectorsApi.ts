@@ -65,6 +65,16 @@ export const sectorsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'Sector', id: 'LIST' }],
     }),
+
+    // Bulk upload sectors
+    bulkUploadSectors: builder.mutation<{ success: boolean; created: number; updated: number; errors: { row: number; message: string }[] }, FormData>({
+      query: (formData) => ({
+        url: 'sectors/bulk-upload',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: [{ type: 'Sector', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -74,4 +84,5 @@ export const {
   useCreateSectorMutation,
   useUpdateSectorMutation,
   useDeleteSectorMutation,
+  useBulkUploadSectorsMutation,
 } = sectorsApi;

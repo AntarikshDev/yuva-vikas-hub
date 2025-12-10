@@ -66,6 +66,16 @@ export const documentTypesApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: 'DocumentType', id: 'LIST' }],
     }),
+
+    // Bulk upload document types
+    bulkUploadDocumentTypes: builder.mutation<{ success: boolean; created: number; updated: number; errors: { row: number; message: string }[] }, FormData>({
+      query: (formData) => ({
+        url: 'document-types/bulk-upload',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: [{ type: 'DocumentType', id: 'LIST' }],
+    }),
   }),
 });
 
@@ -75,4 +85,5 @@ export const {
   useCreateDocumentTypeMutation,
   useUpdateDocumentTypeMutation,
   useDeleteDocumentTypeMutation,
+  useBulkUploadDocumentTypesMutation,
 } = documentTypesApi;
