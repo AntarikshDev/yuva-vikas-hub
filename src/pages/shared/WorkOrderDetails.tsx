@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Calendar, Target, Building2, FileText } from "lucide-react";
+import { ArrowLeft, Play, Calendar, Target, Building2, FileText, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import CentreStatusTab from "@/components/work-order/CentreStatusTab";
 import TargetPlanningTab from "@/components/work-order/TargetPlanningTab";
+import DistrictAdoptionTab from "@/components/work-order/DistrictAdoptionTab";
 
 interface WorkOrderDetailsProps {
   role: 'director' | 'national-head';
@@ -179,7 +180,7 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
             <span className="hidden sm:inline">Target Planning</span>
           </TabsTrigger>
           <TabsTrigger value="district-adoption" className="gap-2">
-            <FileText className="h-4 w-4" />
+            <MapPin className="h-4 w-4" />
             <span className="hidden sm:inline">District Adoption</span>
           </TabsTrigger>
           <TabsTrigger value="assignment" className="gap-2">
@@ -210,13 +211,11 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
         </TabsContent>
 
         <TabsContent value="district-adoption">
-          <Card>
-            <CardContent className="py-16 text-center">
-              <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">District Adoption Policy</h3>
-              <p className="text-muted-foreground">Coming Soon</p>
-            </CardContent>
-          </Card>
+          <DistrictAdoptionTab 
+            workOrderId={id || ""} 
+            role={role}
+            isStarted={workOrder.status !== 'active'}
+          />
         </TabsContent>
 
         <TabsContent value="assignment">
