@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,13 +11,18 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronRight, ChevronDown, Building2, MapPin } from 'lucide-react';
+import { ChevronRight, ChevronDown, Building2, MapPin, FileText, Loader2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useGetStatesQuery } from '@/store/api/locationsApi';
+import { useGetCentresQuery } from '@/store/api/programsApi';
+import { useGetDocumentTypesQuery } from '@/store/api/documentTypesApi';
 
 const formSchema = z.object({
   code: z.string().min(1, 'Code is required').max(10, 'Code must be 10 characters or less'),
   name: z.string().min(1, 'Name is required').max(20, 'Name must be 20 characters or less'),
   fullName: z.string().min(1, 'Full name is required').max(200, 'Full name must be 200 characters or less'),
   selectedCentres: z.array(z.string()).min(1, 'At least one centre must be selected'),
+  requiredDocuments: z.array(z.string()).default([]),
   isActive: z.boolean().default(true),
 });
 
@@ -29,72 +34,26 @@ interface ProgramFormProps {
   itemId?: number | null;
 }
 
-// Mock data for states and centres
-const statesWithCentres = [
-  {
-    id: 'state_1',
-    name: 'Maharashtra',
-    centres: [
-      { id: 'centre_1_1', name: 'Mumbai Training Centre' },
-      { id: 'centre_1_2', name: 'Pune Skill Centre' },
-      { id: 'centre_1_3', name: 'Nagpur Development Centre' },
-      { id: 'centre_1_4', name: 'Nashik Vocational Centre' },
-    ],
-  },
-  {
-    id: 'state_2',
-    name: 'Karnataka',
-    centres: [
-      { id: 'centre_2_1', name: 'Bangalore Tech Hub' },
-      { id: 'centre_2_2', name: 'Mysore Training Institute' },
-      { id: 'centre_2_3', name: 'Hubli Skill Centre' },
-    ],
-  },
-  {
-    id: 'state_3',
-    name: 'Tamil Nadu',
-    centres: [
-      { id: 'centre_3_1', name: 'Chennai Central Centre' },
-      { id: 'centre_3_2', name: 'Coimbatore Industrial Training' },
-      { id: 'centre_3_3', name: 'Madurai Skill Hub' },
-      { id: 'centre_3_4', name: 'Trichy Development Centre' },
-    ],
-  },
-  {
-    id: 'state_4',
-    name: 'Uttar Pradesh',
-    centres: [
-      { id: 'centre_4_1', name: 'Lucknow Main Centre' },
-      { id: 'centre_4_2', name: 'Noida IT Training Centre' },
-      { id: 'centre_4_3', name: 'Kanpur Vocational Institute' },
-      { id: 'centre_4_4', name: 'Varanasi Skill Centre' },
-      { id: 'centre_4_5', name: 'Agra Training Hub' },
-    ],
-  },
-  {
-    id: 'state_5',
-    name: 'Gujarat',
-    centres: [
-      { id: 'centre_5_1', name: 'Ahmedabad Skill Centre' },
-      { id: 'centre_5_2', name: 'Surat Training Institute' },
-      { id: 'centre_5_3', name: 'Vadodara Development Centre' },
-    ],
-  },
-  {
-    id: 'state_6',
-    name: 'Rajasthan',
-    centres: [
-      { id: 'centre_6_1', name: 'Jaipur Central Hub' },
-      { id: 'centre_6_2', name: 'Jodhpur Skill Centre' },
-      { id: 'centre_6_3', name: 'Udaipur Training Institute' },
-    ],
-  },
-];
-
 export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
   const { toast } = useToast();
   const isEditing = itemId !== null && itemId !== undefined;
   const [expandedStates, setExpandedStates] = useState<string[]>([]);
+
+  // RTK Query hooks for fetching data
+  const { data: statesData, isLoading: isLoadingStates } = useGetStatesQuery({});
+  const { data: centresData, isLoading: isLoadingCentres } = useGetCentresQuery({});
+  const { data: documentsData, isLoading: isLoadingDocuments } = useGetDocumentTypesQuery({});
+
+  // Group centres by state
+  const statesWithCentres = useMemo(() => {
+    if (!statesData || !centresData) return [];
+    
+    return statesData.map(state => ({
+      id: state.id,
+      name: state.name,
+      centres: centresData.filter(centre => centre.stateId === state.id),
+    })).filter(state => state.centres.length > 0);
+  }, [statesData, centresData]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -103,11 +62,13 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
       name: '',
       fullName: '',
       selectedCentres: [],
+      requiredDocuments: [],
       isActive: true,
     },
   });
 
   const selectedCentres = form.watch('selectedCentres');
+  const selectedDocuments = form.watch('requiredDocuments');
 
   React.useEffect(() => {
     if (isEditing && open) {
@@ -116,6 +77,7 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
         name: 'DDU-GKY',
         fullName: 'Deen Dayal Upadhyaya Grameen Kaushalya Yojana',
         selectedCentres: ['centre_1_1', 'centre_1_2', 'centre_2_1'],
+        requiredDocuments: ['doc_1', 'doc_2'],
         isActive: true,
       });
       setExpandedStates(['state_1', 'state_2']);
@@ -125,6 +87,7 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
         name: '',
         fullName: '',
         selectedCentres: [],
+        requiredDocuments: [],
         isActive: true,
       });
       setExpandedStates([]);
@@ -170,6 +133,13 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
     form.setValue('selectedCentres', newSelection);
   };
 
+  const toggleDocumentSelection = (docId: string) => {
+    const newSelection = selectedDocuments.includes(docId)
+      ? selectedDocuments.filter(id => id !== docId)
+      : [...selectedDocuments, docId];
+    form.setValue('requiredDocuments', newSelection);
+  };
+
   const selectAllCentres = () => {
     const allCentreIds = statesWithCentres.flatMap(state => state.centres.map(c => c.id));
     form.setValue('selectedCentres', allCentreIds);
@@ -178,6 +148,16 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
 
   const clearAllCentres = () => {
     form.setValue('selectedCentres', []);
+  };
+
+  const selectAllDocuments = () => {
+    if (documentsData) {
+      form.setValue('requiredDocuments', documentsData.map(d => d.id));
+    }
+  };
+
+  const clearAllDocuments = () => {
+    form.setValue('requiredDocuments', []);
   };
 
   const getSelectionSummary = () => {
@@ -196,9 +176,11 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
     form.reset();
   };
 
+  const isLoading = isLoadingStates || isLoadingCentres || isLoadingDocuments;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Program' : 'Add New Program'}</DialogTitle>
           <DialogDescription>
@@ -251,6 +233,7 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                 )}
               />
 
+              {/* States & Centres Selection */}
               <FormField
                 control={form.control}
                 name="selectedCentres"
@@ -265,6 +248,7 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                           size="sm"
                           onClick={selectAllCentres}
                           className="text-xs h-7"
+                          disabled={isLoading}
                         >
                           Select All
                         </Button>
@@ -274,6 +258,7 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                           size="sm"
                           onClick={clearAllCentres}
                           className="text-xs h-7"
+                          disabled={isLoading}
                         >
                           Clear All
                         </Button>
@@ -282,59 +267,165 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
                     <div className="text-xs text-muted-foreground mb-2">
                       {selectedCentres.length > 0 ? getSelectionSummary() : 'No centres selected'}
                     </div>
-                    <ScrollArea className="h-[280px] rounded-md border p-3 bg-muted/30">
-                      <div className="space-y-1">
-                        {statesWithCentres.map((state) => (
-                          <Collapsible
-                            key={state.id}
-                            open={expandedStates.includes(state.id)}
-                            onOpenChange={() => toggleState(state.id)}
-                          >
-                            <div className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors">
-                              <CollapsibleTrigger asChild>
-                                <Button variant="ghost" size="sm" className="p-0 h-5 w-5">
-                                  {expandedStates.includes(state.id) ? (
-                                    <ChevronDown className="h-4 w-4" />
-                                  ) : (
-                                    <ChevronRight className="h-4 w-4" />
-                                  )}
-                                </Button>
-                              </CollapsibleTrigger>
-                              <Checkbox
-                                checked={isStateFullySelected(state) ? true : isStatePartiallySelected(state) ? 'indeterminate' : false}
-                                onCheckedChange={() => toggleStateSelection(state)}
-                              />
-                              <MapPin className="h-4 w-4 text-primary" />
-                              <span className="font-medium text-sm">{state.name}</span>
-                              <span className="text-xs text-muted-foreground ml-auto">
-                                ({state.centres.filter(c => selectedCentres.includes(c.id)).length}/{state.centres.length})
-                              </span>
+                    <ScrollArea className="h-[200px] rounded-md border p-3 bg-muted/30">
+                      {isLoadingStates || isLoadingCentres ? (
+                        <div className="space-y-2">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-2 py-1.5">
+                              <Skeleton className="h-4 w-4" />
+                              <Skeleton className="h-4 w-32" />
                             </div>
-                            <CollapsibleContent>
-                              <div className="ml-8 mt-1 space-y-1 border-l-2 border-muted pl-3">
-                                {state.centres.map((centre) => (
-                                  <div
-                                    key={centre.id}
-                                    className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
-                                  >
-                                    <Checkbox
-                                      checked={selectedCentres.includes(centre.id)}
-                                      onCheckedChange={(checked) => {
-                                        if (checked !== 'indeterminate') {
-                                          toggleCentreSelection(centre.id);
-                                        }
-                                      }}
-                                      onClick={(e) => e.stopPropagation()}
-                                    />
-                                    <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                                    <span className="text-sm">{centre.name}</span>
-                                  </div>
-                                ))}
+                          ))}
+                        </div>
+                      ) : statesWithCentres.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                          <MapPin className="h-8 w-8 mb-2 opacity-50" />
+                          <p className="text-sm">No states or centres available</p>
+                          <p className="text-xs">Add locations in Master Data first</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          {statesWithCentres.map((state) => (
+                            <Collapsible
+                              key={state.id}
+                              open={expandedStates.includes(state.id)}
+                              onOpenChange={() => toggleState(state.id)}
+                            >
+                              <div className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors">
+                                <CollapsibleTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="p-0 h-5 w-5">
+                                    {expandedStates.includes(state.id) ? (
+                                      <ChevronDown className="h-4 w-4" />
+                                    ) : (
+                                      <ChevronRight className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </CollapsibleTrigger>
+                                <Checkbox
+                                  checked={isStateFullySelected(state) ? true : isStatePartiallySelected(state) ? 'indeterminate' : false}
+                                  onCheckedChange={() => toggleStateSelection(state)}
+                                />
+                                <MapPin className="h-4 w-4 text-primary" />
+                                <span className="font-medium text-sm">{state.name}</span>
+                                <span className="text-xs text-muted-foreground ml-auto">
+                                  ({state.centres.filter(c => selectedCentres.includes(c.id)).length}/{state.centres.length})
+                                </span>
                               </div>
-                            </CollapsibleContent>
-                          </Collapsible>
-                        ))}
+                              <CollapsibleContent>
+                                <div className="ml-8 mt-1 space-y-1 border-l-2 border-muted pl-3">
+                                  {state.centres.map((centre) => (
+                                    <div
+                                      key={centre.id}
+                                      className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-muted/50 transition-colors cursor-pointer"
+                                    >
+                                      <Checkbox
+                                        checked={selectedCentres.includes(centre.id)}
+                                        onCheckedChange={(checked) => {
+                                          if (checked !== 'indeterminate') {
+                                            toggleCentreSelection(centre.id);
+                                          }
+                                        }}
+                                        onClick={(e) => e.stopPropagation()}
+                                      />
+                                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                      <span className="text-sm">{centre.name}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Required Documents Selection */}
+              <FormField
+                control={form.control}
+                name="requiredDocuments"
+                render={() => (
+                  <FormItem>
+                    <div className="flex items-center justify-between mb-2">
+                      <FormLabel>Required Documents for Verification</FormLabel>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={selectAllDocuments}
+                          className="text-xs h-7"
+                          disabled={isLoading}
+                        >
+                          Select All
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={clearAllDocuments}
+                          className="text-xs h-7"
+                          disabled={isLoading}
+                        >
+                          Clear All
+                        </Button>
                       </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground mb-2">
+                      {selectedDocuments.length > 0 
+                        ? `${selectedDocuments.length} documents selected` 
+                        : 'No documents selected'}
+                    </div>
+                    <ScrollArea className="h-[150px] rounded-md border p-3 bg-muted/30">
+                      {isLoadingDocuments ? (
+                        <div className="space-y-2">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-2 py-1.5">
+                              <Skeleton className="h-4 w-4" />
+                              <Skeleton className="h-4 w-40" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : !documentsData || documentsData.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                          <FileText className="h-8 w-8 mb-2 opacity-50" />
+                          <p className="text-sm">No document types available</p>
+                          <p className="text-xs">Add documents in Master Data first</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          {documentsData.map((doc) => (
+                            <div
+                              key={doc.id}
+                              className="flex items-center gap-2 py-2 px-3 rounded-md hover:bg-muted/50 transition-colors cursor-pointer border border-transparent hover:border-muted"
+                              onClick={() => toggleDocumentSelection(doc.id)}
+                            >
+                              <Checkbox
+                                checked={selectedDocuments.includes(doc.id)}
+                                onCheckedChange={() => toggleDocumentSelection(doc.id)}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                              <FileText className="h-4 w-4 text-primary" />
+                              <div className="flex-1 min-w-0">
+                                <span className="text-sm font-medium block truncate">{doc.name}</span>
+                                {doc.category && (
+                                  <span className="text-xs text-muted-foreground block truncate">
+                                    {doc.category}
+                                  </span>
+                                )}
+                              </div>
+                              {doc.isRequired && (
+                                <span className="text-xs bg-destructive/10 text-destructive px-1.5 py-0.5 rounded">
+                                  Required
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </ScrollArea>
                     <FormMessage />
                   </FormItem>
@@ -361,7 +452,10 @@ export function ProgramForm({ open, onOpenChange, itemId }: ProgramFormProps) {
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">{isEditing ? 'Update' : 'Create'} Program</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isEditing ? 'Update' : 'Create'} Program
+              </Button>
             </DialogFooter>
           </form>
         </Form>
