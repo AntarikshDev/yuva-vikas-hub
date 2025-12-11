@@ -4,16 +4,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useGetCompanyHRDashboardQuery } from "@/store/api/apiSlice";
 
-// Mock data
+// Mock data for fallback
 const mockData = {
   kpis: [
-    { label: "Upcoming Batches Assigned", value: 5, icon: Users, color: "text-blue-600" },
-    { label: "Candidates Ready for Interview", value: 120, icon: UserCheck, color: "text-green-600" },
-    { label: "Offer Letters Pending", value: 35, icon: FileText, color: "text-orange-600" },
-    { label: "Travel Plans Pending", value: 20, icon: Plane, color: "text-purple-600" },
-    { label: "New Feedback This Week", value: 15, icon: MessageSquare, color: "text-indigo-600" },
-    { label: "Guest Sessions Scheduled", value: 2, icon: CalendarDays, color: "text-pink-600" }
+    { label: "Upcoming Batches Assigned", value: 5, icon: "Users", color: "text-blue-600" },
+    { label: "Candidates Ready for Interview", value: 120, icon: "UserCheck", color: "text-green-600" },
+    { label: "Offer Letters Pending", value: 35, icon: "FileText", color: "text-orange-600" },
+    { label: "Travel Plans Pending", value: 20, icon: "Plane", color: "text-purple-600" },
+    { label: "New Feedback This Week", value: 15, icon: "MessageSquare", color: "text-indigo-600" },
+    { label: "Guest Sessions Scheduled", value: 2, icon: "CalendarDays", color: "text-pink-600" }
   ],
   tasks: [
     { id: 1, task: "Issue 10 Offer Letters for Batch X", priority: "high", dueDate: "Today" },
@@ -30,10 +31,34 @@ const mockData = {
   ]
 };
 
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Users,
+  UserCheck,
+  FileText,
+  Plane,
+  MessageSquare,
+  CalendarDays,
+  Bell
+};
+
 const Dashboard: React.FC = () => {
   const [selectedState, setSelectedState] = useState<string>("");
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedJobRole, setSelectedJobRole] = useState<string>("");
+
+  // RTK Query with mock fallback
+  const { data: apiData, isLoading, error } = useGetCompanyHRDashboardQuery();
+
+  let dashboardData: typeof mockData;
+  if (!apiData) {
+    dashboardData = mockData;
+  } else {
+    dashboardData = apiData.data || apiData || mockData;
+  }
+
+  const kpis = dashboardData.kpis || mockData.kpis;
+  const tasks = dashboardData.tasks || mockData.tasks;
+  const upcomingSchedule = dashboardData.upcomingSchedule || mockData.upcomingSchedule;
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -55,16 +80,22 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Company HR Dashboard</h1>
           <p className="text-gray-600 mt-1">Manage candidates, batches, and hiring processes</p>
         </div>
         
-        {/* Filters */}
         <div className="flex flex-wrap gap-3">
           <Select value={selectedState} onValueChange={setSelectedState}>
             <SelectTrigger className="w-[180px]">
@@ -104,10 +135,9 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockData.kpis.map((kpi, index) => {
-          const Icon = kpi.icon;
+        {kpis.map((kpi: any, index: number) => {
+          const Icon = iconMap[kpi.icon] || Users;
           return (
             <Card key={index} className="hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -125,7 +155,6 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Pending Tasks Panel */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -137,14 +166,14 @@ const Dashboard: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {mockData.tasks.map((task) => (
+            {tasks.map((task: any) => (
               <div key={task.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900 mb-1">{task.task}</p>
                   <p className="text-xs text-gray-600">Due: {task.dueDate}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={getPriorityColor(task.priority)}>
+                  <Badge variant={getPriorityColor(task.priority) as any}>
                     {task.priority}
                   </Badge>
                   <Button size="sm" variant="outline">
@@ -156,7 +185,6 @@ const Dashboard: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Upcoming Schedule Widget */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -168,7 +196,7 @@ const Dashboard: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {mockData.upcomingSchedule.map((schedule, index) => (
+            {upcomingSchedule.map((schedule: any, index: number) => (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">{schedule.event}</p>
@@ -186,7 +214,6 @@ const Dashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Quick Actions */}
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>

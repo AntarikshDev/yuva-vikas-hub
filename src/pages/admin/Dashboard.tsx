@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { DashboardGrid } from '@/components/dashboard/DashboardGrid';
@@ -10,52 +9,45 @@ import { motion } from 'framer-motion';
 import { ArrowUpRight, Book, Building, Calendar, ChevronRight, LineChart, Percent, Target, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { KpiAlertForm } from '@/components/forms/KpiAlertForm';
+import { useGetAdminDashboardQuery } from '@/store/api/apiSlice';
+
+// Mock data for fallback
+const mockDashboardData = {
+  totalStudents: 12846,
+  activeCenters: 148,
+  placementRate: 78,
+  retentionRate: 82,
+  programData: [
+    { name: 'UPSDM Program', value: 4862, target: 5000 },
+    { name: 'DDUGKY Program', value: 3215, target: 4000 },
+    { name: 'BSDM Program', value: 2890, target: 3000 },
+    { name: 'PMKVY Program', value: 1879, target: 2500 },
+  ],
+  recentActivities: [
+    { title: 'New center approved in Bihar', time: '2 hours ago', actor: 'State Manager' },
+    { title: 'Candidate batch completed training', time: '4 hours ago', actor: 'Training Manager' },
+    { title: 'Placement drive scheduled', time: '8 hours ago', actor: 'Placement Officer' }
+  ],
+  placementCompanies: [
+    { name: 'TCS', count: 120 },
+    { name: 'Wipro', count: 85 },
+    { name: 'Infosys', count: 65 },
+    { name: 'HCL', count: 52 },
+  ]
+};
 
 const SuperAdminDashboard: React.FC = () => {
   const [kpiAlertOpen, setKpiAlertOpen] = useState(false);
-  
-  // This would come from API in a real application
-  const dashboardData = {
-    totalStudents: 12846,
-    activeCenters: 148,
-    placementRate: 78,
-    retentionRate: 82,
-    
-    // Program data
-    programData: [
-      { name: 'UPSDM Program', value: 4862, target: 5000 },
-      { name: 'DDUGKY Program', value: 3215, target: 4000 },
-      { name: 'BSDM Program', value: 2890, target: 3000 },
-      { name: 'PMKVY Program', value: 1879, target: 2500 },
-    ],
-    
-    // Recent activities
-    recentActivities: [
-      { 
-        title: 'New center approved in Bihar',
-        time: '2 hours ago',
-        actor: 'State Manager'
-      },
-      { 
-        title: 'Candidate batch completed training',
-        time: '4 hours ago',
-        actor: 'Training Manager'
-      },
-      { 
-        title: 'Placement drive scheduled',
-        time: '8 hours ago',
-        actor: 'Placement Officer'
-      }
-    ],
-    
-    // Placement data
-    placementCompanies: [
-      { name: 'TCS', count: 120 },
-      { name: 'Wipro', count: 85 },
-      { name: 'Infosys', count: 65 },
-      { name: 'HCL', count: 52 },
-    ]
-  };
+
+  // RTK Query with mock fallback
+  const { data: apiData, isLoading, error } = useGetAdminDashboardQuery();
+
+  let dashboardData: typeof mockDashboardData;
+  if (!apiData) {
+    dashboardData = mockDashboardData;
+  } else {
+    dashboardData = apiData.data || apiData || mockDashboardData;
+  }
   
   const filterOptions = [
     {
@@ -85,14 +77,11 @@ const SuperAdminDashboard: React.FC = () => {
     },
   ];
 
-  // Animation variants for staggered animations
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+      transition: { staggerChildren: 0.1 }
     }
   };
 
@@ -101,13 +90,19 @@ const SuperAdminDashboard: React.FC = () => {
     visible: {
       y: 0,
       opacity: 1,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24
-      }
+      transition: { type: "spring", stiffness: 300, damping: 24 }
     }
   };
+
+  if (isLoading) {
+    return (
+      <MainLayout role="admin">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout role="admin">
@@ -143,7 +138,6 @@ const SuperAdminDashboard: React.FC = () => {
         </motion.div>
 
         <section className="space-y-6">
-          {/* Stats Cards Row */}
           <DashboardGrid>
             <StatCard
               title="Total Students Registered"
@@ -181,7 +175,6 @@ const SuperAdminDashboard: React.FC = () => {
             <h2 className="text-xl font-semibold mt-8 mb-4">Program Performance</h2>
           </motion.div>
           
-          {/* Program Performance Cards */}
           <DashboardGrid>
             {dashboardData.programData.map((program, index) => (
               <motion.div 
@@ -212,7 +205,6 @@ const SuperAdminDashboard: React.FC = () => {
             ))}
           </DashboardGrid>
 
-          {/* Activity and Placement Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <motion.div variants={itemVariants}>
               <ChartCard
@@ -302,7 +294,6 @@ const SuperAdminDashboard: React.FC = () => {
         </section>
       </motion.div>
 
-      {/* KPI Alert Form Dialog */}
       <KpiAlertForm open={kpiAlertOpen} onOpenChange={setKpiAlertOpen} />
     </MainLayout>
   );

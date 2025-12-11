@@ -3,15 +3,15 @@ import { MainLayout } from '@/layouts/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { Users, GraduationCap, Briefcase, TrendingUp } from 'lucide-react';
+import { useGetDirectorDashboardQuery } from '@/store/api/apiSlice';
 
-const DirectorDashboard = () => {
-  const navigate = useNavigate();
-
-  const dashboardSections = [
+// Mock data for fallback
+const mockDashboardData = {
+  sections: [
     {
       title: 'Mobilisation',
       description: 'Track candidate mobilisation, targets, and work orders',
-      icon: Users,
+      icon: 'Users',
       path: '/director/mobilisation',
       color: 'from-blue-500 to-blue-600',
       stats: { active: 12, total: 15 }
@@ -19,7 +19,7 @@ const DirectorDashboard = () => {
     {
       title: 'Training',
       description: 'Monitor training batches, curriculum, and trainer performance',
-      icon: GraduationCap,
+      icon: 'GraduationCap',
       path: '/director/training',
       color: 'from-green-500 to-green-600',
       stats: { active: 8, total: 10 }
@@ -27,7 +27,7 @@ const DirectorDashboard = () => {
     {
       title: 'Placements',
       description: 'Oversee placement activities, company partnerships, and success rates',
-      icon: Briefcase,
+      icon: 'Briefcase',
       path: '/director/placements',
       color: 'from-purple-500 to-purple-600',
       stats: { active: 5, total: 8 }
@@ -35,17 +35,56 @@ const DirectorDashboard = () => {
     {
       title: 'Post Placements',
       description: 'Track retention, welfare, and post-placement support',
-      icon: TrendingUp,
+      icon: 'TrendingUp',
       path: '/director/post-placements',
       color: 'from-orange-500 to-orange-600',
       stats: { active: 6, total: 7 }
     }
-  ];
+  ],
+  overview: {
+    totalCandidates: 15234,
+    activeCenters: 42,
+    placementRate: 78,
+    totalBudget: '₹28.1Cr'
+  }
+};
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Users,
+  GraduationCap,
+  Briefcase,
+  TrendingUp
+};
+
+const DirectorDashboard = () => {
+  const navigate = useNavigate();
+
+  // RTK Query with mock fallback
+  const { data: apiData, isLoading, error } = useGetDirectorDashboardQuery();
+
+  let dashboardData: typeof mockDashboardData;
+  if (!apiData) {
+    dashboardData = mockDashboardData;
+  } else {
+    dashboardData = apiData.data || apiData || mockDashboardData;
+  }
+
+  const dashboardSections = dashboardData.sections || mockDashboardData.sections;
+  const overview = dashboardData.overview || mockDashboardData.overview;
+
+  if (isLoading) {
+    return (
+      <MainLayout role="director">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout role="director">
       <div className="space-y-6">
-        {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-foreground">Director Dashboard</h1>
           <p className="text-muted-foreground mt-2">
@@ -53,10 +92,9 @@ const DirectorDashboard = () => {
           </p>
         </div>
 
-        {/* 4-Tile Launcher Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-          {dashboardSections.map((section) => {
-            const Icon = section.icon;
+          {dashboardSections.map((section: any) => {
+            const Icon = iconMap[section.icon] || Users;
             return (
               <Card
                 key={section.path}
@@ -100,7 +138,6 @@ const DirectorDashboard = () => {
           })}
         </div>
 
-        {/* Quick Stats Overview */}
         <Card>
           <CardHeader>
             <CardTitle>National Overview</CardTitle>
@@ -110,22 +147,22 @@ const DirectorDashboard = () => {
             <div className="grid gap-4 md:grid-cols-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Total Candidates</p>
-                <p className="text-2xl font-bold">15,234</p>
+                <p className="text-2xl font-bold">{overview.totalCandidates?.toLocaleString()}</p>
                 <p className="text-xs text-green-600">+12% from last month</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Active Centers</p>
-                <p className="text-2xl font-bold">42</p>
+                <p className="text-2xl font-bold">{overview.activeCenters}</p>
                 <p className="text-xs text-blue-600">Across 8 states</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Placement Rate</p>
-                <p className="text-2xl font-bold">78%</p>
+                <p className="text-2xl font-bold">{overview.placementRate}%</p>
                 <p className="text-xs text-green-600">+5% from target</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Total Budget</p>
-                <p className="text-2xl font-bold">₹28.1Cr</p>
+                <p className="text-2xl font-bold">{overview.totalBudget}</p>
                 <p className="text-xs text-muted-foreground">Across all programs</p>
               </div>
             </div>

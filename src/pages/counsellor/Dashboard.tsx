@@ -7,37 +7,14 @@ import { Calendar, CalendarDays, FileText, Users, AlertTriangle, CheckCircle, Cl
 import { Badge } from "@/components/ui/badge";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { useGetCounsellorDashboardQuery } from "@/store/api/apiSlice";
 
-// Mock data
+// Mock data for fallback
 const mockKpis = [
-  {
-    label: "Pending Counselling Sessions",
-    value: 12,
-    icon: Users,
-    status: "warning",
-    subtitle: "candidates pending"
-  },
-  {
-    label: "Parent Counselling Pending", 
-    value: 3,
-    icon: Calendar,
-    status: "danger",
-    subtitle: "parents not counselled"
-  },
-  {
-    label: "OFRs To Generate",
-    value: 5,
-    icon: FileText,
-    status: "warning", 
-    subtitle: "OFRs left"
-  },
-  {
-    label: "Document Compliance",
-    value: 78,
-    icon: CheckCircle,
-    status: "success",
-    subtitle: "% complete"
-  }
+  { label: "Pending Counselling Sessions", value: 12, icon: "Users", status: "warning", subtitle: "candidates pending" },
+  { label: "Parent Counselling Pending", value: 3, icon: "Calendar", status: "danger", subtitle: "parents not counselled" },
+  { label: "OFRs To Generate", value: 5, icon: "FileText", status: "warning", subtitle: "OFRs left" },
+  { label: "Document Compliance", value: 78, icon: "CheckCircle", status: "success", subtitle: "% complete" }
 ];
 
 const mockAlerts = [
@@ -47,10 +24,34 @@ const mockAlerts = [
   { id: 4, text: "Document Review Required - Batch A", status: "warning", priority: "medium" }
 ];
 
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Users,
+  Calendar,
+  FileText,
+  CheckCircle
+};
+
 export default function CounsellorDashboard() {
   const [selectedCentre, setSelectedCentre] = useState("");
   const [selectedBatch, setSelectedBatch] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+
+  // RTK Query with mock fallback
+  const { data: apiData, isLoading, error } = useGetCounsellorDashboardQuery({
+    centreId: selectedCentre || undefined,
+    batchId: selectedBatch || undefined
+  });
+
+  let kpis: typeof mockKpis;
+  let alerts: typeof mockAlerts;
+  
+  if (!apiData) {
+    kpis = mockKpis;
+    alerts = mockAlerts;
+  } else {
+    kpis = apiData.kpis || apiData.data?.kpis || mockKpis;
+    alerts = apiData.alerts || apiData.data?.alerts || mockAlerts;
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -69,14 +70,22 @@ export default function CounsellorDashboard() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <MainLayout role="counsellor">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    );
+  }
+
   return (
     <MainLayout role="counsellor">
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-3xl font-bold text-primary">Counsellor Dashboard</h1>
           
-          {/* Filter Bar */}
           <div className="flex flex-wrap gap-3">
             <Select value={selectedCentre} onValueChange={setSelectedCentre}>
               <SelectTrigger className="w-40">
@@ -108,10 +117,9 @@ export default function CounsellorDashboard() {
           </div>
         </div>
 
-        {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {mockKpis.map((kpi, index) => {
-            const Icon = kpi.icon;
+          {kpis.map((kpi: any, index: number) => {
+            const Icon = iconMap[kpi.icon] || Users;
             return (
               <Card key={index} className="card-hover">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -135,7 +143,6 @@ export default function CounsellorDashboard() {
           })}
         </div>
 
-        {/* Alerts Widget */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -145,7 +152,7 @@ export default function CounsellorDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {mockAlerts.map((alert) => (
+              {alerts.map((alert: any) => (
                 <div key={alert.id} className="flex items-center justify-between p-3 rounded-lg border">
                   <div className="flex items-center gap-3">
                     <div className={getStatusColor(alert.status)}>
@@ -168,7 +175,6 @@ export default function CounsellorDashboard() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
         <Card>
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
