@@ -1133,6 +1133,340 @@ export const apiSlice = createApi({
       }),
       providesTags: ['User'],
     }),
+
+    // ==================== DASHBOARD ENDPOINTS ====================
+    // Admin Dashboard
+    getAdminDashboard: builder.query<any, void>({
+      query: () => '/dashboard/admin',
+      providesTags: ['WorkOrders', 'Candidates', 'Centre'],
+    }),
+
+    // Director Dashboard
+    getDirectorDashboard: builder.query<any, void>({
+      query: () => '/dashboard/director',
+      providesTags: ['WorkOrders', 'Candidates', 'Centre'],
+    }),
+
+    // National Head Dashboard
+    getNationalHeadDashboard: builder.query<any, { dateRange?: string[] }>({
+      query: (params) => ({
+        url: '/dashboard/national-head',
+        params,
+      }),
+      providesTags: ['WorkOrders', 'Candidates', 'Centre', 'State'],
+    }),
+
+    // Counsellor Dashboard
+    getCounsellorDashboard: builder.query<any, { centreId?: string; batchId?: string }>({
+      query: (params) => ({
+        url: '/dashboard/counsellor',
+        params,
+      }),
+      providesTags: ['Candidates', 'Centre'],
+    }),
+
+    // Center Manager Dashboard
+    getCenterManagerDashboard: builder.query<any, { centerId?: string; batchId?: string }>({
+      query: (params) => ({
+        url: '/dashboard/center-manager',
+        params,
+      }),
+      providesTags: ['Candidates', 'Centre'],
+    }),
+
+    // Trainer Dashboard
+    getTrainerDashboard: builder.query<any, { batchId?: string }>({
+      query: (params) => ({
+        url: '/dashboard/trainer',
+        params,
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    // State Head Dashboard
+    getStateHeadDashboard: builder.query<any, { stateId?: string }>({
+      query: (params) => ({
+        url: '/dashboard/state-head',
+        params,
+      }),
+      providesTags: ['WorkOrders', 'Candidates', 'Centre', 'State'],
+    }),
+
+    // MIS Dashboard
+    getMISDashboard: builder.query<any, void>({
+      query: () => '/dashboard/mis',
+      providesTags: ['Candidates', 'WorkOrders'],
+    }),
+
+    // POC Dashboard
+    getPOCDashboard: builder.query<any, void>({
+      query: () => '/dashboard/poc',
+      providesTags: ['Candidates'],
+    }),
+
+    // Company HR Dashboard
+    getCompanyHRDashboard: builder.query<any, void>({
+      query: () => '/dashboard/company-hr',
+      providesTags: ['Candidates'],
+    }),
+
+    // PPC Admin Dashboard
+    getPPCAdminDashboard: builder.query<any, void>({
+      query: () => '/dashboard/ppc-admin',
+      providesTags: ['Candidates'],
+    }),
+
+    // ==================== BATCHES ====================
+    getBatches: builder.query<any[], { centreId?: string; status?: string }>({
+      query: (params) => ({
+        url: '/batches',
+        params,
+      }),
+      providesTags: ['Centre'],
+    }),
+
+    getBatchById: builder.query<any, string>({
+      query: (id) => `/batches/${id}`,
+      providesTags: (result, error, id) => [{ type: 'Centre', id }],
+    }),
+
+    createBatch: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/batches',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Centre'],
+    }),
+
+    updateBatch: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/batches/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Centre'],
+    }),
+
+    // ==================== ALERTS ====================
+    getAlerts: builder.query<any[], { role?: string; status?: string }>({
+      query: (params) => ({
+        url: '/alerts',
+        params,
+      }),
+      providesTags: ['User'],
+    }),
+
+    markAlertRead: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/alerts/${id}/read`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    // ==================== COUNSELLING ====================
+    getCounsellingSessions: builder.query<any[], { candidateId?: string; status?: string }>({
+      query: (params) => ({
+        url: '/counselling/sessions',
+        params,
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    createCounsellingSession: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/counselling/sessions',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    // ==================== OFR ====================
+    getOFRs: builder.query<any[], { status?: string; centreId?: string }>({
+      query: (params) => ({
+        url: '/ofr',
+        params,
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    createOFR: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/ofr',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    verifyOFR: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/ofr/${id}/verify`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    // ==================== ATTENDANCE ====================
+    getAttendance: builder.query<any[], { batchId?: string; date?: string }>({
+      query: (params) => ({
+        url: '/attendance',
+        params,
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    markAttendance: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/attendance',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    // ==================== PLACEMENTS ====================
+    getPlacements: builder.query<any[], { status?: string; centreId?: string }>({
+      query: (params) => ({
+        url: '/placements',
+        params,
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    createPlacement: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/placements',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    // ==================== VIDEO LOGS ====================
+    getVideoLogs: builder.query<any[], { batchId?: string; status?: string }>({
+      query: (params) => ({
+        url: '/video-logs',
+        params,
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    uploadVideoLog: builder.mutation<any, FormData>({
+      query: (formData) => ({
+        url: '/video-logs',
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    // ==================== ASSESSMENTS ====================
+    getAssessments: builder.query<any[], { batchId?: string; status?: string }>({
+      query: (params) => ({
+        url: '/assessments',
+        params,
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    submitAssessment: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/assessments',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    // ==================== DOCUMENTS ====================
+    getCandidateDocuments: builder.query<any[], { candidateId: string }>({
+      query: ({ candidateId }) => `/candidates/${candidateId}/documents`,
+      providesTags: ['Candidates', 'DocumentType'],
+    }),
+
+    uploadCandidateDocument: builder.mutation<any, { candidateId: string; formData: FormData }>({
+      query: ({ candidateId, formData }) => ({
+        url: `/candidates/${candidateId}/documents`,
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: ['Candidates', 'DocumentType'],
+    }),
+
+    verifyDocument: builder.mutation<any, { documentId: string; status: string }>({
+      query: ({ documentId, status }) => ({
+        url: `/documents/${documentId}/verify`,
+        method: 'PUT',
+        body: { status },
+      }),
+      invalidatesTags: ['Candidates', 'DocumentType'],
+    }),
+
+    // ==================== REPORTS ====================
+    getReports: builder.query<any[], { type?: string; dateRange?: string[] }>({
+      query: (params) => ({
+        url: '/reports',
+        params,
+      }),
+      providesTags: ['WorkOrders', 'Candidates'],
+    }),
+
+    generateReport: builder.mutation<any, { type: string; filters: any }>({
+      query: (body) => ({
+        url: '/reports/generate',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    // ==================== COMPANIES ====================
+    getCompanies: builder.query<any[], { status?: string }>({
+      query: (params) => ({
+        url: '/companies',
+        params,
+      }),
+      providesTags: ['User'],
+    }),
+
+    createCompany: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/companies',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    // ==================== SOS/WELFARE ====================
+    getSOSCases: builder.query<any[], { status?: string }>({
+      query: (params) => ({
+        url: '/sos',
+        params,
+      }),
+      providesTags: ['Candidates'],
+    }),
+
+    createSOSCase: builder.mutation<any, any>({
+      query: (body) => ({
+        url: '/sos',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
+
+    updateSOSCase: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/sos/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Candidates'],
+    }),
   }),
 });
 
@@ -1261,6 +1595,59 @@ export const {
   useGetLocationDataQuery,
   // National Heads
   useGetNationalHeadsQuery,
+  // Dashboard endpoints
+  useGetAdminDashboardQuery,
+  useGetDirectorDashboardQuery,
+  useGetNationalHeadDashboardQuery,
+  useGetCounsellorDashboardQuery,
+  useGetCenterManagerDashboardQuery,
+  useGetTrainerDashboardQuery,
+  useGetStateHeadDashboardQuery,
+  useGetMISDashboardQuery,
+  useGetPOCDashboardQuery,
+  useGetCompanyHRDashboardQuery,
+  useGetPPCAdminDashboardQuery,
+  // Batches
+  useGetBatchesQuery,
+  useGetBatchByIdQuery,
+  useCreateBatchMutation,
+  useUpdateBatchMutation,
+  // Alerts
+  useGetAlertsQuery,
+  useMarkAlertReadMutation,
+  // Counselling
+  useGetCounsellingSessionsQuery,
+  useCreateCounsellingSessionMutation,
+  // OFR
+  useGetOFRsQuery,
+  useCreateOFRMutation,
+  useVerifyOFRMutation,
+  // Attendance
+  useGetAttendanceQuery,
+  useMarkAttendanceMutation,
+  // Placements
+  useGetPlacementsQuery,
+  useCreatePlacementMutation,
+  // Video Logs
+  useGetVideoLogsQuery,
+  useUploadVideoLogMutation,
+  // Assessments
+  useGetAssessmentsQuery,
+  useSubmitAssessmentMutation,
+  // Documents
+  useGetCandidateDocumentsQuery,
+  useUploadCandidateDocumentMutation,
+  useVerifyDocumentMutation,
+  // Reports
+  useGetReportsQuery,
+  useGenerateReportMutation,
+  // Companies
+  useGetCompaniesQuery,
+  useCreateCompanyMutation,
+  // SOS/Welfare
+  useGetSOSCasesQuery,
+  useCreateSOSCaseMutation,
+  useUpdateSOSCaseMutation,
 } = apiSlice;
 
 export default apiSlice;
