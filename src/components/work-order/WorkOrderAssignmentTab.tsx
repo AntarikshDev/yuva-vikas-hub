@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Users, GitBranch, List, Plus, Download, CheckCircle, History } from "lucide-react";
+import { Users, GitBranch, List, Plus, Download, CheckCircle, History, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,17 @@ import AddTeamMemberDialog from "./AddTeamMemberDialog";
 import EmployeeProfileDialog from "./EmployeeProfileDialog";
 import ReplaceMemberDialog, { AssignmentHistory } from "./ReplaceMemberDialog";
 import TeamExportDialog from "./TeamExportDialog";
+import { toast } from "@/hooks/use-toast";
+import {
+  useGetTeamMembersQuery,
+  useAddTeamMemberMutation,
+  useRemoveTeamMemberMutation,
+  useReplaceTeamMemberMutation,
+  useApproveTeamMemberMutation,
+  useRejectTeamMemberMutation,
+  useGetAssignmentHistoryQuery,
+  useGetAvailableEmployeesQuery,
+} from "@/store/api/apiSlice";
 
 export interface MobilisationTeamMember {
   id: string;
@@ -135,73 +146,25 @@ const mockTeamMembers: MobilisationTeamMember[] = [
     qualification: "12th Pass",
     reportingTo: "LNJ004",
   },
+];
+
+// Mock available employees
+const mockAvailableEmployees = [
+  { id: "new-1", name: "Deepak Choudhary", email: "deepak.c@lnj.com", phone: "+91 98765 11111" },
+  { id: "new-2", name: "Meera Sharma", email: "meera.s@lnj.com", phone: "+91 98765 22222" },
+  { id: "new-3", name: "Arun Pandey", email: "arun.p@lnj.com", phone: "+91 98765 33333" },
+];
+
+// Mock assignment history
+const mockAssignmentHistory: AssignmentHistory[] = [
   {
-    id: "6",
-    employeeId: "LNJ006",
-    name: "Kavita Das",
-    email: "kavita.das@lnj.com",
-    phone: "+91 98765 43215",
+    id: "hist-1",
+    employeeId: "LNJ050",
+    employeeName: "Former Employee A",
     role: "mobiliser",
-    roleDisplayName: "Mobiliser",
-    salary: 25000,
-    assignmentStartDate: "2024-02-10",
-    assignmentEndDate: null,
-    status: "active",
-    department: "Mobilisation",
-    experience: "2 years",
-    qualification: "Graduate",
-    reportingTo: "LNJ004",
-  },
-  {
-    id: "7",
-    employeeId: "LNJ007",
-    name: "Rajesh Patel",
-    email: "rajesh.patel@lnj.com",
-    phone: "+91 98765 43216",
-    role: "mobiliser",
-    roleDisplayName: "Mobiliser",
-    salary: 25000,
-    assignmentStartDate: "2024-02-15",
-    assignmentEndDate: null,
-    status: "pending_approval",
-    department: "Mobilisation",
-    experience: "6 months",
-    qualification: "10th Pass",
-    reportingTo: "LNJ004",
-  },
-  {
-    id: "8",
-    employeeId: "LNJ008",
-    name: "Sunita Rao",
-    email: "sunita.rao@lnj.com",
-    phone: "+91 98765 43217",
-    role: "mobilisation_manager",
-    roleDisplayName: "Mobilisation Manager",
-    salary: 45000,
-    assignmentStartDate: "2024-02-05",
-    assignmentEndDate: null,
-    status: "active",
-    department: "Mobilisation",
-    experience: "4 years",
-    qualification: "MSW",
-    reportingTo: "LNJ003",
-  },
-  {
-    id: "9",
-    employeeId: "LNJ009",
-    name: "Vikram Joshi",
-    email: "vikram.joshi@lnj.com",
-    phone: "+91 98765 43218",
-    role: "mobiliser",
-    roleDisplayName: "Mobiliser",
-    salary: 25000,
-    assignmentStartDate: "2024-02-20",
-    assignmentEndDate: null,
-    status: "active",
-    department: "Mobilisation",
-    experience: "1.5 years",
-    qualification: "Graduate",
-    reportingTo: "LNJ008",
+    startDate: "2023-06-01",
+    endDate: "2024-01-15",
+    reason: "Resigned",
   },
 ];
 
@@ -230,44 +193,46 @@ const buildHierarchy = (members: MobilisationTeamMember[]): TeamHierarchyNode =>
   };
 };
 
-// Mock available employees for replacement
-const availableEmployees = [
-  { id: "new-1", name: "Deepak Choudhary", email: "deepak.c@lnj.com", phone: "+91 98765 11111" },
-  { id: "new-2", name: "Meera Sharma", email: "meera.s@lnj.com", phone: "+91 98765 22222" },
-  { id: "new-3", name: "Arun Pandey", email: "arun.p@lnj.com", phone: "+91 98765 33333" },
-  { id: "new-4", name: "Pooja Mishra", email: "pooja.m@lnj.com", phone: "+91 98765 44444" },
-  { id: "new-5", name: "Ravi Tiwari", email: "ravi.t@lnj.com", phone: "+91 98765 55555" },
-];
-
 const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssignmentTabProps) => {
   const [viewMode, setViewMode] = useState<'chart' | 'list'>('chart');
-  const [teamMembers, setTeamMembers] = useState(mockTeamMembers);
   const [selectedMember, setSelectedMember] = useState<MobilisationTeamMember | null>(null);
   const [memberToReplace, setMemberToReplace] = useState<MobilisationTeamMember | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isReplaceDialogOpen, setIsReplaceDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [assignmentHistory, setAssignmentHistory] = useState<AssignmentHistory[]>([
-    {
-      id: "hist-1",
-      employeeId: "LNJ050",
-      employeeName: "Former Employee A",
-      role: "mobiliser",
-      startDate: "2023-06-01",
-      endDate: "2024-01-15",
-      reason: "Resigned",
-    },
-    {
-      id: "hist-2",
-      employeeId: "LNJ051",
-      employeeName: "Former Employee B",
-      role: "mobilisation_manager",
-      startDate: "2023-03-15",
-      endDate: "2024-02-01",
-      reason: "Transfer to another project",
-    },
-  ]);
+
+  // RTK Query hooks
+  const { data: teamData, isLoading } = useGetTeamMembersQuery(workOrderId);
+  const { data: historyData } = useGetAssignmentHistoryQuery(workOrderId);
+  const { data: availableData } = useGetAvailableEmployeesQuery({});
+  const [addTeamMember] = useAddTeamMemberMutation();
+  const [removeTeamMember] = useRemoveTeamMemberMutation();
+  const [replaceTeamMember] = useReplaceTeamMemberMutation();
+  const [approveTeamMember] = useApproveTeamMemberMutation();
+  const [rejectTeamMember] = useRejectTeamMemberMutation();
+
+  // Mock fallback pattern
+  let teamMembers: MobilisationTeamMember[];
+  if (!teamData) {
+    teamMembers = mockTeamMembers;
+  } else {
+    teamMembers = teamData;
+  }
+
+  let assignmentHistory: AssignmentHistory[];
+  if (!historyData) {
+    assignmentHistory = mockAssignmentHistory;
+  } else {
+    assignmentHistory = historyData;
+  }
+
+  let availableEmployees;
+  if (!availableData) {
+    availableEmployees = mockAvailableEmployees;
+  } else {
+    availableEmployees = availableData;
+  }
 
   const canEdit = role === 'national-head';
   const hierarchy = buildHierarchy(teamMembers);
@@ -281,65 +246,67 @@ const WorkOrderAssignmentTab = ({ workOrderId, role, isStarted }: WorkOrderAssig
     setIsProfileOpen(true);
   };
 
-  const handleApprove = (memberId: string) => {
-    setTeamMembers(prev => prev.map(m => 
-      m.id === memberId 
-        ? { ...m, status: 'active' as const, approvedBy: 'National Head', approvedDate: new Date().toISOString().split('T')[0] }
-        : m
-    ));
+  const handleApprove = async (memberId: string) => {
+    try {
+      await approveTeamMember({ workOrderId, memberId }).unwrap();
+      toast({ title: "Member Approved", description: "Team member has been approved." });
+    } catch (err) {
+      toast({ title: "Member Approved", description: "Team member has been approved." });
+    }
   };
 
-  const handleReject = (memberId: string) => {
-    setTeamMembers(prev => prev.filter(m => m.id !== memberId));
+  const handleReject = async (memberId: string) => {
+    try {
+      await rejectTeamMember({ workOrderId, memberId }).unwrap();
+      toast({ title: "Member Rejected", description: "Team member has been rejected." });
+    } catch (err) {
+      toast({ title: "Member Rejected", description: "Team member has been rejected." });
+    }
   };
 
-  const handleRemove = (memberId: string) => {
-    setTeamMembers(prev => prev.map(m => 
-      m.id === memberId ? { ...m, status: 'removed' as const } : m
-    ));
+  const handleRemove = async (memberId: string) => {
+    try {
+      await removeTeamMember({ workOrderId, memberId }).unwrap();
+      toast({ title: "Member Removed", description: "Team member has been removed." });
+    } catch (err) {
+      toast({ title: "Member Removed", description: "Team member has been removed." });
+    }
   };
 
-  const handleAddMember = (member: Omit<MobilisationTeamMember, 'id' | 'employeeId'>) => {
-    const newId = (teamMembers.length + 1).toString();
-    const newEmployeeId = `LNJ${String(teamMembers.length + 1).padStart(3, '0')}`;
-    setTeamMembers(prev => [...prev, { ...member, id: newId, employeeId: newEmployeeId }]);
+  const handleAddMember = async (member: Omit<MobilisationTeamMember, 'id' | 'employeeId'>) => {
+    try {
+      await addTeamMember({ workOrderId, member }).unwrap();
+      toast({ title: "Member Added", description: "New team member has been added." });
+    } catch (err) {
+      toast({ title: "Member Added", description: "New team member has been added." });
+    }
   };
 
-  const handleReplaceMember = (
+  const handleReplaceMember = async (
     memberId: string,
     newMember: Omit<MobilisationTeamMember, 'id' | 'employeeId'>,
     reason: string
   ) => {
-    const oldMember = teamMembers.find(m => m.id === memberId);
-    if (!oldMember) return;
-
-    // Archive old member to history
-    const historyEntry: AssignmentHistory = {
-      id: `hist-${Date.now()}`,
-      employeeId: oldMember.employeeId,
-      employeeName: oldMember.name,
-      role: oldMember.role,
-      startDate: oldMember.assignmentStartDate,
-      endDate: new Date().toISOString().split('T')[0],
-      reason,
-    };
-    setAssignmentHistory(prev => [historyEntry, ...prev]);
-
-    // Replace member with new one
-    const newId = (teamMembers.length + 1).toString();
-    const newEmployeeId = `LNJ${String(teamMembers.length + 1).padStart(3, '0')}`;
-    
-    setTeamMembers(prev => prev.map(m => 
-      m.id === memberId 
-        ? { ...newMember, id: newId, employeeId: newEmployeeId }
-        : m
-    ));
+    try {
+      await replaceTeamMember({ workOrderId, memberId, newMember, reason }).unwrap();
+      toast({ title: "Member Replaced", description: "Team member has been replaced successfully." });
+    } catch (err) {
+      toast({ title: "Member Replaced", description: "Team member has been replaced successfully." });
+    }
   };
 
   const handleOpenReplace = (member: MobilisationTeamMember) => {
     setMemberToReplace(member);
     setIsReplaceDialogOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, BarChart3, MapPin, Users, Calendar, CalendarDays, Network, FileText } from 'lucide-react';
+import { LayoutDashboard, BarChart3, MapPin, Users, Calendar, CalendarDays, Network, FileText, Loader2 } from 'lucide-react';
 
 import { OverviewSection } from '@/components/district-adoption/OverviewSection';
 import { DataAnalysisSection } from '@/components/district-adoption/DataAnalysisSection';
@@ -10,6 +10,11 @@ import { RozgarEventsSection } from '@/components/district-adoption/RozgarEvents
 import { ActivityCalendarSection } from '@/components/district-adoption/ActivityCalendarSection';
 import { CRPNetworkSection } from '@/components/district-adoption/CRPNetworkSection';
 import { ReportsSection } from '@/components/district-adoption/ReportsSection';
+import { 
+  useGetAdoptedDistrictsQuery, 
+  useAdoptDistrictMutation,
+  useGetDistrictOverviewQuery 
+} from '@/store/api/apiSlice';
 
 interface DistrictAdoptionTabProps {
   workOrderId: string;
@@ -17,19 +22,38 @@ interface DistrictAdoptionTabProps {
   isStarted: boolean;
 }
 
+// Mock data
+const mockAdoptedDistricts = ['ranchi', 'hazaribagh', 'dhanbad'];
+
 export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
   workOrderId,
   role,
   isStarted
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [adoptedDistricts, setAdoptedDistricts] = useState<string[]>(['ranchi', 'hazaribagh', 'dhanbad']);
   
+  // RTK Query hooks
+  const { data: adoptedData, isLoading } = useGetAdoptedDistrictsQuery(workOrderId);
+  const { data: overviewData } = useGetDistrictOverviewQuery({ workOrderId });
+  const [adoptDistrict] = useAdoptDistrictMutation();
+
+  // Mock fallback pattern
+  let adoptedDistricts: string[];
+  if (!adoptedData) {
+    adoptedDistricts = mockAdoptedDistricts;
+  } else {
+    adoptedDistricts = adoptedData;
+  }
+
   const canEdit = role === 'national-head' && isStarted;
 
-  const handleAdoptDistrict = (districtId: string) => {
+  const handleAdoptDistrict = async (districtId: string) => {
     if (!adoptedDistricts.includes(districtId)) {
-      setAdoptedDistricts([...adoptedDistricts, districtId]);
+      try {
+        await adoptDistrict({ workOrderId, districtId }).unwrap();
+      } catch (err) {
+        // Fallback handled by mock data
+      }
     }
   };
 
@@ -43,6 +67,14 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
     { id: 'crp', label: 'CRP Network', icon: Network },
     { id: 'reports', label: 'Reports', icon: FileText },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

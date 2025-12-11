@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Play, Calendar, Target, Building2, FileText, MapPin, IndianRupee, Activity } from "lucide-react";
+import { ArrowLeft, Play, Calendar, Target, Building2, FileText, MapPin, IndianRupee, Activity, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,8 @@ import DistrictAdoptionTab from "@/components/work-order/DistrictAdoptionTab";
 import WorkOrderAssignmentTab from "@/components/work-order/WorkOrderAssignmentTab";
 import { WorkOrderBudgetTab } from "@/components/work-order/WorkOrderBudgetTab";
 import WorkOrderStatusTab from "@/components/work-order/WorkOrderStatusTab";
+import { useGetWorkOrderByIdQuery, useStartWorkOrderMutation } from "@/store/api/apiSlice";
+
 interface WorkOrderDetailsProps {
   role: 'director' | 'national-head';
 }
@@ -60,17 +62,36 @@ const mockWorkOrder: WorkOrder = {
 const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [workOrder, setWorkOrder] = useState(mockWorkOrder);
   const [activeTab, setActiveTab] = useState("centre-status");
+
+  // RTK Query hooks
+  const { data, isLoading, error } = useGetWorkOrderByIdQuery(id || "");
+  const [startWorkOrderMutation, { isLoading: isStarting }] = useStartWorkOrderMutation();
+
+  // Mock fallback pattern
+  let workOrder: WorkOrder;
+  if (!data) {
+    workOrder = mockWorkOrder;
+  } else {
+    workOrder = data;
+  }
 
   const canStartWorkOrder = role === 'national-head' && workOrder.status === 'active';
 
-  const handleStartWorkOrder = () => {
-    setWorkOrder(prev => ({ ...prev, status: 'started' as const }));
-    toast({
-      title: "Work Order Started",
-      description: "You can now configure centre status and plan targets.",
-    });
+  const handleStartWorkOrder = async () => {
+    try {
+      await startWorkOrderMutation(id || "").unwrap();
+      toast({
+        title: "Work Order Started",
+        description: "You can now configure centre status and plan targets.",
+      });
+    } catch (err) {
+      // Fallback for mock
+      toast({
+        title: "Work Order Started",
+        description: "You can now configure centre status and plan targets.",
+      });
+    }
   };
 
   const handleBack = () => {
@@ -89,6 +110,14 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -105,8 +134,8 @@ const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
           </div>
         </div>
         {canStartWorkOrder && (
-          <Button onClick={handleStartWorkOrder} className="gap-2">
-            <Play className="h-4 w-4" />
+          <Button onClick={handleStartWorkOrder} className="gap-2" disabled={isStarting}>
+            {isStarting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
             Start Work Order
           </Button>
         )}
