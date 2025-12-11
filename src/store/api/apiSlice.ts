@@ -95,6 +95,11 @@ export const apiSlice = createApi({
     'User',
     'Candidates',
     'WorkOrders',
+    'Mobilizers',
+    'Centers',
+    'States',
+    'Districts',
+    'TravelMode',
   ],
   endpoints: (builder) => ({
     // ==================== AUTH ====================
@@ -1030,6 +1035,104 @@ export const apiSlice = createApi({
         { type: 'District', id: `${stateCode}-LIST` },
       ],
     }),
+
+    // ==================== TRAVEL MODES ====================
+    getTravelModes: builder.query<any[], { search?: string }>({
+      query: (params) => ({
+        url: '/work-orders/travel-modes',
+        method: 'GET',
+        params,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map((item: any) => ({ type: 'TravelMode' as const, id: item.id })),
+              { type: 'TravelMode', id: 'LIST' },
+            ]
+          : [{ type: 'TravelMode', id: 'LIST' }],
+    }),
+
+    getTravelMode: builder.query<any, string>({
+      query: (id) => `/work-orders/travel-modes/${id}`,
+      providesTags: (result, error, id) => [{ type: 'TravelMode', id }],
+    }),
+
+    createTravelMode: builder.mutation<any, { name: string }>({
+      query: (body) => ({
+        url: '/work-orders/travel-modes',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [{ type: 'TravelMode', id: 'LIST' }],
+    }),
+
+    updateTravelMode: builder.mutation<any, { id: string; name: string }>({
+      query: ({ id, ...body }) => ({
+        url: `/work-orders/travel-modes/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'TravelMode', id },
+        { type: 'TravelMode', id: 'LIST' },
+      ],
+    }),
+
+    deleteTravelMode: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/work-orders/travel-modes/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'TravelMode', id: 'LIST' }],
+    }),
+
+    // ==================== LOCATION DATA ====================
+    getLocationData: builder.query<any, { state?: string; district?: string; block?: string }>({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+        if (params.state) searchParams.append('state', params.state);
+        if (params.district) searchParams.append('district', params.district);
+        if (params.block) searchParams.append('block', params.block);
+        return `/work-orders/getlocationdata?${searchParams.toString()}`;
+      },
+      providesTags: ['State', 'District', 'Block'],
+    }),
+
+    // ==================== WORK ORDER DETAILS ====================
+    getWorkOrderById: builder.query<any, string>({
+      query: (id) => `/work-orders/${id}`,
+      providesTags: (result, error, id) => [{ type: 'WorkOrders', id }],
+    }),
+
+    updateWorkOrder: builder.mutation<any, { id: string; data: any }>({
+      query: ({ id, data }) => ({
+        url: `/work-orders/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'WorkOrders', id },
+        { type: 'WorkOrders', id: 'LIST' },
+      ],
+    }),
+
+    deleteWorkOrder: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/work-orders/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'WorkOrders', id: 'LIST' }],
+    }),
+
+    // ==================== NATIONAL HEADS ====================
+    getNationalHeads: builder.query<any[], { stateId?: string }>({
+      query: (params) => ({
+        url: '/work-orders/national-heads',
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['User'],
+    }),
   }),
 });
 
@@ -1128,6 +1231,9 @@ export const {
   useCreateWorkOrderMutation,
   useWorkOrdersByProgramIdMutation,
   useGetDetailWorkOrdersByProgramIdAndStatusMutation,
+  useGetWorkOrderByIdQuery,
+  useUpdateWorkOrderMutation,
+  useDeleteWorkOrderMutation,
   // Statistics
   useGetPageQuery,
   useGetFinalStatsQuery,
@@ -1145,6 +1251,16 @@ export const {
   useGetActiveStatesListQuery,
   useGetStatesListForAddQuery,
   useGetDistrictListForAddQuery,
+  // Travel Modes
+  useGetTravelModesQuery,
+  useGetTravelModeQuery,
+  useCreateTravelModeMutation,
+  useUpdateTravelModeMutation,
+  useDeleteTravelModeMutation,
+  // Location Data
+  useGetLocationDataQuery,
+  // National Heads
+  useGetNationalHeadsQuery,
 } = apiSlice;
 
 export default apiSlice;
