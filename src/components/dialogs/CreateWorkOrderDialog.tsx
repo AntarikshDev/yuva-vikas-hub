@@ -22,6 +22,12 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { 
+  useGetProgramsQuery, 
+  useGetStatesListForAddQuery, 
+  useGetDistrictListForAddQuery,
+  useGetNationalHeadsQuery 
+} from '@/store/api/apiSlice';
 
 interface CreateWorkOrderDialogProps {
   open: boolean;
@@ -54,7 +60,7 @@ interface WorkOrderFormData {
   status: string;
 }
 
-// Mock data
+// Mock data - used as fallback when API doesn't respond
 const mockPrograms = [
   { id: 'prog-1', name: 'DDU-GKY', code: 'DDU' },
   { id: 'prog-2', name: 'PMKVY', code: 'PMK' },
@@ -63,11 +69,11 @@ const mockPrograms = [
 ];
 
 const mockStates = [
-  { id: 'state-1', name: 'Maharashtra' },
-  { id: 'state-2', name: 'Karnataka' },
-  { id: 'state-3', name: 'Tamil Nadu' },
-  { id: 'state-4', name: 'Gujarat' },
-  { id: 'state-5', name: 'Rajasthan' },
+  { id: 'state-1', name: 'Maharashtra', code: 'MH' },
+  { id: 'state-2', name: 'Karnataka', code: 'KA' },
+  { id: 'state-3', name: 'Tamil Nadu', code: 'TN' },
+  { id: 'state-4', name: 'Gujarat', code: 'GJ' },
+  { id: 'state-5', name: 'Rajasthan', code: 'RJ' },
 ];
 
 const mockDistricts: Record<string, { id: string; name: string }[]> = {
@@ -137,8 +143,48 @@ export const CreateWorkOrderDialog: React.FC<CreateWorkOrderDialogProps> = ({
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [selectedStateId, setSelectedStateId] = useState<string>('');
-  const [availableDistricts, setAvailableDistricts] = useState<{ id: string; name: string }[]>([]);
-  const [availableNationalHeads, setAvailableNationalHeads] = useState<{ id: string; name: string }[]>([]);
+  const [selectedStateCode, setSelectedStateCode] = useState<string>('');
+
+  // RTK Query hooks with mock fallback pattern
+  const { data: apiPrograms } = useGetProgramsQuery({ search: '', status: 'active' });
+  const { data: apiStates } = useGetStatesListForAddQuery({});
+  const { data: apiDistricts } = useGetDistrictListForAddQuery(selectedStateCode, { skip: !selectedStateCode });
+  const { data: apiNationalHeads } = useGetNationalHeadsQuery({ stateId: selectedStateId }, { skip: !selectedStateId });
+
+  // Mock fallback pattern - use mock data if API doesn't return data
+  let programs: typeof mockPrograms;
+  if (!apiPrograms) {
+    programs = mockPrograms;
+  } else {
+    programs = Array.isArray(apiPrograms) ? apiPrograms : mockPrograms;
+  }
+
+  let states: typeof mockStates;
+  if (!apiStates) {
+    states = mockStates;
+  } else {
+    states = Array.isArray(apiStates) ? apiStates : (apiStates as any).data || mockStates;
+  }
+
+  // Districts with mock fallback
+  let availableDistricts: { id: string; name: string }[];
+  if (!apiDistricts && selectedStateId) {
+    availableDistricts = mockDistricts[selectedStateId] || [];
+  } else if (apiDistricts) {
+    availableDistricts = Array.isArray(apiDistricts) ? apiDistricts : (apiDistricts as any).data || [];
+  } else {
+    availableDistricts = [];
+  }
+
+  // National heads with mock fallback
+  let availableNationalHeads: { id: string; name: string }[];
+  if (!apiNationalHeads && selectedStateId) {
+    availableNationalHeads = mockNationalHeads[selectedStateId] || [];
+  } else if (apiNationalHeads) {
+    availableNationalHeads = Array.isArray(apiNationalHeads) ? apiNationalHeads : (apiNationalHeads as any).data || [];
+  } else {
+    availableNationalHeads = [];
+  }
 
   // Reset form when dialog opens/closes
   useEffect(() => {
@@ -149,11 +195,10 @@ export const CreateWorkOrderDialog: React.FC<CreateWorkOrderDialogProps> = ({
       setEndDate(initialData.endDate ? new Date(initialData.endDate) : undefined);
       
       // Find state ID from state name
-      const state = mockStates.find(s => s.name === initialData.stateName);
+      const state = states.find((s: any) => s.name === initialData.stateName);
       if (state) {
         setSelectedStateId(state.id);
-        setAvailableDistricts(mockDistricts[state.id] || []);
-        setAvailableNationalHeads(mockNationalHeads[state.id] || []);
+        setSelectedStateCode((state as any).code || state.id);
       }
     } else if (!open) {
       setFormData({
@@ -171,35 +216,32 @@ export const CreateWorkOrderDialog: React.FC<CreateWorkOrderDialogProps> = ({
       setStartDate(undefined);
       setEndDate(undefined);
       setSelectedStateId('');
-      setAvailableDistricts([]);
-      setAvailableNationalHeads([]);
+      setSelectedStateCode('');
     }
-  }, [open, initialData]);
+  }, [open, initialData, states]);
 
-  // Update districts and national heads when state changes
-  useEffect(() => {
-    if (selectedStateId) {
-      setAvailableDistricts(mockDistricts[selectedStateId] || []);
-      setAvailableNationalHeads(mockNationalHeads[selectedStateId] || []);
-    } else {
-      setAvailableDistricts([]);
-      setAvailableNationalHeads([]);
-    }
-  }, [selectedStateId]);
+  // Update state code when state changes
+  const handleStateChange = (stateId: string) => {
+    setSelectedStateId(stateId);
+    const state = states.find((s: any) => s.id === stateId);
+    setSelectedStateCode((state as any)?.code || stateId);
+    // Reset district and national head when state changes
+    setFormData(prev => ({ ...prev, districtId: undefined, assignedNationalHeadId: undefined }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const program = mockPrograms.find(p => p.id === formData.programId);
-    const state = mockStates.find(s => s.id === selectedStateId);
-    const district = availableDistricts.find(d => d.id === formData.districtId);
-    const nationalHead = availableNationalHeads.find(nh => nh.id === formData.assignedNationalHeadId);
+    const program = programs.find((p: any) => p.id === formData.programId);
+    const state = states.find((s: any) => s.id === selectedStateId);
+    const district = availableDistricts.find((d: any) => d.id === formData.districtId);
+    const nationalHead = availableNationalHeads.find((nh: any) => nh.id === formData.assignedNationalHeadId);
 
     const submitData: WorkOrderFormData = {
       workOrderNo: formData.workOrderNo || '',
       programId: formData.programId || '',
       programName: program?.name || '',
-      programCode: program?.code || '',
+      programCode: (program as any)?.code || '',
       assignedDate: assignedDate ? format(assignedDate, 'yyyy-MM-dd') : '',
       startDate: startDate ? format(startDate, 'yyyy-MM-dd') : '',
       endDate: endDate ? format(endDate, 'yyyy-MM-dd') : '',
@@ -245,7 +287,7 @@ export const CreateWorkOrderDialog: React.FC<CreateWorkOrderDialogProps> = ({
                     <SelectValue placeholder="Select program" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    {mockPrograms.map((program) => (
+                    {programs.map((program: any) => (
                       <SelectItem key={program.id} value={program.id}>
                         {program.name} ({program.code})
                       </SelectItem>
@@ -443,13 +485,13 @@ export const CreateWorkOrderDialog: React.FC<CreateWorkOrderDialogProps> = ({
                 <Label>State (Optional)</Label>
                 <Select
                   value={selectedStateId}
-                  onValueChange={setSelectedStateId}
+                  onValueChange={handleStateChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select state" />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    {mockStates.map((state) => (
+                    {states.map((state: any) => (
                       <SelectItem key={state.id} value={state.id}>
                         {state.name}
                       </SelectItem>
@@ -468,13 +510,13 @@ export const CreateWorkOrderDialog: React.FC<CreateWorkOrderDialogProps> = ({
                   <SelectTrigger>
                     <SelectValue placeholder="Select district" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    {availableDistricts.map((district) => (
-                      <SelectItem key={district.id} value={district.id}>
-                        {district.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+                <SelectContent className="bg-white">
+                  {availableDistricts.map((district: any) => (
+                    <SelectItem key={district.id} value={district.id}>
+                      {district.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
                 </Select>
               </div>
             </div>
@@ -489,13 +531,13 @@ export const CreateWorkOrderDialog: React.FC<CreateWorkOrderDialogProps> = ({
                 <SelectTrigger>
                   <SelectValue placeholder={selectedStateId ? "Select national head" : "Select state first"} />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
-                  {availableNationalHeads.map((nh) => (
-                    <SelectItem key={nh.id} value={nh.id}>
-                      {nh.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+              <SelectContent className="bg-white">
+                {availableNationalHeads.map((nh: any) => (
+                  <SelectItem key={nh.id} value={nh.id}>
+                    {nh.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
                 National heads are filtered based on the selected state from user management.
