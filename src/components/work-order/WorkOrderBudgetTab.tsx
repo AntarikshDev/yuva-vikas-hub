@@ -510,6 +510,8 @@ export const WorkOrderBudgetTab: React.FC<WorkOrderBudgetTabProps> = ({
         onOpenChange={setIsExpenseApprovalOpen}
         onApprove={handleExpenseApproval}
         onReject={handleExpenseReject}
+        teamMembers={[]}
+        currentUserLevel={1}
       />
     </div>
   );
