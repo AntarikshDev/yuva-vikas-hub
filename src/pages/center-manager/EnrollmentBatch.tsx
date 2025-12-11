@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Calendar, Users, Plus, FileDown, Eye } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useGetBatchesQuery, useGetCandidatesListQuery } from '@/store/api/apiSlice';
 
 const EnrollmentBatch = () => {
   const [selectedBatch, setSelectedBatch] = useState('all');
@@ -15,6 +16,10 @@ const EnrollmentBatch = () => {
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isBatchRosterOpen, setIsBatchRosterOpen] = useState(false);
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+
+  // RTK Query hooks
+  const { data: batchesData, isLoading: batchesLoading } = useGetBatchesQuery({});
+  const { data: candidatesData, isLoading: candidatesLoading } = useGetCandidatesListQuery({});
 
   // Mock data for pending enrollments
   const pendingEnrollments = [

@@ -10,9 +10,10 @@ import { Search, Eye, MessageCircle, UserCheck, ChevronLeft, ChevronRight } from
 import { MultiStageCounsellingDialog } from "@/components/dialogs/MultiStageCounsellingDialog";
 import { ParentCounsellingDialog } from "@/components/dialogs/ParentCounsellingDialog";
 import { DocumentComplianceDialog } from "@/components/dialogs/DocumentComplianceDialog";
+import { useGetCandidatesListQuery } from "@/store/api/apiSlice";
 
-// Mock data with counselling session storage
-const initialCandidates = [
+// Mock data for fallback
+const mockCandidates = [
   {
     id: 1,
     name: "Rajesh Kumar",
@@ -60,7 +61,17 @@ let counsellingSessions: { [candidateId: number]: any } = {};
 let parentCoursellingSessions: { [candidateId: number]: any } = {};
 
 export default function CandidateManagement() {
-  const [candidates, setCandidates] = useState(initialCandidates);
+  // RTK Query with mock fallback
+  const { data, isLoading, error } = useGetCandidatesListQuery({});
+  
+  let candidatesData;
+  if (!data) {
+    candidatesData = mockCandidates;
+  } else {
+    candidatesData = data.data || data || mockCandidates;
+  }
+
+  const [candidates, setCandidates] = useState(candidatesData);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStage, setSelectedStage] = useState("all");
   const [selectedBatch, setSelectedBatch] = useState("all");

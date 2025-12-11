@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
 import { DataTable } from '@/components/common/DataTable';
+import { useGetBatchesQuery, useCreateBatchMutation, useUpdateBatchMutation } from '@/store/api/apiSlice';
 
 // Define the Batch type to ensure consistency
 interface Batch {
@@ -65,9 +66,14 @@ const BatchManagement = () => {
   });
 
   const { toast } = useToast();
+  
+  // RTK Query hooks
+  const { data: batchesData, isLoading, error } = useGetBatchesQuery({});
+  const [createBatchMutation] = useCreateBatchMutation();
+  const [updateBatchMutation] = useUpdateBatchMutation();
 
-  // Updated batches state with the proper type
-  const [batches, setBatches] = useState<Batch[]>([
+  // Mock data for fallback
+  const mockBatches: Batch[] = [
     { 
       id: 'B001', 
       name: 'CSE Batch 01', 
@@ -133,7 +139,18 @@ const BatchManagement = () => {
       progress: 20,
       status: 'active'
     },
-  ]);
+  ];
+
+  // Apply mock fallback pattern
+  let batchesList: Batch[];
+  if (!batchesData) {
+    batchesList = mockBatches;
+  } else {
+    batchesList = Array.isArray(batchesData) ? batchesData : (batchesData as any).data || mockBatches;
+  }
+
+  // Updated batches state with the proper type
+  const [batches, setBatches] = useState<Batch[]>(batchesList);
 
   // Filter data based on search term and filters
   const filteredBatches = batches.filter(batch => {

@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Bell, Users, FileText, MapPin, AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { useGetPPCAdminDashboardQuery } from "@/store/api/apiSlice";
 
 const Dashboard = () => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCentre, setSelectedCentre] = useState("");
 
-  const kpiData = [
+  // Mock data for fallback
+  const mockKpiData = [
     { label: "Total Batches Under Monitoring", value: 15, icon: Users, color: "bg-blue-500" },
     { label: "Counselling Completion %", value: 88, icon: CheckCircle, color: "bg-green-500" },
     { label: "Assessments Completed %", value: 92, icon: FileText, color: "bg-purple-500" },
@@ -20,26 +22,42 @@ const Dashboard = () => {
     { label: "POC Visits This Week", value: 3, icon: Calendar, color: "bg-yellow-500" }
   ];
 
-  const centreStatus = [
+  const mockCentreStatus = [
     { batch: "Batch X", status: "Counselling Stage-2 Running", center: "Delhi Center A", progress: 75 },
     { batch: "Batch Y", status: "Interview Practice Completed", center: "Mumbai Center B", progress: 90 },
     { batch: "Batch Z", status: "Assessment Phase", center: "Bangalore Center C", progress: 60 },
     { batch: "Batch A", status: "Travel Planning", center: "Chennai Center D", progress: 95 }
   ];
 
-  const pendingActions = [
+  const mockPendingActions = [
     "Review Declaration by Centre Manager – 3 Batches",
     "Check Candidate Declaration Letters – 12 Pending",
     "Verify Travel Status for Batch Z",
     "Approve Hostel Allocation for Batch Y"
   ];
 
-  const upcomingEvents = [
+  const mockUpcomingEvents = [
     { date: "2025-07-21", event: "POC Hostel Visit – Bangalore", type: "visit" },
     { date: "2025-07-22", event: "Batch X Interview", type: "interview" },
     { date: "2025-07-23", event: "Travel Departure – Batch Y", type: "travel" },
     { date: "2025-07-24", event: "POC Employer Visit – Chennai", type: "visit" }
   ];
+
+  // RTK Query with mock fallback
+  const { data, isLoading, error } = useGetPPCAdminDashboardQuery();
+  
+  let kpiData, centreStatus, pendingActions, upcomingEvents;
+  if (!data) {
+    kpiData = mockKpiData;
+    centreStatus = mockCentreStatus;
+    pendingActions = mockPendingActions;
+    upcomingEvents = mockUpcomingEvents;
+  } else {
+    kpiData = data.kpiData || mockKpiData;
+    centreStatus = data.centreStatus || mockCentreStatus;
+    pendingActions = data.pendingActions || mockPendingActions;
+    upcomingEvents = data.upcomingEvents || mockUpcomingEvents;
+  }
 
   return (
     <div className="p-6 space-y-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">

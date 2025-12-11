@@ -6,14 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Users, Building, AlertTriangle, CreditCard, Calendar, Bell, Activity, Database, Clock } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
+import { useGetAdminDashboardQuery } from '@/store/api/apiSlice';
 
 const MISAdminDashboard = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [selectedCenter, setSelectedCenter] = useState('all');
 
-  // Mock data for KPIs
-  const kpiData = {
+  // Mock data for fallback
+  const mockKpiData = {
     totalActiveUsers: 1247,
     centresActive: 89,
     pendingDataSyncErrors: 23,
@@ -22,13 +23,24 @@ const MISAdminDashboard = () => {
     alertsTriggered: 7
   };
 
-  // Mock system health data
-  const systemHealth = {
+  const mockSystemHealth = {
     apiUptime: 'operational',
     syncQueuePending: 156,
     syncQueueProcessed: 2847,
     lastBackup: '2025-07-18 03:30:00'
   };
+
+  // RTK Query with mock fallback
+  const { data, isLoading, error } = useGetAdminDashboardQuery();
+  
+  let kpiData, systemHealth;
+  if (!data) {
+    kpiData = mockKpiData;
+    systemHealth = mockSystemHealth;
+  } else {
+    kpiData = data.kpiData || mockKpiData;
+    systemHealth = data.systemHealth || mockSystemHealth;
+  }
 
   const regions = [
     { id: 'all', name: 'All Regions' },

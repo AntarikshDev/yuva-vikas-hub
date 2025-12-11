@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,6 +12,7 @@ import { RoleMatrixForm } from '@/components/forms/RoleMatrixForm';
 import { UserFilterDialog, UserFilters } from '@/components/dialogs/UserFilterDialog';
 import { UserActionDialog } from '@/components/dialogs/UserActionDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useGetUsersListQuery, useAddUserMutation, useUpdateUserMutation, useDeleteUserMutation } from '@/store/api/apiSlice';
 
 const UserManagement = () => {
   // State for dialog forms
@@ -40,14 +40,31 @@ const UserManagement = () => {
 
   const { toast } = useToast();
 
-  // Dummy data for users
-  const [users, setUsers] = useState([
+  // RTK Query hooks
+  const { data: usersData, isLoading, error } = useGetUsersListQuery({});
+  const [addUser] = useAddUserMutation();
+  const [updateUser] = useUpdateUserMutation();
+  const [deleteUserMutation] = useDeleteUserMutation();
+
+  // Mock data for fallback
+  const mockUsers = [
     { id: 1, name: 'John Doe', email: 'john@example.com', mobile: '9876543210', role: 'State Head', center: 'Delhi Center', status: 'active' },
     { id: 2, name: 'Jane Smith', email: 'jane@example.com', mobile: '9876543211', role: 'Center Manager', center: 'Mumbai Center', status: 'active' },
     { id: 3, name: 'Alice Johnson', email: 'alice@example.com', mobile: '9876543212', role: 'Mobilizer', center: 'Pune Center', status: 'inactive' },
     { id: 4, name: 'Bob Wilson', email: 'bob@example.com', mobile: '9876543213', role: 'Trainer', center: 'Chennai Center', status: 'active' },
     { id: 5, name: 'Carol Williams', email: 'carol@example.com', mobile: '9876543214', role: 'PPC Team', center: 'Kolkata Center', status: 'active' },
-  ]);
+  ];
+
+  // Apply mock fallback pattern
+  let usersListData;
+  if (!usersData) {
+    usersListData = mockUsers;
+  } else {
+    usersListData = Array.isArray(usersData) ? usersData : (usersData as any).data || mockUsers;
+  }
+
+  // Dummy data for users
+  const [users, setUsers] = useState(usersListData);
 
   // Filter users based on search query and applied filters
   const filteredUsers = users.filter(user => {
