@@ -2014,6 +2014,52 @@ export const {
   useGetSOSCasesQuery,
   useCreateSOSCaseMutation,
   useUpdateSOSCaseMutation,
+  // CRP Network
+  useGetCRPNetworkQuery,
+  useAddCRPMutation,
+  // Activity Calendar
+  useGetActivityCalendarQuery,
+  useCreateActivityMutation,
+  // Work Order Details - Centre Status
+  useGetCentresForWorkOrderQuery,
+  useGetCentreStatusQuery,
+  useSaveCentreChecklistMutation,
+  useUploadAuditReportMutation,
+  // Work Order Details - District Adoption
+  useGetAdoptedDistrictsQuery,
+  useAdoptDistrictMutation,
+  useGetDistrictOverviewQuery,
+  // Work Order Details - Target Planning
+  useGetMobilisationTargetsQuery,
+  useGetEnrolmentTargetsQuery,
+  useSaveTargetsMutation,
+  // Work Order Details - Team Assignment
+  useGetTeamMembersQuery,
+  useAddTeamMemberMutation,
+  useRemoveTeamMemberMutation,
+  useReplaceTeamMemberMutation,
+  useApproveTeamMemberMutation,
+  useRejectTeamMemberMutation,
+  useGetAssignmentHistoryQuery,
+  useGetAvailableEmployeesQuery,
+  // Work Order Details - Budget
+  useGetWorkOrderBudgetQuery,
+  useGetTeamSalaryDataQuery,
+  useCreateWorkOrderBudgetMutation,
+  useUpdateWorkOrderBudgetMutation,
+  useBulkUploadExpensesMutation,
+  useApproveExpensesMutation,
+  useRejectExpensesMutation,
+  // Work Order Details - Status
+  useGetWorkOrderStatusQuery,
+  useGetCentreStatusSummaryQuery,
+  useGetTicketsQuery,
+  useGetMonthlyTargetAchievementQuery,
+  useGetDistrictOFRStatusQuery,
+  useGetVacantPositionsQuery,
+  useGetBudgetVarianceQuery,
+  // Work Order Start
+  useStartWorkOrderMutation,
 } = apiSlice;
 
 export default apiSlice;
