@@ -21,7 +21,17 @@ import {
   AlertCircle,
   Clock,
   FileText,
+  Loader2,
 } from "lucide-react";
+import {
+  useGetWorkOrderStatusQuery,
+  useGetCentreStatusSummaryQuery,
+  useGetTicketsQuery,
+  useGetMonthlyTargetAchievementQuery,
+  useGetDistrictOFRStatusQuery,
+  useGetVacantPositionsQuery,
+  useGetBudgetVarianceQuery,
+} from "@/store/api/apiSlice";
 
 interface WorkOrderStatusTabProps {
   workOrderId: string;
@@ -29,7 +39,7 @@ interface WorkOrderStatusTabProps {
   totalTarget: number;
 }
 
-// Mock data for centre status
+// Mock data
 const mockCentreStatus = [
   { id: "1", name: "Mumbai Training Centre", status: "operational", capacity: 200, enrolled: 185, trainer: "Available", infra: "Complete", tickets: 2 },
   { id: "2", name: "Pune Skill Centre", status: "operational", capacity: 150, enrolled: 142, trainer: "Available", infra: "Complete", tickets: 0 },
@@ -37,7 +47,6 @@ const mockCentreStatus = [
   { id: "4", name: "Thane Training Institute", status: "issue", capacity: 120, enrolled: 45, trainer: "Vacant", infra: "Pending", tickets: 5 },
 ];
 
-// Mock tickets data
 const mockTickets = [
   { id: "TKT-001", centre: "Mumbai Training Centre", issue: "Infrastructure repair needed", priority: "medium", status: "open", createdAt: "2024-01-10" },
   { id: "TKT-002", centre: "Mumbai Training Centre", issue: "Network connectivity issues", priority: "high", status: "in_progress", createdAt: "2024-01-12" },
@@ -45,38 +54,29 @@ const mockTickets = [
   { id: "TKT-004", centre: "Nagpur Development Hub", issue: "Equipment malfunction", priority: "medium", status: "open", createdAt: "2024-01-11" },
   { id: "TKT-005", centre: "Nagpur Development Hub", issue: "AC not working", priority: "low", status: "resolved", createdAt: "2024-01-05" },
   { id: "TKT-006", centre: "Thane Training Institute", issue: "Trainer vacancy - urgent", priority: "critical", status: "open", createdAt: "2024-01-02" },
-  { id: "TKT-007", centre: "Thane Training Institute", issue: "Safety compliance issue", priority: "high", status: "open", createdAt: "2024-01-09" },
-  { id: "TKT-008", centre: "Thane Training Institute", issue: "Classroom renovation needed", priority: "medium", status: "in_progress", createdAt: "2024-01-06" },
 ];
 
-// Mock monthly target achievement
 const mockMonthlyTargets = [
   { month: "Jan 2024", planned: 400, achieved: 380, variance: -20, status: "on_track" },
   { month: "Feb 2024", planned: 450, achieved: 420, variance: -30, status: "on_track" },
   { month: "Mar 2024", planned: 500, achieved: 485, variance: -15, status: "on_track" },
   { month: "Apr 2024", planned: 520, achieved: 490, variance: -30, status: "warning" },
   { month: "May 2024", planned: 550, achieved: 480, variance: -70, status: "critical" },
-  { month: "Jun 2024", planned: 500, achieved: 0, variance: -500, status: "pending" },
 ];
 
-// Mock district adoption OFR data
 const mockDistrictOFR = [
   { district: "Mumbai Suburban", block: "Andheri", ofrReceived: 245, ofrTarget: 300, adoptionStatus: "good", lastUpdate: "2024-01-14" },
   { district: "Mumbai Suburban", block: "Borivali", ofrReceived: 180, ofrTarget: 200, adoptionStatus: "good", lastUpdate: "2024-01-13" },
   { district: "Pune", block: "Haveli", ofrReceived: 120, ofrTarget: 250, adoptionStatus: "poor", lastUpdate: "2024-01-10" },
   { district: "Pune", block: "Mulshi", ofrReceived: 95, ofrTarget: 150, adoptionStatus: "moderate", lastUpdate: "2024-01-12" },
-  { district: "Nagpur", block: "Nagpur Urban", ofrReceived: 60, ofrTarget: 200, adoptionStatus: "critical", lastUpdate: "2024-01-08" },
 ];
 
-// Mock vacant positions
 const mockVacantPositions = [
   { id: "1", position: "State Head", location: "Nagpur", vacantSince: "2024-01-01", priority: "critical", candidates: 2 },
   { id: "2", position: "Trainer - IT", location: "Thane Training Institute", vacantSince: "2024-01-05", priority: "high", candidates: 5 },
   { id: "3", position: "Counsellor", location: "Pune Skill Centre", vacantSince: "2024-01-10", priority: "medium", candidates: 3 },
-  { id: "4", position: "Mobilizer", location: "Mumbai Suburban", vacantSince: "2024-01-12", priority: "low", candidates: 8 },
 ];
 
-// Mock budget variance data
 const mockBudgetVariance = {
   teamSalary: { planned: 2500000, actual: 2450000, variance: 50000, status: "under" },
   travelExpenses: { planned: 800000, actual: 920000, variance: -120000, status: "over" },
@@ -87,6 +87,58 @@ const mockBudgetVariance = {
 
 export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrderStatusTabProps) => {
   const [activeSection, setActiveSection] = useState("overview");
+
+  // RTK Query hooks
+  const { data: statusData, isLoading } = useGetWorkOrderStatusQuery(workOrderId);
+  const { data: centreStatusData } = useGetCentreStatusSummaryQuery(workOrderId);
+  const { data: ticketsData } = useGetTicketsQuery({ workOrderId });
+  const { data: monthlyTargetsData } = useGetMonthlyTargetAchievementQuery(workOrderId);
+  const { data: districtOFRData } = useGetDistrictOFRStatusQuery(workOrderId);
+  const { data: vacantPositionsData } = useGetVacantPositionsQuery(workOrderId);
+  const { data: budgetVarianceData } = useGetBudgetVarianceQuery(workOrderId);
+
+  // Mock fallback pattern
+  let centreStatus;
+  if (!centreStatusData) {
+    centreStatus = mockCentreStatus;
+  } else {
+    centreStatus = centreStatusData;
+  }
+
+  let tickets;
+  if (!ticketsData) {
+    tickets = mockTickets;
+  } else {
+    tickets = ticketsData;
+  }
+
+  let monthlyTargets;
+  if (!monthlyTargetsData) {
+    monthlyTargets = mockMonthlyTargets;
+  } else {
+    monthlyTargets = monthlyTargetsData;
+  }
+
+  let districtOFR;
+  if (!districtOFRData) {
+    districtOFR = mockDistrictOFR;
+  } else {
+    districtOFR = districtOFRData;
+  }
+
+  let vacantPositions;
+  if (!vacantPositionsData) {
+    vacantPositions = mockVacantPositions;
+  } else {
+    vacantPositions = vacantPositionsData;
+  }
+
+  let budgetVariance;
+  if (!budgetVarianceData) {
+    budgetVariance = mockBudgetVariance;
+  } else {
+    budgetVariance = budgetVarianceData;
+  }
 
   const getCentreStatusBadge = (status: string) => {
     const config: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
@@ -125,10 +177,18 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
     }).format(amount);
   };
 
-  const totalAchieved = mockMonthlyTargets.reduce((sum, m) => sum + m.achieved, 0);
-  const totalPlanned = mockMonthlyTargets.filter(m => m.status !== 'pending').reduce((sum, m) => sum + m.planned, 0);
-  const openTickets = mockTickets.filter(t => t.status !== 'resolved').length;
-  const criticalIssues = mockTickets.filter(t => t.priority === 'critical' && t.status !== 'resolved').length;
+  const totalAchieved = monthlyTargets.reduce((sum: number, m: any) => sum + m.achieved, 0);
+  const totalPlanned = monthlyTargets.filter((m: any) => m.status !== 'pending').reduce((sum: number, m: any) => sum + m.planned, 0);
+  const openTickets = tickets.filter((t: any) => t.status !== 'resolved').length;
+  const criticalIssues = tickets.filter((t: any) => t.priority === 'critical' && t.status !== 'resolved').length;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -140,7 +200,7 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
               <div>
                 <p className="text-sm text-muted-foreground">Centres Status</p>
                 <p className="text-2xl font-bold">
-                  {mockCentreStatus.filter(c => c.status === 'operational').length}/{mockCentreStatus.length}
+                  {centreStatus.filter((c: any) => c.status === 'operational').length}/{centreStatus.length}
                 </p>
                 <p className="text-xs text-muted-foreground">Fully Operational</p>
               </div>
@@ -167,7 +227,7 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Target Achievement</p>
-                <p className="text-2xl font-bold">{Math.round((totalAchieved / totalPlanned) * 100)}%</p>
+                <p className="text-2xl font-bold">{totalPlanned > 0 ? Math.round((totalAchieved / totalPlanned) * 100) : 0}%</p>
                 <p className="text-xs text-muted-foreground">{totalAchieved.toLocaleString()}/{totalPlanned.toLocaleString()}</p>
               </div>
               <Target className="h-8 w-8 text-primary opacity-50" />
@@ -180,9 +240,9 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Vacant Positions</p>
-                <p className="text-2xl font-bold text-orange-500">{mockVacantPositions.length}</p>
+                <p className="text-2xl font-bold text-orange-500">{vacantPositions.length}</p>
                 <p className="text-xs text-orange-500">
-                  {mockVacantPositions.filter(p => p.priority === 'critical').length} Critical
+                  {vacantPositions.filter((p: any) => p.priority === 'critical').length} Critical
                 </p>
               </div>
               <Users className="h-8 w-8 text-orange-500 opacity-50" />
@@ -192,7 +252,7 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
       </div>
 
       {/* Alerts Section */}
-      {(criticalIssues > 0 || mockBudgetVariance.travelExpenses.status === 'over') && (
+      {(criticalIssues > 0 || budgetVariance.travelExpenses.status === 'over') && (
         <div className="space-y-2">
           {criticalIssues > 0 && (
             <Alert variant="destructive">
@@ -203,12 +263,12 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
               </AlertDescription>
             </Alert>
           )}
-          {mockBudgetVariance.travelExpenses.status === 'over' && (
+          {budgetVariance.travelExpenses.status === 'over' && (
             <Alert variant="destructive">
               <IndianRupee className="h-4 w-4" />
               <AlertTitle>Budget Overspending Alert</AlertTitle>
               <AlertDescription>
-                Travel expenses are {formatCurrency(Math.abs(mockBudgetVariance.travelExpenses.variance))} over budget.
+                Travel expenses are {formatCurrency(Math.abs(budgetVariance.travelExpenses.variance))} over budget.
               </AlertDescription>
             </Alert>
           )}
@@ -247,7 +307,7 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockCentreStatus.map((centre) => (
+                    {centreStatus.map((centre: any) => (
                       <TableRow key={centre.id}>
                         <TableCell className="font-medium">{centre.name}</TableCell>
                         <TableCell>{getCentreStatusBadge(centre.status)}</TableCell>
@@ -285,7 +345,7 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockVacantPositions.map((position) => (
+                    {vacantPositions.map((position: any) => (
                       <TableRow key={position.id}>
                         <TableCell className="font-medium">{position.position}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{position.location}</TableCell>
@@ -323,7 +383,7 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockTickets.map((ticket) => (
+                  {tickets.map((ticket: any) => (
                     <TableRow key={ticket.id}>
                       <TableCell className="font-mono text-sm">{ticket.id}</TableCell>
                       <TableCell>{ticket.centre}</TableCell>
@@ -366,35 +426,20 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockMonthlyTargets.map((month, idx) => (
+                  {monthlyTargets.map((month: any, idx: number) => (
                     <TableRow key={idx}>
                       <TableCell className="font-medium">{month.month}</TableCell>
                       <TableCell>{month.planned.toLocaleString()}</TableCell>
                       <TableCell>{month.achieved.toLocaleString()}</TableCell>
                       <TableCell className={month.variance < 0 ? 'text-destructive' : 'text-green-600'}>
-                        <span className="flex items-center gap-1">
-                          {month.variance < 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
-                          {month.variance}
-                        </span>
-                      </TableCell>
-                      <TableCell className="w-[150px]">
-                        {month.status !== 'pending' ? (
-                          <Progress value={(month.achieved / month.planned) * 100} className="h-2" />
-                        ) : (
-                          <span className="text-muted-foreground text-sm">Pending</span>
-                        )}
+                        {month.variance >= 0 ? '+' : ''}{month.variance}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={
-                            month.status === 'on_track' ? 'default' :
-                            month.status === 'warning' ? 'secondary' :
-                            month.status === 'critical' ? 'destructive' : 'outline'
-                          }
-                        >
-                          {month.status === 'on_track' ? 'On Track' :
-                           month.status === 'warning' ? 'Warning' :
-                           month.status === 'critical' ? 'Critical' : 'Pending'}
+                        <Progress value={(month.achieved / month.planned) * 100} className="h-2 w-24" />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={month.status === 'on_track' ? 'default' : month.status === 'warning' ? 'secondary' : 'destructive'}>
+                          {month.status === 'on_track' ? 'On Track' : month.status === 'warning' ? 'Warning' : 'Critical'}
                         </Badge>
                       </TableCell>
                     </TableRow>
@@ -411,9 +456,9 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                District Adoption Status
+                District Adoption OFR Status
               </CardTitle>
-              <CardDescription>OFR received from Blocks and Districts as per adoption plan</CardDescription>
+              <CardDescription>OFR reception status by adopted districts</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -421,30 +466,23 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
                   <TableRow>
                     <TableHead>District</TableHead>
                     <TableHead>Block</TableHead>
-                    <TableHead>OFR Target</TableHead>
                     <TableHead>OFR Received</TableHead>
+                    <TableHead>OFR Target</TableHead>
                     <TableHead>Progress</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Last Update</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockDistrictOFR.map((district, idx) => (
+                  {districtOFR.map((item: any, idx: number) => (
                     <TableRow key={idx}>
-                      <TableCell className="font-medium">{district.district}</TableCell>
-                      <TableCell>{district.block}</TableCell>
-                      <TableCell>{district.ofrTarget}</TableCell>
-                      <TableCell>{district.ofrReceived}</TableCell>
-                      <TableCell className="w-[150px]">
-                        <div className="flex items-center gap-2">
-                          <Progress value={(district.ofrReceived / district.ofrTarget) * 100} className="h-2 flex-1" />
-                          <span className="text-xs text-muted-foreground">
-                            {Math.round((district.ofrReceived / district.ofrTarget) * 100)}%
-                          </span>
-                        </div>
+                      <TableCell className="font-medium">{item.district}</TableCell>
+                      <TableCell>{item.block}</TableCell>
+                      <TableCell>{item.ofrReceived}</TableCell>
+                      <TableCell>{item.ofrTarget}</TableCell>
+                      <TableCell>
+                        <Progress value={(item.ofrReceived / item.ofrTarget) * 100} className="h-2 w-24" />
                       </TableCell>
-                      <TableCell>{getAdoptionBadge(district.adoptionStatus)}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{district.lastUpdate}</TableCell>
+                      <TableCell>{getAdoptionBadge(item.adoptionStatus)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -454,14 +492,14 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
         </TabsContent>
 
         {/* Budget Variance Tab */}
-        <TabsContent value="budget" className="space-y-4">
+        <TabsContent value="budget">
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <IndianRupee className="h-4 w-4" />
-                Budget Variance Report
+                Budget Variance Analysis
               </CardTitle>
-              <CardDescription>Planned vs Actual expenses with variance analysis</CardDescription>
+              <CardDescription>Planned vs Actual budget breakdown</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -471,133 +509,27 @@ export const WorkOrderStatusTab = ({ workOrderId, role, totalTarget }: WorkOrder
                     <TableHead className="text-right">Planned</TableHead>
                     <TableHead className="text-right">Actual</TableHead>
                     <TableHead className="text-right">Variance</TableHead>
-                    <TableHead className="text-right">%</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Team Salary</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.teamSalary.planned)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.teamSalary.actual)}</TableCell>
-                    <TableCell className={`text-right ${mockBudgetVariance.teamSalary.variance >= 0 ? 'text-green-600' : 'text-destructive'}`}>
-                      {formatCurrency(mockBudgetVariance.teamSalary.variance)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {Math.round((mockBudgetVariance.teamSalary.actual / mockBudgetVariance.teamSalary.planned) * 100)}%
-                    </TableCell>
-                    <TableCell>
-                      {mockBudgetVariance.teamSalary.status === 'under' ? (
-                        <Badge variant="default" className="gap-1">
-                          <CheckCircle2 className="h-3 w-3" /> Under Budget
+                  {Object.entries(budgetVariance).map(([key, value]: [string, any]) => (
+                    <TableRow key={key}>
+                      <TableCell className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(value.planned)}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(value.actual)}</TableCell>
+                      <TableCell className={`text-right ${value.variance < 0 ? 'text-destructive' : 'text-green-600'}`}>
+                        {value.variance >= 0 ? '+' : ''}{formatCurrency(value.variance)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={value.status === 'under' ? 'default' : 'destructive'}>
+                          {value.status === 'under' ? 'Under Budget' : 'Over Budget'}
                         </Badge>
-                      ) : (
-                        <Badge variant="destructive" className="gap-1">
-                          <AlertTriangle className="h-3 w-3" /> Over Budget
-                        </Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="bg-destructive/5">
-                    <TableCell className="font-medium">Travel Expenses</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.travelExpenses.planned)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.travelExpenses.actual)}</TableCell>
-                    <TableCell className="text-right text-destructive">
-                      {formatCurrency(mockBudgetVariance.travelExpenses.variance)}
-                    </TableCell>
-                    <TableCell className="text-right text-destructive">
-                      {Math.round((mockBudgetVariance.travelExpenses.actual / mockBudgetVariance.travelExpenses.planned) * 100)}%
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="destructive" className="gap-1">
-                        <AlertTriangle className="h-3 w-3" /> Over Budget
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Activity Costs</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.activityCosts.planned)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.activityCosts.actual)}</TableCell>
-                    <TableCell className="text-right text-green-600">
-                      {formatCurrency(mockBudgetVariance.activityCosts.variance)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {Math.round((mockBudgetVariance.activityCosts.actual / mockBudgetVariance.activityCosts.planned) * 100)}%
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="default" className="gap-1">
-                        <CheckCircle2 className="h-3 w-3" /> Under Budget
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Migration Costs</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.migrationCosts.planned)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.migrationCosts.actual)}</TableCell>
-                    <TableCell className="text-right text-green-600">
-                      {formatCurrency(mockBudgetVariance.migrationCosts.variance)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {Math.round((mockBudgetVariance.migrationCosts.actual / mockBudgetVariance.migrationCosts.planned) * 100)}%
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="default" className="gap-1">
-                        <CheckCircle2 className="h-3 w-3" /> Under Budget
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="font-semibold border-t-2">
-                    <TableCell>Total Budget</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.totalBudget.planned)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(mockBudgetVariance.totalBudget.actual)}</TableCell>
-                    <TableCell className={`text-right ${mockBudgetVariance.totalBudget.variance >= 0 ? 'text-green-600' : 'text-destructive'}`}>
-                      {formatCurrency(mockBudgetVariance.totalBudget.variance)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {Math.round((mockBudgetVariance.totalBudget.actual / mockBudgetVariance.totalBudget.planned) * 100)}%
-                    </TableCell>
-                    <TableCell>
-                      {mockBudgetVariance.totalBudget.status === 'under' ? (
-                        <Badge variant="default" className="gap-1">
-                          <CheckCircle2 className="h-3 w-3" /> Under Budget
-                        </Badge>
-                      ) : (
-                        <Badge variant="destructive" className="gap-1">
-                          <AlertTriangle className="h-3 w-3" /> Over Budget
-                        </Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-
-          {/* Budget Alerts */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                Budget Alerts
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Travel Expenses Overspending</AlertTitle>
-                <AlertDescription>
-                  Travel expenses have exceeded budget by {formatCurrency(Math.abs(mockBudgetVariance.travelExpenses.variance))} (115% of planned).
-                  Review and approve pending expense claims to control costs.
-                </AlertDescription>
-              </Alert>
-              <Alert>
-                <Clock className="h-4 w-4" />
-                <AlertTitle>Remaining Budget</AlertTitle>
-                <AlertDescription>
-                  {formatCurrency(mockBudgetVariance.totalBudget.variance)} remaining from total planned budget.
-                  Current cost per candidate: {formatCurrency(mockBudgetVariance.totalBudget.actual / totalAchieved)}
-                </AlertDescription>
-              </Alert>
             </CardContent>
           </Card>
         </TabsContent>

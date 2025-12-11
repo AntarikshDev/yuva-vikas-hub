@@ -1467,6 +1467,372 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['Candidates'],
     }),
+
+    // ==================== WORK ORDER DETAILS ====================
+    getWorkOrderDetails: builder.query<any, string>({
+      query: (id) => `/work-orders/${id}/details`,
+      providesTags: (result, error, id) => [{ type: 'WorkOrders', id }],
+    }),
+
+    startWorkOrder: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/work-orders/${id}/start`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, id) => [{ type: 'WorkOrders', id }],
+    }),
+
+    // ==================== CENTRE STATUS ====================
+    getCentreStatus: builder.query<any, { workOrderId: string }>({
+      query: ({ workOrderId }) => `/work-orders/${workOrderId}/centre-status`,
+      providesTags: ['Centers', 'WorkOrders'],
+    }),
+
+    getCentresForWorkOrder: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/centres`,
+      providesTags: ['Centers'],
+    }),
+
+    updateCentreStatus: builder.mutation<any, { workOrderId: string; centreId: string; data: any }>({
+      query: ({ workOrderId, centreId, data }) => ({
+        url: `/work-orders/${workOrderId}/centres/${centreId}/status`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Centers', 'WorkOrders'],
+    }),
+
+    saveCentreChecklist: builder.mutation<any, { workOrderId: string; centreId: string; checklist: any }>({
+      query: ({ workOrderId, centreId, checklist }) => ({
+        url: `/work-orders/${workOrderId}/centres/${centreId}/checklist`,
+        method: 'POST',
+        body: checklist,
+      }),
+      invalidatesTags: ['Centers'],
+    }),
+
+    uploadAuditReport: builder.mutation<any, { workOrderId: string; centreId: string; formData: FormData }>({
+      query: ({ workOrderId, centreId, formData }) => ({
+        url: `/work-orders/${workOrderId}/centres/${centreId}/audit-report`,
+        method: 'POST',
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ['Centers'],
+    }),
+
+    // ==================== TARGET PLANNING ====================
+    getTargetPlanning: builder.query<any, { workOrderId: string }>({
+      query: ({ workOrderId }) => `/work-orders/${workOrderId}/target-planning`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    getMobilisationTargets: builder.query<any[], { workOrderId: string; centreId?: string }>({
+      query: ({ workOrderId, centreId }) => ({
+        url: `/work-orders/${workOrderId}/mobilisation-targets`,
+        params: { centreId },
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    getEnrolmentTargets: builder.query<any[], { workOrderId: string; centreId?: string }>({
+      query: ({ workOrderId, centreId }) => ({
+        url: `/work-orders/${workOrderId}/enrolment-targets`,
+        params: { centreId },
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    saveTargets: builder.mutation<any, { workOrderId: string; centreId: string; mobilisation: any[]; enrolment: any[] }>({
+      query: ({ workOrderId, centreId, mobilisation, enrolment }) => ({
+        url: `/work-orders/${workOrderId}/targets`,
+        method: 'POST',
+        body: { centreId, mobilisation, enrolment },
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    // ==================== DISTRICT ADOPTION ====================
+    getDistrictAdoption: builder.query<any, { workOrderId: string }>({
+      query: ({ workOrderId }) => `/work-orders/${workOrderId}/district-adoption`,
+      providesTags: ['Districts', 'WorkOrders'],
+    }),
+
+    getAdoptedDistricts: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/adopted-districts`,
+      providesTags: ['Districts'],
+    }),
+
+    adoptDistrict: builder.mutation<any, { workOrderId: string; districtId: string }>({
+      query: ({ workOrderId, districtId }) => ({
+        url: `/work-orders/${workOrderId}/adopt-district`,
+        method: 'POST',
+        body: { districtId },
+      }),
+      invalidatesTags: ['Districts', 'WorkOrders'],
+    }),
+
+    removeAdoptedDistrict: builder.mutation<any, { workOrderId: string; districtId: string }>({
+      query: ({ workOrderId, districtId }) => ({
+        url: `/work-orders/${workOrderId}/districts/${districtId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Districts'],
+    }),
+
+    getDistrictOverview: builder.query<any, { workOrderId: string }>({
+      query: ({ workOrderId }) => `/work-orders/${workOrderId}/district-overview`,
+      providesTags: ['Districts'],
+    }),
+
+    getDistrictAnalysis: builder.query<any, { workOrderId: string }>({
+      query: ({ workOrderId }) => `/work-orders/${workOrderId}/district-analysis`,
+      providesTags: ['Districts'],
+    }),
+
+    // ==================== TEAM ASSIGNMENT ====================
+    getTeamAssignment: builder.query<any, { workOrderId: string }>({
+      query: ({ workOrderId }) => `/work-orders/${workOrderId}/team-assignment`,
+      providesTags: ['User', 'WorkOrders'],
+    }),
+
+    getTeamMembers: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/team-members`,
+      providesTags: ['User'],
+    }),
+
+    addTeamMember: builder.mutation<any, { workOrderId: string; member: any }>({
+      query: ({ workOrderId, member }) => ({
+        url: `/work-orders/${workOrderId}/team-members`,
+        method: 'POST',
+        body: member,
+      }),
+      invalidatesTags: ['User', 'WorkOrders'],
+    }),
+
+    updateTeamMember: builder.mutation<any, { workOrderId: string; memberId: string; data: any }>({
+      query: ({ workOrderId, memberId, data }) => ({
+        url: `/work-orders/${workOrderId}/team-members/${memberId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    removeTeamMember: builder.mutation<any, { workOrderId: string; memberId: string }>({
+      query: ({ workOrderId, memberId }) => ({
+        url: `/work-orders/${workOrderId}/team-members/${memberId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    replaceTeamMember: builder.mutation<any, { workOrderId: string; memberId: string; newMember: any; reason: string }>({
+      query: ({ workOrderId, memberId, newMember, reason }) => ({
+        url: `/work-orders/${workOrderId}/team-members/${memberId}/replace`,
+        method: 'POST',
+        body: { newMember, reason },
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    approveTeamMember: builder.mutation<any, { workOrderId: string; memberId: string }>({
+      query: ({ workOrderId, memberId }) => ({
+        url: `/work-orders/${workOrderId}/team-members/${memberId}/approve`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    rejectTeamMember: builder.mutation<any, { workOrderId: string; memberId: string }>({
+      query: ({ workOrderId, memberId }) => ({
+        url: `/work-orders/${workOrderId}/team-members/${memberId}/reject`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['User'],
+    }),
+
+    getAssignmentHistory: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/assignment-history`,
+      providesTags: ['User'],
+    }),
+
+    getAvailableEmployees: builder.query<any[], { role?: string }>({
+      query: (params) => ({
+        url: '/employees/available',
+        params,
+      }),
+      providesTags: ['User'],
+    }),
+
+    // ==================== BUDGET ====================
+    getWorkOrderBudget: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/budget`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    getTeamSalaryData: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/team-salary`,
+      providesTags: ['User', 'WorkOrders'],
+    }),
+
+    createWorkOrderBudget: builder.mutation<any, { workOrderId: string; budget: any }>({
+      query: ({ workOrderId, budget }) => ({
+        url: `/work-orders/${workOrderId}/budget`,
+        method: 'POST',
+        body: budget,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    updateWorkOrderBudget: builder.mutation<any, { workOrderId: string; budgetId: string; data: any }>({
+      query: ({ workOrderId, budgetId, data }) => ({
+        url: `/work-orders/${workOrderId}/budget/${budgetId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    bulkUploadExpenses: builder.mutation<any, { workOrderId: string; expenses: any[] }>({
+      query: ({ workOrderId, expenses }) => ({
+        url: `/work-orders/${workOrderId}/expenses/bulk`,
+        method: 'POST',
+        body: { expenses },
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    approveExpenses: builder.mutation<any, { workOrderId: string; expenseIds: string[]; remarks: string }>({
+      query: ({ workOrderId, expenseIds, remarks }) => ({
+        url: `/work-orders/${workOrderId}/expenses/approve`,
+        method: 'POST',
+        body: { expenseIds, remarks },
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    rejectExpenses: builder.mutation<any, { workOrderId: string; expenseIds: string[]; reason: string }>({
+      query: ({ workOrderId, expenseIds, reason }) => ({
+        url: `/work-orders/${workOrderId}/expenses/reject`,
+        method: 'POST',
+        body: { expenseIds, reason },
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    getHigherAuthorityOptions: builder.query<any[], void>({
+      query: () => '/budget/higher-authority-options',
+      providesTags: ['User'],
+    }),
+
+    // ==================== WORK ORDER STATUS ====================
+    getWorkOrderStatus: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/status`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    getCentreStatusSummary: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/centres/status-summary`,
+      providesTags: ['Centers'],
+    }),
+
+    getTickets: builder.query<any[], { workOrderId: string; status?: string }>({
+      query: ({ workOrderId, status }) => ({
+        url: `/work-orders/${workOrderId}/tickets`,
+        params: { status },
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    createTicket: builder.mutation<any, { workOrderId: string; ticket: any }>({
+      query: ({ workOrderId, ticket }) => ({
+        url: `/work-orders/${workOrderId}/tickets`,
+        method: 'POST',
+        body: ticket,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    updateTicket: builder.mutation<any, { workOrderId: string; ticketId: string; data: any }>({
+      query: ({ workOrderId, ticketId, data }) => ({
+        url: `/work-orders/${workOrderId}/tickets/${ticketId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    getMonthlyTargetAchievement: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/monthly-achievement`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    getDistrictOFRStatus: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/district-ofr-status`,
+      providesTags: ['Districts', 'WorkOrders'],
+    }),
+
+    getVacantPositions: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/vacant-positions`,
+      providesTags: ['User', 'WorkOrders'],
+    }),
+
+    getBudgetVariance: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/budget-variance`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    // ==================== ROZGAR EVENTS ====================
+    getRozgarEvents: builder.query<any[], { workOrderId: string; type?: string }>({
+      query: ({ workOrderId, type }) => ({
+        url: `/work-orders/${workOrderId}/rozgar-events`,
+        params: { type },
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    createRozgarEvent: builder.mutation<any, { workOrderId: string; event: any }>({
+      query: ({ workOrderId, event }) => ({
+        url: `/work-orders/${workOrderId}/rozgar-events`,
+        method: 'POST',
+        body: event,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    // ==================== CRP NETWORK ====================
+    getCRPNetwork: builder.query<any[], string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/crp-network`,
+      providesTags: ['User', 'WorkOrders'],
+    }),
+
+    addCRP: builder.mutation<any, { workOrderId: string; crp: any }>({
+      query: ({ workOrderId, crp }) => ({
+        url: `/work-orders/${workOrderId}/crp-network`,
+        method: 'POST',
+        body: crp,
+      }),
+      invalidatesTags: ['User', 'WorkOrders'],
+    }),
+
+    // ==================== ACTIVITY CALENDAR ====================
+    getActivityCalendar: builder.query<any[], { workOrderId: string; month?: string }>({
+      query: ({ workOrderId, month }) => ({
+        url: `/work-orders/${workOrderId}/activity-calendar`,
+        params: { month },
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    createActivity: builder.mutation<any, { workOrderId: string; activity: any }>({
+      query: ({ workOrderId, activity }) => ({
+        url: `/work-orders/${workOrderId}/activities`,
+        method: 'POST',
+        body: activity,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
   }),
 });
 
