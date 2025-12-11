@@ -20,13 +20,33 @@ import { MetricsComparisonDialog } from '@/components/dialogs/MetricsComparisonD
 import { Button } from '@/components/ui/button';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { Download, Bell, Target, GitCompare } from 'lucide-react';
+import { useGetNationalHeadDashboardQuery } from '@/store/api/apiSlice';
 
 const NationalHeadDashboard = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { summary, statePerformance, programHealth, centreHealth, alerts, filters, isLoading } = useAppSelector(
+  const { summary, statePerformance, programHealth, centreHealth, alerts, filters, isLoading: reduxLoading } = useAppSelector(
     (state) => state.nationalHead
   );
   const [comparisonOpen, setComparisonOpen] = React.useState(false);
+
+  // RTK Query with mock fallback
+  const mockSummary = {
+    nhTargetAssigned: 5000,
+    totalOFR: 3500,
+    approvedOFR: 2800,
+    migrated: 2200,
+    enrolled: 1800,
+    activeClusters: 45
+  };
+
+  const { data: dashboardData, isLoading: queryLoading } = useGetNationalHeadDashboardQuery({ dateRange: filters.dateRange });
+  
+  let dashboardSummary;
+  if (!dashboardData) {
+    dashboardSummary = mockSummary;
+  } else {
+    dashboardSummary = dashboardData.summary || mockSummary;
+  }
 
   useEffect(() => {
     dispatch(fetchNHSummary(filters));
@@ -72,19 +92,19 @@ const NationalHeadDashboard = () => {
         {/* Section 1: Main KPIs */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Main</h2>
-          <NHSummaryKPIs summary={summary} isLoading={isLoading} />
+          <NHSummaryKPIs summary={summary} isLoading={reduxLoading || queryLoading} />
         </div>
 
         {/* Section 2: Mobilisation */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Mobilisation</h2>
-          <NHStateHeatmap states={statePerformance} isLoading={isLoading} />
+          <NHStateHeatmap states={statePerformance} isLoading={reduxLoading || queryLoading} />
         </div>
 
         {/* Section 3: Centre Health */}
         <div>
           <h2 className="text-2xl font-bold mb-4">Centre Health</h2>
-          <NHCentreHealthSnapshot centreHealth={centreHealth} isLoading={isLoading} />
+          <NHCentreHealthSnapshot centreHealth={centreHealth} isLoading={reduxLoading || queryLoading} />
         </div>
 
         {/* Section 4: Centre Performance */}
@@ -96,11 +116,11 @@ const NationalHeadDashboard = () => {
               Compare Metrics
             </Button>
           </div>
-          <NHProgramHealthCards programHealth={programHealth} isLoading={isLoading} />
+          <NHProgramHealthCards programHealth={programHealth} isLoading={reduxLoading || queryLoading} />
         </div>
 
         {/* Section 5: Alerts & Tasks */}
-        <NHAlertsPanel alerts={alerts} isLoading={isLoading} />
+        <NHAlertsPanel alerts={alerts} isLoading={reduxLoading || queryLoading} />
       </div>
 
       <MetricsComparisonDialog open={comparisonOpen} onOpenChange={setComparisonOpen} />

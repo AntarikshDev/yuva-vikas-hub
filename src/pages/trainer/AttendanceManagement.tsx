@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useGetAttendanceQuery, useMarkAttendanceMutation } from "@/store/api/apiSlice";
 
 const AttendanceManagement = () => {
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);

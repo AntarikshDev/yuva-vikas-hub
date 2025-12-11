@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useGetCandidatesListQuery, useGetBatchesQuery } from "@/store/api/apiSlice";
 
 // Mock data
 const mockCandidates = [

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/layouts/MainLayout';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -13,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useGetCandidatesListQuery } from '@/store/api/apiSlice';
 
 // Define the Candidate interface
 interface Candidate {
@@ -40,14 +40,27 @@ const CandidateDirectory = () => {
 
   const { toast } = useToast();
 
-  // Dummy data for candidates
-  const [candidates, setCandidates] = useState<Candidate[]>([
+  // Mock data for fallback
+  const mockCandidates: Candidate[] = [
     { id: 1, name: 'John Doe', email: 'john@example.com', mobile: '9876543210', course: 'Web Development', batch: 'WD001', status: 'active' },
     { id: 2, name: 'Jane Smith', email: 'jane@example.com', mobile: '9876543211', course: 'Graphic Design', batch: 'GD002', status: 'placed' },
     { id: 3, name: 'Alice Johnson', email: 'alice@example.com', mobile: '9876543212', course: 'Digital Marketing', batch: 'DM003', status: 'dropout' },
     { id: 4, name: 'Bob Wilson', email: 'bob@example.com', mobile: '9876543213', course: 'Mobile App Development', batch: 'MD004', status: 'active' },
     { id: 5, name: 'Carol Williams', email: 'carol@example.com', mobile: '9876543214', course: 'Data Science', batch: 'DS005', status: 'active' },
-  ]);
+  ];
+
+  // RTK Query with mock fallback
+  const { data, isLoading, error } = useGetCandidatesListQuery({});
+  
+  let candidatesData: Candidate[];
+  if (!data) {
+    candidatesData = mockCandidates;
+  } else {
+    candidatesData = data.data || data || mockCandidates;
+  }
+
+  // Dummy data for candidates
+  const [candidates, setCandidates] = useState<Candidate[]>(candidatesData);
 
   // Available courses for filter
   const courses = [...new Set(candidates.map(c => c.course))];

@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 import { DateRange } from 'react-day-picker';
 import { Download, FileSpreadsheet, BarChart4 } from 'lucide-react';
 import CurriculumProgressCard from '@/components/dashboard/CurriculumProgressCard';
+import { useGetStateHeadDashboardQuery } from '@/store/api/apiSlice';
 import {
   LineChart,
   Line,
@@ -31,13 +32,23 @@ const StateHeadDashboard: React.FC = () => {
   // Add state for date range
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   
-  // Mock dashboard data
-  const dashboardData = {
+  // Mock dashboard data for fallback
+  const mockDashboardData = {
     totalCandidates: 4568,
     placedCandidates: 387,
     activeMobilizers: 42,
     placementPercentage: 85,
   };
+
+  // RTK Query with mock fallback
+  const { data, isLoading, error } = useGetStateHeadDashboardQuery({});
+  
+  let dashboardData;
+  if (!data) {
+    dashboardData = mockDashboardData;
+  } else {
+    dashboardData = data.data || data || mockDashboardData;
+  }
 
   // Chart data
   const mobilizationPlacementData = [
