@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -9,21 +9,61 @@ import { Separator } from '@/components/ui/separator';
 import { MapPin, Users, BarChart3, CheckCircle, AlertCircle, Lightbulb, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { jharkhandDistricts, calculateDistrictPriority, DistrictData, trainingCenters } from '@/data/jharkhandCensusData';
+import { DistrictAnalysisData } from '@/utils/districtTemplateGenerator';
 
 interface DistrictSelectionSectionProps {
   canEdit: boolean;
   adoptedDistricts: string[];
   onAdoptDistrict: (districtId: string) => void;
+  analysisData?: DistrictAnalysisData;
 }
 
 export const DistrictSelectionSection: React.FC<DistrictSelectionSectionProps> = ({
   canEdit,
   adoptedDistricts,
-  onAdoptDistrict
+  onAdoptDistrict,
+  analysisData
 }) => {
   const [selectedDistrictId, setSelectedDistrictId] = useState<string>('');
 
-  const selectedDistrict = jharkhandDistricts.find(d => d.id === selectedDistrictId);
+  // Convert analysisData to district format or use jharkhand data
+  const districtDataList = useMemo(() => {
+    if (analysisData?.density) {
+      return analysisData.density.map((d, index) => {
+        const enrolment = analysisData.enrolment?.find(e => e.district === d.district);
+        const distance = analysisData.distance?.find(dist => dist.district === d.district);
+        const blocks = analysisData.blocks?.filter(b => b.district === d.district) || [];
+        
+        return {
+          id: d.district.toLowerCase().replace(/\s+/g, '-'),
+          name: d.district,
+          population: d.population,
+          area: d.area,
+          density: d.density,
+          literacy: d.literacy || 70,
+          bplPercentage: d.bplPercentage || 40,
+          distanceFromTC1: distance?.tc1Distance || 100,
+          distanceFromTC2: distance?.tc2Distance || 150,
+          historicalEnrolment: {
+            total: enrolment?.total || 100,
+            ssmo: enrolment?.ssmo || 50,
+            fma: enrolment?.fma || 25,
+            hhaGda: enrolment?.hhaGda || 25
+          },
+          blocks: blocks.map(b => ({
+            name: b.block,
+            population: b.population,
+            area: b.area,
+            density: b.density,
+            sexRatio: b.sexRatio
+          }))
+        } as DistrictData;
+      });
+    }
+    return jharkhandDistricts;
+  }, [analysisData]);
+
+  const selectedDistrict = districtDataList.find(d => d.id === selectedDistrictId);
   const isAdopted = selectedDistrictId ? adoptedDistricts.includes(selectedDistrictId) : false;
 
   const handleAdoptDistrict = () => {
@@ -49,7 +89,7 @@ export const DistrictSelectionSection: React.FC<DistrictSelectionSectionProps> =
   ];
 
   // Calculate priority scores for all districts
-  const prioritizedDistricts = jharkhandDistricts
+  const prioritizedDistricts = districtDataList
     .map(d => ({ ...d, priority: calculateDistrictPriority(d) }))
     .sort((a, b) => b.priority - a.priority);
 

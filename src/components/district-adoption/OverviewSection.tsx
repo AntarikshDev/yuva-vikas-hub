@@ -4,20 +4,32 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { MapPin, Users, Calendar, TrendingUp, Building2, Target } from 'lucide-react';
 import { trainingCenters, jharkhandDistricts, conversionRates } from '@/data/jharkhandCensusData';
+import { DistrictAnalysisData } from '@/utils/districtTemplateGenerator';
 
 interface OverviewSectionProps {
   workOrderId: string;
   adoptedDistricts: string[];
+  analysisData?: DistrictAnalysisData;
 }
 
-export const OverviewSection: React.FC<OverviewSectionProps> = ({ workOrderId, adoptedDistricts }) => {
+export const OverviewSection: React.FC<OverviewSectionProps> = ({ workOrderId, adoptedDistricts, analysisData }) => {
+  // Use analysisData if provided, otherwise fallback to jharkhand data
+  const districts = analysisData?.density || jharkhandDistricts.map(d => ({
+    district: d.name,
+    population: d.population,
+    area: d.area,
+    density: d.density,
+    literacy: d.literacy,
+    bplPercentage: d.bplPercentage
+  }));
+
   // Calculate summary stats
-  const totalDistricts = jharkhandDistricts.length;
+  const totalDistricts = districts.length;
   const adoptedCount = adoptedDistricts.length;
   
   // Mock event data
   const activeEvents = 12;
-  const totalMigrated = 1847;
+  const totalMigrated = analysisData?.enrolment?.reduce((acc, d) => acc + d.total, 0) || 1847;
   const totalCRPs = 234;
 
   // Funnel data (mock based on conversion rates)

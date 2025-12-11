@@ -1833,6 +1833,45 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['WorkOrders'],
     }),
+
+    // ==================== DISTRICT ADOPTION PLAN ====================
+    getDistrictAdoptionPlan: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/district-adoption-plan`,
+      providesTags: ['WorkOrders', 'Districts'],
+    }),
+
+    createDistrictAdoptionPlan: builder.mutation<any, { workOrderId: string; plan: any }>({
+      query: ({ workOrderId, plan }) => ({
+        url: `/work-orders/${workOrderId}/district-adoption-plan`,
+        method: 'POST',
+        body: plan,
+      }),
+      invalidatesTags: ['WorkOrders', 'Districts'],
+    }),
+
+    updateDistrictAdoptionPlan: builder.mutation<any, { workOrderId: string; planId: string; data: any }>({
+      query: ({ workOrderId, planId, data }) => ({
+        url: `/work-orders/${workOrderId}/district-adoption-plan/${planId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['WorkOrders', 'Districts'],
+    }),
+
+    uploadDistrictAnalysisData: builder.mutation<any, { workOrderId: string; fileType: string; data: any }>({
+      query: ({ workOrderId, fileType, data }) => ({
+        url: `/work-orders/${workOrderId}/district-analysis/${fileType}`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['WorkOrders', 'Districts'],
+    }),
+
+    getDistrictAnalysisData: builder.query<any, { workOrderId: string; analysisType: string }>({
+      query: ({ workOrderId, analysisType }) => 
+        `/work-orders/${workOrderId}/district-analysis/${analysisType}`,
+      providesTags: ['WorkOrders', 'Districts'],
+    }),
   }),
 });
 
@@ -2060,6 +2099,12 @@ export const {
   useGetBudgetVarianceQuery,
   // Work Order Start
   useStartWorkOrderMutation,
+  // District Adoption Plan
+  useGetDistrictAdoptionPlanQuery,
+  useCreateDistrictAdoptionPlanMutation,
+  useUpdateDistrictAdoptionPlanMutation,
+  useUploadDistrictAnalysisDataMutation,
+  useGetDistrictAnalysisDataQuery,
 } = apiSlice;
 
 export default apiSlice;
