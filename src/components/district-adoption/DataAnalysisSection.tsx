@@ -6,40 +6,70 @@ import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { BarChart3, TrendingUp, MapPin, Route } from 'lucide-react';
 import { jharkhandDistricts, trainingCenters } from '@/data/jharkhandCensusData';
+import { DistrictAnalysisData } from '@/utils/districtTemplateGenerator';
 
-export const DataAnalysisSection: React.FC = () => {
+interface DataAnalysisSectionProps {
+  analysisData?: DistrictAnalysisData;
+}
+
+export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analysisData }) => {
   const [activeChart, setActiveChart] = useState('enrolment');
 
-  // Prepare enrolment data sorted by total
-  const enrolmentData = jharkhandDistricts
-    .map(d => ({
-      name: d.name,
-      total: d.historicalEnrolment.total,
-      ssmo: d.historicalEnrolment.ssmo,
-      fma: d.historicalEnrolment.fma,
-      hhaGda: d.historicalEnrolment.hhaGda
-    }))
-    .sort((a, b) => b.total - a.total);
+  // Use analysisData if provided, otherwise fallback to jharkhand data
+  const enrolmentData = analysisData?.enrolment 
+    ? analysisData.enrolment
+        .map(d => ({
+          name: d.district,
+          total: d.total,
+          ssmo: d.ssmo,
+          fma: d.fma,
+          hhaGda: d.hhaGda
+        }))
+        .sort((a, b) => b.total - a.total)
+    : jharkhandDistricts
+        .map(d => ({
+          name: d.name,
+          total: d.historicalEnrolment.total,
+          ssmo: d.historicalEnrolment.ssmo,
+          fma: d.historicalEnrolment.fma,
+          hhaGda: d.historicalEnrolment.hhaGda
+        }))
+        .sort((a, b) => b.total - a.total);
 
-  // Trade-wise top 5
+  // Trade-wise top 5 - derive from enrolment data
   const tradeWiseData = {
-    ssmo: [...jharkhandDistricts].sort((a, b) => b.historicalEnrolment.ssmo - a.historicalEnrolment.ssmo).slice(0, 5),
-    fma: [...jharkhandDistricts].sort((a, b) => b.historicalEnrolment.fma - a.historicalEnrolment.fma).slice(0, 5),
-    hhaGda: [...jharkhandDistricts].sort((a, b) => b.historicalEnrolment.hhaGda - a.historicalEnrolment.hhaGda).slice(0, 5)
+    ssmo: [...enrolmentData].sort((a, b) => b.ssmo - a.ssmo).slice(0, 5),
+    fma: [...enrolmentData].sort((a, b) => b.fma - a.fma).slice(0, 5),
+    hhaGda: [...enrolmentData].sort((a, b) => b.hhaGda - a.hhaGda).slice(0, 5)
   };
 
-  // Density data sorted
-  const densityData = [...jharkhandDistricts]
-    .sort((a, b) => b.density - a.density)
-    .map(d => ({ name: d.name, density: d.density, population: d.population }));
+  // Density data
+  const densityData = analysisData?.density
+    ? [...analysisData.density]
+        .sort((a, b) => b.density - a.density)
+        .map(d => ({ name: d.district, density: d.density, population: d.population }))
+    : [...jharkhandDistricts]
+        .sort((a, b) => b.density - a.density)
+        .map(d => ({ name: d.name, density: d.density, population: d.population }));
 
   // Distance matrix
-  const distanceMatrix = jharkhandDistricts.map(d => ({
-    district: d.name,
-    tc1Distance: d.distanceFromTC1,
-    tc2Distance: d.distanceFromTC2,
-    minDistance: Math.min(d.distanceFromTC1, d.distanceFromTC2)
-  })).sort((a, b) => a.minDistance - b.minDistance);
+  const distanceMatrix = analysisData?.distance
+    ? analysisData.distance.map(d => ({
+        district: d.district,
+        tc1Distance: d.tc1Distance,
+        tc2Distance: d.tc2Distance,
+        minDistance: Math.min(d.tc1Distance, d.tc2Distance),
+        tc1Name: d.tc1Name,
+        tc2Name: d.tc2Name
+      })).sort((a, b) => a.minDistance - b.minDistance)
+    : jharkhandDistricts.map(d => ({
+        district: d.name,
+        tc1Distance: d.distanceFromTC1,
+        tc2Distance: d.distanceFromTC2,
+        minDistance: Math.min(d.distanceFromTC1, d.distanceFromTC2),
+        tc1Name: trainingCenters[0].name,
+        tc2Name: trainingCenters[1].name
+      })).sort((a, b) => a.minDistance - b.minDistance);
 
   const COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef'];
 
@@ -140,7 +170,7 @@ export const DataAnalysisSection: React.FC = () => {
                   <ResponsiveContainer width="100%" height={250}>
                     <PieChart>
                       <Pie
-                        data={tradeWiseData[trade].map(d => ({ name: d.name, value: d.historicalEnrolment[trade] }))}
+                        data={tradeWiseData[trade].map(d => ({ name: d.name, value: d[trade] }))}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -158,12 +188,12 @@ export const DataAnalysisSection: React.FC = () => {
                   </ResponsiveContainer>
                   <div className="mt-4 space-y-2">
                     {tradeWiseData[trade].map((d, i) => (
-                      <div key={d.id} className="flex items-center justify-between text-sm">
+                      <div key={d.name} className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i] }}></div>
                           <span>{d.name}</span>
                         </div>
-                        <Badge variant="secondary">{d.historicalEnrolment[trade]}</Badge>
+                        <Badge variant="secondary">{d[trade]}</Badge>
                       </div>
                     ))}
                   </div>
@@ -250,8 +280,8 @@ export const DataAnalysisSection: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>District</TableHead>
-                    <TableHead className="text-center">{trainingCenters[0].name}</TableHead>
-                    <TableHead className="text-center">{trainingCenters[1].name}</TableHead>
+                    <TableHead className="text-center">{distanceMatrix[0]?.tc1Name || 'Training Center 1'}</TableHead>
+                    <TableHead className="text-center">{distanceMatrix[0]?.tc2Name || 'Training Center 2'}</TableHead>
                     <TableHead className="text-center">Nearest TC</TableHead>
                   </TableRow>
                 </TableHeader>
