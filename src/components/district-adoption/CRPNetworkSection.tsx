@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -8,9 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, UserPlus, FileSignature, Smartphone, Calendar, DollarSign, CheckCircle, XCircle } from 'lucide-react';
+import { Users, UserPlus, FileSignature, Smartphone, Calendar, DollarSign, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { crpCategories, jharkhandDistricts } from '@/data/jharkhandCensusData';
+import { useGetCRPNetworkQuery, useAddCRPMutation } from '@/store/api/apiSlice';
 
 interface CRP {
   id: string;
@@ -41,21 +42,42 @@ interface Meeting {
 interface CRPNetworkSectionProps {
   canEdit: boolean;
   adoptedDistricts: string[];
+  workOrderId?: string;
 }
 
-export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({ canEdit, adoptedDistricts }) => {
-  const [crps, setCrps] = useState<CRP[]>([
-    { id: '1', name: 'Ram Kumar Sharma', category: 'School Principal', homeLocation: 'Kanke', workLocation: 'Kanke Block', phone: '9876543210', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-15', appRegistered: true, appRegistrationDate: '2024-01-16', lastPaymentDate: '2024-02-01', totalPayments: 2, isActive: true },
-    { id: '2', name: 'Sunita Devi', category: 'SHG Member', homeLocation: 'Ratu', workLocation: 'Ratu Block', phone: '9876543211', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-18', appRegistered: true, appRegistrationDate: '2024-01-19', lastPaymentDate: '2024-02-01', totalPayments: 2, isActive: true },
-    { id: '3', name: 'Vikash Oraon', category: 'Teacher', homeLocation: 'Burmu', workLocation: 'Burmu Block', phone: '9876543212', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-20', appRegistered: false, totalPayments: 0, isActive: true },
-    { id: '4', name: 'Meena Kumari', category: 'Alumni', homeLocation: 'Hazaribag', workLocation: 'Hazaribag Block', phone: '9876543213', districtId: 'hazaribagh', loiSigned: false, appRegistered: false, totalPayments: 0, isActive: true },
-    { id: '5', name: 'Rajesh Munda', category: 'Local Influencer', homeLocation: 'Dhanbad', workLocation: 'Dhanbad Block', phone: '9876543214', districtId: 'dhanbad', loiSigned: true, loiDate: '2024-01-25', appRegistered: true, appRegistrationDate: '2024-01-26', lastPaymentDate: '2024-02-15', totalPayments: 1, isActive: true },
-  ]);
+// Mock CRP data
+const mockCRPs: CRP[] = [
+  { id: '1', name: 'Ram Kumar Sharma', category: 'School Principal', homeLocation: 'Kanke', workLocation: 'Kanke Block', phone: '9876543210', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-15', appRegistered: true, appRegistrationDate: '2024-01-16', lastPaymentDate: '2024-02-01', totalPayments: 2, isActive: true },
+  { id: '2', name: 'Sunita Devi', category: 'SHG Member', homeLocation: 'Ratu', workLocation: 'Ratu Block', phone: '9876543211', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-18', appRegistered: true, appRegistrationDate: '2024-01-19', lastPaymentDate: '2024-02-01', totalPayments: 2, isActive: true },
+  { id: '3', name: 'Vikash Oraon', category: 'Teacher', homeLocation: 'Burmu', workLocation: 'Burmu Block', phone: '9876543212', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-20', appRegistered: false, totalPayments: 0, isActive: true },
+  { id: '4', name: 'Meena Kumari', category: 'Alumni', homeLocation: 'Hazaribag', workLocation: 'Hazaribag Block', phone: '9876543213', districtId: 'hazaribagh', loiSigned: false, appRegistered: false, totalPayments: 0, isActive: true },
+  { id: '5', name: 'Rajesh Munda', category: 'Local Influencer', homeLocation: 'Dhanbad', workLocation: 'Dhanbad Block', phone: '9876543214', districtId: 'dhanbad', loiSigned: true, loiDate: '2024-01-25', appRegistered: true, appRegistrationDate: '2024-01-26', lastPaymentDate: '2024-02-15', totalPayments: 1, isActive: true },
+];
 
-  const [meetings, setMeetings] = useState<Meeting[]>([
-    { id: '1', date: '2024-02-01', venue: 'Ranchi Training Centre', attendees: 45, totalCRPs: 50, notes: 'Monthly review meeting. Discussed mobilization targets.' },
-    { id: '2', date: '2024-01-15', venue: 'Hazaribagh Training Centre', attendees: 38, totalCRPs: 42, notes: 'Initial onboarding meeting for new CRPs.' },
-  ]);
+// Mock meetings data
+const mockMeetings: Meeting[] = [
+  { id: '1', date: '2024-02-01', venue: 'Ranchi Training Centre', attendees: 45, totalCRPs: 50, notes: 'Monthly review meeting. Discussed mobilization targets.' },
+  { id: '2', date: '2024-01-15', venue: 'Hazaribagh Training Centre', attendees: 38, totalCRPs: 42, notes: 'Initial onboarding meeting for new CRPs.' },
+];
+
+export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({ 
+  canEdit, 
+  adoptedDistricts,
+  workOrderId = ''
+}) => {
+  // RTK Query hooks
+  const { data: crpData, isLoading } = useGetCRPNetworkQuery(workOrderId, { skip: !workOrderId });
+  const [addCRPMutation] = useAddCRPMutation();
+
+  // Mock fallback pattern
+  const [crps, setCrps] = useState<CRP[]>(mockCRPs);
+  const [meetings, setMeetings] = useState<Meeting[]>(mockMeetings);
+
+  useEffect(() => {
+    if (crpData && Array.isArray(crpData) && crpData.length > 0) {
+      setCrps(crpData as CRP[]);
+    }
+  }, [crpData]);
 
   const [isAddCRPOpen, setIsAddCRPOpen] = useState(false);
   const [isScheduleMeetingOpen, setIsScheduleMeetingOpen] = useState(false);

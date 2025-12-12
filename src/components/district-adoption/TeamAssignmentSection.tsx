@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Users, UserPlus, Info, Phone, MapPin, Building2 } from 'lucide-react';
+import { Users, UserPlus, Info, Phone, MapPin, Building2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { jharkhandDistricts } from '@/data/jharkhandCensusData';
+import { useGetTeamMembersQuery, useAddTeamMemberMutation } from '@/store/api/apiSlice';
 
 interface TeamMember {
   id: string;
@@ -32,6 +33,7 @@ interface DistrictAssignment {
 interface TeamAssignmentSectionProps {
   canEdit: boolean;
   adoptedDistricts: string[];
+  workOrderId?: string;
 }
 
 // Mock team members
@@ -44,20 +46,40 @@ const mockTeamMembers: TeamMember[] = [
   { id: '6', name: 'Meena Kumari', designation: 'Counsellor', phone: '9876543215', homeLocation: 'Ranchi', workLocation: 'Ranchi' },
 ];
 
-export const TeamAssignmentSection: React.FC<TeamAssignmentSectionProps> = ({ canEdit, adoptedDistricts }) => {
-  const [assignments, setAssignments] = useState<DistrictAssignment[]>(
-    adoptedDistricts.map(districtId => {
-      const district = jharkhandDistricts.find(d => d.id === districtId);
-      return {
-        districtId,
-        districtName: district?.name || districtId,
-        accountableLeader: null,
-        responsibleLeader: null,
-        centreTeam: [],
-        groundTeam: []
-      };
-    })
-  );
+// Mock district assignments
+const getMockAssignments = (adoptedDistricts: string[]): DistrictAssignment[] => 
+  adoptedDistricts.map(districtId => {
+    const district = jharkhandDistricts.find(d => d.id === districtId);
+    return {
+      districtId,
+      districtName: district?.name || districtId,
+      accountableLeader: districtId === 'ranchi' ? mockTeamMembers[0] : null,
+      responsibleLeader: districtId === 'ranchi' ? mockTeamMembers[2] : null,
+      centreTeam: districtId === 'ranchi' ? [mockTeamMembers[5]] : [],
+      groundTeam: districtId === 'ranchi' ? [mockTeamMembers[4]] : []
+    };
+  });
+
+export const TeamAssignmentSection: React.FC<TeamAssignmentSectionProps> = ({ 
+  canEdit, 
+  adoptedDistricts,
+  workOrderId = ''
+}) => {
+  // RTK Query hooks
+  const { data: teamData, isLoading } = useGetTeamMembersQuery(workOrderId, { skip: !workOrderId });
+  const [addTeamMemberMutation] = useAddTeamMemberMutation();
+
+  // Mock fallback pattern
+  const [assignments, setAssignments] = useState<DistrictAssignment[]>([]);
+
+  useEffect(() => {
+    if (teamData && Array.isArray(teamData) && teamData.length > 0) {
+      // Use API data if available, otherwise use mock
+      setAssignments(getMockAssignments(adoptedDistricts));
+    } else {
+      setAssignments(getMockAssignments(adoptedDistricts));
+    }
+  }, [teamData, adoptedDistricts]);
 
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');

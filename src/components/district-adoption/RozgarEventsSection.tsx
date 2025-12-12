@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Plus, Users, MapPin, FileText, Target, Megaphone } from 'lucide-react';
+import { Calendar, Plus, Users, MapPin, FileText, Target, Megaphone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { jharkhandDistricts, deskWorkFormFields, eventTargets } from '@/data/jharkhandCensusData';
+import { useGetRozgarEventsQuery, useCreateRozgarEventMutation } from '@/store/api/apiSlice';
 
 interface RozgarEvent {
   id: string;
@@ -34,51 +35,73 @@ interface RozgarEvent {
 interface RozgarEventsSectionProps {
   canEdit: boolean;
   adoptedDistricts: string[];
+  workOrderId?: string;
 }
 
-export const RozgarEventsSection: React.FC<RozgarEventsSectionProps> = ({ canEdit, adoptedDistricts }) => {
-  const [events, setEvents] = useState<RozgarEvent[]>([
-    {
-      id: '1',
-      type: 'mela',
-      districtId: 'ranchi',
-      gramPanchayat: 'Kanke',
-      village: 'Kanke Village',
-      date: '2024-02-15',
-      status: 'completed',
-      expectedFootfall: 100,
-      actualFootfall: 95,
-      ofrFilled: 78,
-      counselled: 62,
-      interested: 31,
-      migrated: 24,
-      deskWorkCompleted: true
-    },
-    {
-      id: '2',
-      type: 'sabha',
-      districtId: 'hazaribagh',
-      gramPanchayat: 'Bishnugarh',
-      village: 'Bishnugarh Main',
-      date: '2024-02-18',
-      status: 'in_progress',
-      expectedFootfall: 40,
-      actualFootfall: 38,
-      ofrFilled: 30,
-      deskWorkCompleted: true
-    },
-    {
-      id: '3',
-      type: 'mela',
-      districtId: 'dhanbad',
-      gramPanchayat: 'Jharia',
-      village: 'Jharia Central',
-      date: '2024-02-25',
-      status: 'planned',
-      expectedFootfall: 100,
-      deskWorkCompleted: false
+// Mock events data
+const mockEvents: RozgarEvent[] = [
+  {
+    id: '1',
+    type: 'mela',
+    districtId: 'ranchi',
+    gramPanchayat: 'Kanke',
+    village: 'Kanke Village',
+    date: '2024-02-15',
+    status: 'completed',
+    expectedFootfall: 100,
+    actualFootfall: 95,
+    ofrFilled: 78,
+    counselled: 62,
+    interested: 31,
+    migrated: 24,
+    deskWorkCompleted: true
+  },
+  {
+    id: '2',
+    type: 'sabha',
+    districtId: 'hazaribagh',
+    gramPanchayat: 'Bishnugarh',
+    village: 'Bishnugarh Main',
+    date: '2024-02-18',
+    status: 'in_progress',
+    expectedFootfall: 40,
+    actualFootfall: 38,
+    ofrFilled: 30,
+    deskWorkCompleted: true
+  },
+  {
+    id: '3',
+    type: 'mela',
+    districtId: 'dhanbad',
+    gramPanchayat: 'Jharia',
+    village: 'Jharia Central',
+    date: '2024-02-25',
+    status: 'planned',
+    expectedFootfall: 100,
+    deskWorkCompleted: false
+  }
+];
+
+export const RozgarEventsSection: React.FC<RozgarEventsSectionProps> = ({ 
+  canEdit, 
+  adoptedDistricts,
+  workOrderId = ''
+}) => {
+  // RTK Query hooks
+  const { data: eventsData, isLoading } = useGetRozgarEventsQuery(
+    { workOrderId },
+    { skip: !workOrderId }
+  );
+  const [createRozgarEventMutation] = useCreateRozgarEventMutation();
+
+  // Mock fallback pattern
+  const [events, setEvents] = useState<RozgarEvent[]>(mockEvents);
+
+  useEffect(() => {
+    if (eventsData && Array.isArray(eventsData)) {
+      setEvents(eventsData);
     }
-  ]);
+  }, [eventsData]);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isDeskWorkOpen, setIsDeskWorkOpen] = useState(false);

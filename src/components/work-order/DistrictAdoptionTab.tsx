@@ -161,11 +161,19 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
         </TabsContent>
 
         <TabsContent value="team" className="mt-6">
-          <TeamAssignmentSection canEdit={canEdit} adoptedDistricts={adoptedDistricts} />
+          <TeamAssignmentSection 
+            canEdit={canEdit} 
+            adoptedDistricts={adoptedDistricts}
+            workOrderId={workOrderId}
+          />
         </TabsContent>
 
         <TabsContent value="events" className="mt-6">
-          <RozgarEventsSection canEdit={canEdit} adoptedDistricts={adoptedDistricts} />
+          <RozgarEventsSection 
+            canEdit={canEdit} 
+            adoptedDistricts={adoptedDistricts}
+            workOrderId={workOrderId}
+          />
         </TabsContent>
 
         <TabsContent value="calendar" className="mt-6">
@@ -173,7 +181,11 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
         </TabsContent>
 
         <TabsContent value="crp" className="mt-6">
-          <CRPNetworkSection canEdit={canEdit} adoptedDistricts={adoptedDistricts} />
+          <CRPNetworkSection 
+            canEdit={canEdit} 
+            adoptedDistricts={adoptedDistricts}
+            workOrderId={workOrderId}
+          />
         </TabsContent>
 
         <TabsContent value="reports" className="mt-6">

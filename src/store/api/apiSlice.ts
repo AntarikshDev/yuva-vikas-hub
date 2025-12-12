@@ -2059,6 +2059,9 @@ export const {
   // Activity Calendar
   useGetActivityCalendarQuery,
   useCreateActivityMutation,
+  // Rozgar Events
+  useGetRozgarEventsQuery,
+  useCreateRozgarEventMutation,
   // Work Order Details - Centre Status
   useGetCentresForWorkOrderQuery,
   useGetCentreStatusQuery,
