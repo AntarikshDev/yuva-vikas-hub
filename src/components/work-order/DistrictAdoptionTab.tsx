@@ -58,7 +58,8 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
   // Use uploaded data or fallback to Jharkhand mock data
   const currentAnalysisData = analysisData || getJharkhandMockData();
 
-  const canEdit = role === 'national-head' && isStarted;
+  // Allow editing for national-head regardless of status for demo purposes
+  const canEdit = role === 'national-head';
 
   const handleAdoptDistrict = async (districtId: string) => {
     if (!adoptedDistricts.includes(districtId)) {

@@ -39,7 +39,7 @@ interface WorkOrder {
   status: WorkOrderStatus;
 }
 
-// Mock work order data
+// Mock work order data - status "started" so features are enabled
 const mockWorkOrder: WorkOrder = {
   id: "1",
   workOrderNo: "WO-2024-001",
@@ -56,7 +56,7 @@ const mockWorkOrder: WorkOrder = {
   stateName: "Maharashtra",
   districtName: "Mumbai",
   assignedNationalHead: "Rahul Sharma",
-  status: "active",
+  status: "started",
 };
 
 const WorkOrderDetails = ({ role }: WorkOrderDetailsProps) => {
