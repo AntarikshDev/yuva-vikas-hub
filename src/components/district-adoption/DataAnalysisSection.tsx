@@ -10,9 +10,10 @@ import { DistrictAnalysisData } from '@/utils/districtTemplateGenerator';
 
 interface DataAnalysisSectionProps {
   analysisData?: DistrictAnalysisData;
+  selectedYear?: string;
 }
 
-export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analysisData }) => {
+export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analysisData, selectedYear = '2022-23' }) => {
   const [activeChart, setActiveChart] = useState('enrolment');
 
   // Use analysisData if provided, otherwise fallback to jharkhand data
@@ -105,7 +106,7 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>District-wise Historical Enrolment (FY 22-23)</CardTitle>
+                <CardTitle>District-wise Historical Enrolment (FY {selectedYear})</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={400}>

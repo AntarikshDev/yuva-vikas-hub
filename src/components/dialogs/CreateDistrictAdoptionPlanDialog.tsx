@@ -11,6 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   Upload, 
   Download, 
@@ -24,7 +31,8 @@ import {
   MapPin,
   Route,
   AlertCircle,
-  Info
+  Info,
+  CalendarDays
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { downloadTemplate, getJharkhandMockData, DistrictAnalysisData } from '@/utils/districtTemplateGenerator';
@@ -38,7 +46,7 @@ interface CreateDistrictAdoptionPlanDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   workOrderId: string;
-  onPlanCreated: (data: DistrictAnalysisData) => void;
+  onPlanCreated: (data: DistrictAnalysisData, year: string) => void;
 }
 
 interface UploadedFile {
@@ -46,7 +54,17 @@ interface UploadedFile {
   status: 'pending' | 'success' | 'error';
   data?: any[];
   errors?: string[];
+  year: string;
 }
+
+// Financial years for selection
+const financialYears = [
+  { value: '2024-25', label: 'FY 2024-25' },
+  { value: '2023-24', label: 'FY 2023-24' },
+  { value: '2022-23', label: 'FY 2022-23' },
+  { value: '2021-22', label: 'FY 2021-22' },
+  { value: '2020-21', label: 'FY 2020-21' },
+];
 
 const dataTypes = [
   { id: 'enrolment', label: 'Enrolment', icon: BarChart3, requiredCols: ['District', 'Total', 'SSMO', 'FMA', 'HHA_GDA'] },
@@ -63,6 +81,12 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
 }) => {
   const [activeTab, setActiveTab] = useState('upload');
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, UploadedFile>>({});
+  const [selectedYears, setSelectedYears] = useState<Record<string, string>>({
+    enrolment: '2023-24',
+    tradewise: '2023-24',
+    density: '2023-24',
+    distance: '2023-24',
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingTutorial, setIsLoadingTutorial] = useState(false);
 
@@ -70,10 +94,21 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
   const [createPlan] = useCreateDistrictAdoptionPlanMutation();
   const [uploadData] = useUploadDistrictAnalysisDataMutation();
 
-  const handleFileUpload = useCallback(async (dataType: string, file: File) => {
+  const handleYearChange = (dataType: string, year: string) => {
+    setSelectedYears(prev => ({ ...prev, [dataType]: year }));
+    // Update existing upload with new year
+    if (uploadedFiles[dataType]) {
+      setUploadedFiles(prev => ({
+        ...prev,
+        [dataType]: { ...prev[dataType], year }
+      }));
+    }
+  };
+
+  const handleFileUpload = useCallback(async (dataType: string, file: File, year: string) => {
     setUploadedFiles(prev => ({
       ...prev,
-      [dataType]: { file, status: 'pending' }
+      [dataType]: { file, status: 'pending', year }
     }));
 
     try {
@@ -89,7 +124,7 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
       if (!result.success) {
         setUploadedFiles(prev => ({
           ...prev,
-          [dataType]: { file, status: 'error', errors: result.errors }
+          [dataType]: { file, status: 'error', errors: result.errors, year }
         }));
         return;
       }
@@ -111,39 +146,39 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
       if (validationErrors.length > 0) {
         setUploadedFiles(prev => ({
           ...prev,
-          [dataType]: { file, status: 'error', errors: validationErrors }
+          [dataType]: { file, status: 'error', errors: validationErrors, year }
         }));
         return;
       }
 
       setUploadedFiles(prev => ({
         ...prev,
-        [dataType]: { file, status: 'success', data: result.data }
+        [dataType]: { file, status: 'success', data: result.data, year }
       }));
 
-      toast.success(`${file.name} uploaded successfully`);
+      toast.success(`${file.name} uploaded for ${year} successfully`);
     } catch (error) {
       setUploadedFiles(prev => ({
         ...prev,
-        [dataType]: { file, status: 'error', errors: ['Failed to parse file'] }
+        [dataType]: { file, status: 'error', errors: ['Failed to parse file'], year }
       }));
     }
   }, []);
 
-  const handleDrop = useCallback((dataType: string) => (e: React.DragEvent) => {
+  const handleDrop = useCallback((dataType: string, year: string) => (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file && (file.name.endsWith('.csv') || file.name.endsWith('.xlsx'))) {
-      handleFileUpload(dataType, file);
+      handleFileUpload(dataType, file, year);
     } else {
       toast.error('Please upload a CSV or Excel file');
     }
   }, [handleFileUpload]);
 
-  const handleFileSelect = (dataType: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (dataType: string, year: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      handleFileUpload(dataType, file);
+      handleFileUpload(dataType, file, year);
     }
   };
 
@@ -160,8 +195,8 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      onPlanCreated(jharkhandData);
-      toast.success('Tutorial data loaded successfully! Viewing Jharkhand demo data.');
+      onPlanCreated(jharkhandData, '2022-23');
+      toast.success('Tutorial data loaded successfully! Viewing Jharkhand FY 2022-23 demo data.');
       onOpenChange(false);
     } catch (error) {
       toast.error('Failed to load tutorial data');
@@ -173,8 +208,15 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
   const handleCreatePlan = async () => {
     setIsProcessing(true);
     try {
-      // Combine all uploaded data
+      // Combine all uploaded data with years
       const analysisData: Partial<DistrictAnalysisData> = {};
+      
+      // Get the primary year from the first uploaded file
+      const primaryYear = uploadedFiles.enrolment?.year || 
+                          uploadedFiles.tradewise?.year || 
+                          uploadedFiles.density?.year || 
+                          uploadedFiles.distance?.year || 
+                          '2023-24';
       
       if (uploadedFiles.enrolment?.data) {
         analysisData.enrolment = uploadedFiles.enrolment.data.map((d: any) => ({
@@ -209,7 +251,7 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
 
       // Try to call API, fallback to mock on failure
       try {
-        await createPlan({ workOrderId, plan: analysisData }).unwrap();
+        await createPlan({ workOrderId, plan: analysisData, year: primaryYear }).unwrap();
       } catch {
         // API failed, use mock data flow
       }
@@ -224,8 +266,8 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
         blocks: mockData.blocks
       };
 
-      onPlanCreated(fullData);
-      toast.success('District adoption plan created successfully!');
+      onPlanCreated(fullData, primaryYear);
+      toast.success(`District adoption plan created for ${primaryYear} successfully!`);
       onOpenChange(false);
     } catch (error) {
       toast.error('Failed to create plan');
@@ -272,6 +314,7 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {dataTypes.map((type) => {
                 const uploadState = uploadedFiles[type.id];
+                const selectedYear = selectedYears[type.id];
                 const Icon = type.icon;
 
                 return (
@@ -289,10 +332,30 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
                         Required: {type.requiredCols.join(', ')}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="space-y-3">
+                      {/* Year Selection */}
+                      <div className="flex items-center gap-2">
+                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                        <Select
+                          value={selectedYear}
+                          onValueChange={(value) => handleYearChange(type.id, value)}
+                        >
+                          <SelectTrigger className="h-8 text-xs">
+                            <SelectValue placeholder="Select Year" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {financialYears.map((fy) => (
+                              <SelectItem key={fy.value} value={fy.value}>
+                                {fy.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       <div
                         className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                        onDrop={handleDrop(type.id)}
+                        onDrop={handleDrop(type.id, selectedYear)}
                         onDragOver={(e) => e.preventDefault()}
                       >
                         {uploadState?.status === 'pending' ? (
@@ -301,7 +364,10 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
                           <div className="space-y-1">
                             <CheckCircle2 className="h-6 w-6 mx-auto text-green-500" />
                             <p className="text-xs text-muted-foreground">{uploadState.file.name}</p>
-                            <Badge variant="secondary">{uploadState.data?.length} rows</Badge>
+                            <div className="flex items-center justify-center gap-2">
+                              <Badge variant="secondary">{uploadState.data?.length} rows</Badge>
+                              <Badge variant="outline">{uploadState.year}</Badge>
+                            </div>
                           </div>
                         ) : (
                           <>
@@ -314,7 +380,7 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
                           accept=".csv,.xlsx"
                           className="hidden"
                           id={`file-${type.id}`}
-                          onChange={handleFileSelect(type.id)}
+                          onChange={handleFileSelect(type.id, selectedYear)}
                         />
                       </div>
 

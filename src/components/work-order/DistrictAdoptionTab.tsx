@@ -3,6 +3,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { LayoutDashboard, BarChart3, MapPin, Users, Calendar, CalendarDays, Network, FileText, Loader2, Plus, Info } from 'lucide-react';
 
 import { OverviewSection } from '@/components/district-adoption/OverviewSection';
@@ -28,6 +35,15 @@ interface DistrictAdoptionTabProps {
   isStarted: boolean;
 }
 
+// Financial years for filtering
+const financialYears = [
+  { value: '2024-25', label: 'FY 2024-25' },
+  { value: '2023-24', label: 'FY 2023-24' },
+  { value: '2022-23', label: 'FY 2022-23' },
+  { value: '2021-22', label: 'FY 2021-22' },
+  { value: '2020-21', label: 'FY 2020-21' },
+];
+
 // Mock data
 const mockAdoptedDistricts = ['ranchi', 'hazaribagh', 'dhanbad'];
 
@@ -38,7 +54,10 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isPlanDialogOpen, setIsPlanDialogOpen] = useState(false);
-  const [analysisData, setAnalysisData] = useState<DistrictAnalysisData | null>(null);
+  const [selectedYear, setSelectedYear] = useState<string>('2022-23');
+  const [analysisDataByYear, setAnalysisDataByYear] = useState<Record<string, DistrictAnalysisData>>({
+    '2022-23': getJharkhandMockData() // Default demo data
+  });
   const [isUsingDemoData, setIsUsingDemoData] = useState(true);
   
   // RTK Query hooks
@@ -55,8 +74,11 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
     adoptedDistricts = adoptedData;
   }
 
-  // Use uploaded data or fallback to Jharkhand mock data
-  const currentAnalysisData = analysisData || getJharkhandMockData();
+  // Get current analysis data based on selected year
+  const currentAnalysisData = analysisDataByYear[selectedYear] || getJharkhandMockData();
+
+  // Available years that have data
+  const availableYears = Object.keys(analysisDataByYear);
 
   // Allow editing for national-head regardless of status for demo purposes
   const canEdit = role === 'national-head';
@@ -71,8 +93,12 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
     }
   };
 
-  const handlePlanCreated = (data: DistrictAnalysisData) => {
-    setAnalysisData(data);
+  const handlePlanCreated = (data: DistrictAnalysisData, year: string) => {
+    setAnalysisDataByYear(prev => ({
+      ...prev,
+      [year]: data
+    }));
+    setSelectedYear(year);
     setIsUsingDemoData(false);
   };
 
@@ -97,8 +123,8 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header with Create Plan Button */}
-      <div className="flex items-center justify-between">
+      {/* Header with Year Filter and Create Plan Button */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
           <h2 className="text-lg font-semibold">District Adoption</h2>
           {isUsingDemoData && (
@@ -108,19 +134,44 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
             </Badge>
           )}
         </div>
-        {canEdit && (
-          <Button onClick={() => setIsPlanDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create District Adoption Plan
-          </Button>
-        )}
+        <div className="flex items-center gap-3">
+          {/* Year Filter Dropdown */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Analyze Year:</span>
+            <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Select Year" />
+              </SelectTrigger>
+              <SelectContent>
+                {financialYears.map((fy) => (
+                  <SelectItem 
+                    key={fy.value} 
+                    value={fy.value}
+                    disabled={!availableYears.includes(fy.value)}
+                  >
+                    {fy.label}
+                    {availableYears.includes(fy.value) && (
+                      <Badge variant="secondary" className="ml-2 text-xs">Data</Badge>
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {canEdit && (
+            <Button onClick={() => setIsPlanDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create District Adoption Plan
+            </Button>
+          )}
+        </div>
       </div>
 
       {isUsingDemoData && (
         <Alert className="bg-amber-50 border-amber-200">
           <Info className="h-4 w-4 text-amber-600" />
           <AlertDescription className="text-amber-700">
-            Currently viewing Jharkhand demo data. Click "Create District Adoption Plan" to upload your own data or load tutorial data.
+            Currently viewing Jharkhand demo data for {selectedYear}. Click "Create District Adoption Plan" to upload your own data for different years.
           </AlertDescription>
         </Alert>
       )}
@@ -148,7 +199,7 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
         </TabsContent>
 
         <TabsContent value="analysis" className="mt-6">
-          <DataAnalysisSection analysisData={currentAnalysisData} />
+          <DataAnalysisSection analysisData={currentAnalysisData} selectedYear={selectedYear} />
         </TabsContent>
 
         <TabsContent value="selection" className="mt-6">
