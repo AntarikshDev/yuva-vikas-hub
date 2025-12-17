@@ -1840,11 +1840,11 @@ export const apiSlice = createApi({
       providesTags: ['WorkOrders', 'Districts'],
     }),
 
-    createDistrictAdoptionPlan: builder.mutation<any, { workOrderId: string; plan: any }>({
-      query: ({ workOrderId, plan }) => ({
+    createDistrictAdoptionPlan: builder.mutation<any, { workOrderId: string; plan: any; year: string }>({
+      query: ({ workOrderId, plan, year }) => ({
         url: `/work-orders/${workOrderId}/district-adoption-plan`,
         method: 'POST',
-        body: plan,
+        body: { ...plan, year },
       }),
       invalidatesTags: ['WorkOrders', 'Districts'],
     }),
@@ -1858,11 +1858,11 @@ export const apiSlice = createApi({
       invalidatesTags: ['WorkOrders', 'Districts'],
     }),
 
-    uploadDistrictAnalysisData: builder.mutation<any, { workOrderId: string; fileType: string; data: any }>({
-      query: ({ workOrderId, fileType, data }) => ({
+    uploadDistrictAnalysisData: builder.mutation<any, { workOrderId: string; fileType: string; data: any; year: string }>({
+      query: ({ workOrderId, fileType, data, year }) => ({
         url: `/work-orders/${workOrderId}/district-analysis/${fileType}`,
         method: 'POST',
-        body: data,
+        body: { ...data, year },
       }),
       invalidatesTags: ['WorkOrders', 'Districts'],
     }),
