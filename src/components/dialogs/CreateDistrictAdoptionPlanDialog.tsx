@@ -69,7 +69,7 @@ const dataTypes = [
   { id: 'enrolment', label: 'Enrolment', icon: BarChart3, requiredCols: ['District', 'Total', ...tradeCategories] },
   { id: 'tradewise', label: 'Trade-wise', icon: TrendingUp, requiredCols: ['District', ...tradeCategories] },
   { id: 'density', label: 'Density', icon: MapPin, requiredCols: ['District', 'Population', 'Area_SqKm', 'Density'] },
-  { id: 'distance', label: 'Distance', icon: Route, requiredCols: ['District', 'TC1_Name', 'TC1_Distance_Km', 'TC2_Name', 'TC2_Distance_Km'] },
+  { id: 'distance', label: 'Distance', icon: Route, requiredCols: ['District', 'TC1_Name', 'TC1_Distance_Km', 'TC2_Name', 'TC2_Distance_Km', 'TC3_Name', 'TC3_Distance_Km'] },
 ];
 
 export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPlanDialogProps> = ({
@@ -246,6 +246,8 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
           tc1Distance: Number(d.TC1_Distance_Km) || 0,
           tc2Name: d.TC2_Name || '',
           tc2Distance: Number(d.TC2_Distance_Km) || 0,
+          tc3Name: d.TC3_Name || '',
+          tc3Distance: Number(d.TC3_Distance_Km) || 0,
           workOrderId,
           createdBy: currentUser,
           uploadedDate,
@@ -301,7 +303,9 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
               tc1Name: d.tc1Name,
               tc1Distance: d.tc1Distance,
               tc2Name: d.tc2Name,
-              tc2Distance: d.tc2Distance
+              tc2Distance: d.tc2Distance,
+              tc3Name: d.tc3Name,
+              tc3Distance: d.tc3Distance
             }))
           : mockData.distance,
         blocks: mockData.blocks

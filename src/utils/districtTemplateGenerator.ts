@@ -45,6 +45,8 @@ export interface DistanceData {
   tc1Distance: number;
   tc2Name: string;
   tc2Distance: number;
+  tc3Name: string;
+  tc3Distance: number;
 }
 
 export interface BlockData {
@@ -96,13 +98,15 @@ export const generateDensityTemplate = (): string => {
 
 // Generate Distance Template
 export const generateDistanceTemplate = (): string => {
-  const headers = ['District', 'TC1_Name', 'TC1_Distance_Km', 'TC2_Name', 'TC2_Distance_Km'];
+  const headers = ['District', 'TC1_Name', 'TC1_Distance_Km', 'TC2_Name', 'TC2_Distance_Km', 'TC3_Name', 'TC3_Distance_Km'];
   const rows = jharkhandDistricts.map(d => [
     d.name,
     trainingCenters[0].name,
     d.distanceFromTC1.toString(),
     trainingCenters[1].name,
-    d.distanceFromTC2.toString()
+    d.distanceFromTC2.toString(),
+    trainingCenters[2].name,
+    d.distanceFromTC3.toString()
   ]);
   return generateCSV(headers, rows);
 };
@@ -219,7 +223,9 @@ export const getJharkhandMockData = (): DistrictAnalysisData => {
       tc1Name: trainingCenters[0].name,
       tc1Distance: d.distanceFromTC1,
       tc2Name: trainingCenters[1].name,
-      tc2Distance: d.distanceFromTC2
+      tc2Distance: d.distanceFromTC2,
+      tc3Name: trainingCenters[2].name,
+      tc3Distance: d.distanceFromTC3
     })),
     blocks: jharkhandDistricts.flatMap(d => 
       d.blocks.map(b => ({
