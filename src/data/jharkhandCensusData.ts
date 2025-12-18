@@ -25,6 +25,7 @@ export interface DistrictData {
   femalePopulation: number;
   distanceFromTC1: number; // Ranchi TC
   distanceFromTC2: number; // Jamshedpur TC
+  distanceFromTC3: number; // Hazaribagh TC
   historicalEnrolment: {
     total: number;
     ssmo: number;
@@ -59,6 +60,14 @@ export const trainingCenters: TrainingCenter[] = [
     capacity: 400,
     trades: ['SSMO', 'FMA', 'HHA/GDA'],
     assignedDistricts: ['east-singhbhum', 'west-singhbhum', 'saraikela-kharsawan']
+  },
+  {
+    id: 'tc-hazaribagh',
+    name: 'Hazaribagh Training Centre',
+    location: 'Hazaribagh, Jharkhand',
+    capacity: 350,
+    trades: ['SSMO', 'SMO', 'FMA', 'IT'],
+    assignedDistricts: ['hazaribagh', 'koderma', 'giridih', 'ramgarh', 'chatra']
   }
 ];
 
@@ -78,6 +87,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 1419892,
     distanceFromTC1: 0,
     distanceFromTC2: 130,
+    distanceFromTC3: 95,
     historicalEnrolment: { total: 275, ssmo: 193, fma: 42, hhaGda: 40 },
     blocks: [
       { name: 'Kanke', population: 1317499, area: 432.40, density: 3047, sexRatio: 945 },
@@ -115,6 +125,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 1117277,
     distanceFromTC1: 130,
     distanceFromTC2: 0,
+    distanceFromTC3: 225,
     historicalEnrolment: { total: 369, ssmo: 193, fma: 53, hhaGda: 69 },
     blocks: [
       { name: 'Golmuri-Cum-Jugsalai', population: 1260201, area: 352.74, density: 3573, sexRatio: 942 },
@@ -145,6 +156,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 1277203,
     distanceFromTC1: 165,
     distanceFromTC2: 145,
+    distanceFromTC3: 85,
     historicalEnrolment: { total: 354, ssmo: 238, fma: 57, hhaGda: 59 },
     blocks: [
       { name: 'Dhanbad', population: 1221356, area: 293.89, density: 4155, sexRatio: 902 },
@@ -172,6 +184,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 981418,
     distanceFromTC1: 115,
     distanceFromTC2: 180,
+    distanceFromTC3: 65,
     historicalEnrolment: { total: 187, ssmo: 125, fma: 35, hhaGda: 27 },
     blocks: [
       { name: 'Chas', population: 813402, area: 576.78, density: 1410, sexRatio: 905 },
@@ -200,6 +213,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 1186540,
     distanceFromTC1: 145,
     distanceFromTC2: 195,
+    distanceFromTC3: 45,
     historicalEnrolment: { total: 156, ssmo: 98, fma: 32, hhaGda: 26 },
     blocks: [
       { name: 'Giridih', population: 372570, area: 408.55, density: 912, sexRatio: 938 },
@@ -232,6 +246,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 843261,
     distanceFromTC1: 95,
     distanceFromTC2: 225,
+    distanceFromTC3: 0,
     historicalEnrolment: { total: 198, ssmo: 132, fma: 38, hhaGda: 28 },
     blocks: [
       { name: 'Hazaribag', population: 290098, area: 193.66, density: 1498, sexRatio: 942 },
@@ -267,6 +282,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 929993,
     distanceFromTC1: 175,
     distanceFromTC2: 305,
+    distanceFromTC3: 165,
     historicalEnrolment: { total: 142, ssmo: 89, fma: 28, hhaGda: 25 },
     blocks: [
       { name: 'Chainpur', population: 226550, area: 650.55, density: 348, sexRatio: 918 },
@@ -306,6 +322,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 751169,
     distanceFromTC1: 185,
     distanceFromTC2: 85,
+    distanceFromTC3: 280,
     historicalEnrolment: { total: 178, ssmo: 112, fma: 35, hhaGda: 31 },
     blocks: [
       { name: 'Chakradharpur', population: 197953, area: 394.88, density: 501, sexRatio: 998 },
@@ -343,6 +360,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 524822,
     distanceFromTC1: 155,
     distanceFromTC2: 35,
+    distanceFromTC3: 250,
     historicalEnrolment: { total: 145, ssmo: 92, fma: 28, hhaGda: 25 },
     blocks: [
       { name: 'Adityapur', population: 309072, area: 342.74, density: 902, sexRatio: 965 },
@@ -370,6 +388,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 355744,
     distanceFromTC1: 135,
     distanceFromTC2: 265,
+    distanceFromTC3: 125,
     historicalEnrolment: { total: 98, ssmo: 62, fma: 18, hhaGda: 18 },
     blocks: [
       { name: 'Latehar', population: 144495, area: 485.33, density: 298, sexRatio: 955 },
@@ -398,6 +417,7 @@ export const jharkhandDistricts: DistrictData[] = [
     femalePopulation: 508319,
     distanceFromTC1: 105,
     distanceFromTC2: 235,
+    distanceFromTC3: 55,
     historicalEnrolment: { total: 112, ssmo: 72, fma: 22, hhaGda: 18 },
     blocks: [
       { name: 'Hunterganj', population: 150999, area: 456.78, density: 331, sexRatio: 948 },

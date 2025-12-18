@@ -67,17 +67,21 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
         district: d.district,
         tc1Distance: d.tc1Distance,
         tc2Distance: d.tc2Distance,
-        minDistance: Math.min(d.tc1Distance, d.tc2Distance),
+        tc3Distance: d.tc3Distance,
+        minDistance: Math.min(d.tc1Distance, d.tc2Distance, d.tc3Distance),
         tc1Name: d.tc1Name,
-        tc2Name: d.tc2Name
+        tc2Name: d.tc2Name,
+        tc3Name: d.tc3Name
       })).sort((a, b) => a.minDistance - b.minDistance)
     : jharkhandDistricts.map(d => ({
         district: d.name,
         tc1Distance: d.distanceFromTC1,
         tc2Distance: d.distanceFromTC2,
-        minDistance: Math.min(d.distanceFromTC1, d.distanceFromTC2),
+        tc3Distance: d.distanceFromTC3,
+        minDistance: Math.min(d.distanceFromTC1, d.distanceFromTC2, d.distanceFromTC3),
         tc1Name: trainingCenters[0].name,
-        tc2Name: trainingCenters[1].name
+        tc2Name: trainingCenters[1].name,
+        tc3Name: trainingCenters[2].name
       })).sort((a, b) => a.minDistance - b.minDistance);
 
   const COLORS = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef'];
@@ -291,6 +295,7 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
                     <TableHead>District</TableHead>
                     <TableHead className="text-center">{distanceMatrix[0]?.tc1Name || 'Training Center 1'}</TableHead>
                     <TableHead className="text-center">{distanceMatrix[0]?.tc2Name || 'Training Center 2'}</TableHead>
+                    <TableHead className="text-center">{distanceMatrix[0]?.tc3Name || 'Training Center 3'}</TableHead>
                     <TableHead className="text-center">Nearest TC</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -303,6 +308,9 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge className={getDistanceColor(d.tc2Distance)}>{d.tc2Distance} km</Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge className={getDistanceColor(d.tc3Distance)}>{d.tc3Distance} km</Badge>
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="outline" className="font-semibold">
