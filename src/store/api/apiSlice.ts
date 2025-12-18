@@ -1840,11 +1840,20 @@ export const apiSlice = createApi({
       providesTags: ['WorkOrders', 'Districts'],
     }),
 
-    createDistrictAdoptionPlan: builder.mutation<any, { workOrderId: string; plan: any; year: string }>({
-      query: ({ workOrderId, plan, year }) => ({
-        url: `/work-orders/${workOrderId}/district-adoption-plan`,
+    createDistrictAdoptionPlan: builder.mutation<any, {
+      workOrderId: string;
+      financialYear: string;
+      createdBy: string;
+      uploadedDate: string;
+      enrolmentData: any[];
+      tradewiseData: any[];
+      densityData: any[];
+      distanceData: any[];
+    }>({
+      query: (payload) => ({
+        url: `/work-orders/${payload.workOrderId}/district-adoption-plan`,
         method: 'POST',
-        body: { ...plan, year },
+        body: payload,
       }),
       invalidatesTags: ['WorkOrders', 'Districts'],
     }),
@@ -1870,6 +1879,12 @@ export const apiSlice = createApi({
     getDistrictAnalysisData: builder.query<any, { workOrderId: string; analysisType: string }>({
       query: ({ workOrderId, analysisType }) => 
         `/work-orders/${workOrderId}/district-analysis/${analysisType}`,
+      providesTags: ['WorkOrders', 'Districts'],
+    }),
+
+    getDistrictAnalysisDataByYear: builder.query<any, { workOrderId: string; year: string }>({
+      query: ({ workOrderId, year }) => 
+        `/work-orders/${workOrderId}/district-analysis?year=${year}`,
       providesTags: ['WorkOrders', 'Districts'],
     }),
   }),
@@ -2108,6 +2123,7 @@ export const {
   useUpdateDistrictAdoptionPlanMutation,
   useUploadDistrictAnalysisDataMutation,
   useGetDistrictAnalysisDataQuery,
+  useGetDistrictAnalysisDataByYearQuery,
 } = apiSlice;
 
 export default apiSlice;
