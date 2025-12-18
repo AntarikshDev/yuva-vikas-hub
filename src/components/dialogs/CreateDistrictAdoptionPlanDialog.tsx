@@ -37,10 +37,7 @@ import {
 import { toast } from 'sonner';
 import { downloadTemplate, getJharkhandMockData, DistrictAnalysisData } from '@/utils/districtTemplateGenerator';
 import { parseCSV, readFileAsText, validateEnrolmentData, validateDensityData, validateDistanceData } from '@/utils/csvParser';
-import { 
-  useCreateDistrictAdoptionPlanMutation,
-  useUploadDistrictAnalysisDataMutation 
-} from '@/store/api/apiSlice';
+import { useCreateDistrictAdoptionPlanMutation } from '@/store/api/apiSlice';
 
 interface CreateDistrictAdoptionPlanDialogProps {
   open: boolean;
@@ -54,7 +51,6 @@ interface UploadedFile {
   status: 'pending' | 'success' | 'error';
   data?: any[];
   errors?: string[];
-  year: string;
 }
 
 // Financial years for selection
@@ -66,9 +62,12 @@ const financialYears = [
   { value: '2020-21', label: 'FY 2020-21' },
 ];
 
+// Trade categories - SSMO, SMO, ST, GDA, HHA, IT, FMA
+const tradeCategories = ['SSMO', 'SMO', 'ST', 'GDA', 'HHA', 'IT', 'FMA'];
+
 const dataTypes = [
-  { id: 'enrolment', label: 'Enrolment', icon: BarChart3, requiredCols: ['District', 'Total', 'SSMO', 'FMA', 'HHA_GDA'] },
-  { id: 'tradewise', label: 'Trade-wise', icon: TrendingUp, requiredCols: ['District', 'SSMO', 'FMA', 'HHA_GDA'] },
+  { id: 'enrolment', label: 'Enrolment', icon: BarChart3, requiredCols: ['District', 'Total', ...tradeCategories] },
+  { id: 'tradewise', label: 'Trade-wise', icon: TrendingUp, requiredCols: ['District', ...tradeCategories] },
   { id: 'density', label: 'Density', icon: MapPin, requiredCols: ['District', 'Population', 'Area_SqKm', 'Density'] },
   { id: 'distance', label: 'Distance', icon: Route, requiredCols: ['District', 'TC1_Name', 'TC1_Distance_Km', 'TC2_Name', 'TC2_Distance_Km'] },
 ];
@@ -81,34 +80,17 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
 }) => {
   const [activeTab, setActiveTab] = useState('upload');
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, UploadedFile>>({});
-  const [selectedYears, setSelectedYears] = useState<Record<string, string>>({
-    enrolment: '2023-24',
-    tradewise: '2023-24',
-    density: '2023-24',
-    distance: '2023-24',
-  });
+  const [selectedYear, setSelectedYear] = useState('2023-24');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoadingTutorial, setIsLoadingTutorial] = useState(false);
 
-  // RTK Query mutations
+  // RTK Query mutation
   const [createPlan] = useCreateDistrictAdoptionPlanMutation();
-  const [uploadData] = useUploadDistrictAnalysisDataMutation();
 
-  const handleYearChange = (dataType: string, year: string) => {
-    setSelectedYears(prev => ({ ...prev, [dataType]: year }));
-    // Update existing upload with new year
-    if (uploadedFiles[dataType]) {
-      setUploadedFiles(prev => ({
-        ...prev,
-        [dataType]: { ...prev[dataType], year }
-      }));
-    }
-  };
-
-  const handleFileUpload = useCallback(async (dataType: string, file: File, year: string) => {
+  const handleFileUpload = useCallback(async (dataType: string, file: File) => {
     setUploadedFiles(prev => ({
       ...prev,
-      [dataType]: { file, status: 'pending', year }
+      [dataType]: { file, status: 'pending' }
     }));
 
     try {
@@ -124,7 +106,7 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
       if (!result.success) {
         setUploadedFiles(prev => ({
           ...prev,
-          [dataType]: { file, status: 'error', errors: result.errors, year }
+          [dataType]: { file, status: 'error', errors: result.errors }
         }));
         return;
       }
@@ -146,39 +128,39 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
       if (validationErrors.length > 0) {
         setUploadedFiles(prev => ({
           ...prev,
-          [dataType]: { file, status: 'error', errors: validationErrors, year }
+          [dataType]: { file, status: 'error', errors: validationErrors }
         }));
         return;
       }
 
       setUploadedFiles(prev => ({
         ...prev,
-        [dataType]: { file, status: 'success', data: result.data, year }
+        [dataType]: { file, status: 'success', data: result.data }
       }));
 
-      toast.success(`${file.name} uploaded for ${year} successfully`);
+      toast.success(`${file.name} uploaded successfully`);
     } catch (error) {
       setUploadedFiles(prev => ({
         ...prev,
-        [dataType]: { file, status: 'error', errors: ['Failed to parse file'], year }
+        [dataType]: { file, status: 'error', errors: ['Failed to parse file'] }
       }));
     }
   }, []);
 
-  const handleDrop = useCallback((dataType: string, year: string) => (e: React.DragEvent) => {
+  const handleDrop = useCallback((dataType: string) => (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file && (file.name.endsWith('.csv') || file.name.endsWith('.xlsx'))) {
-      handleFileUpload(dataType, file, year);
+      handleFileUpload(dataType, file);
     } else {
       toast.error('Please upload a CSV or Excel file');
     }
   }, [handleFileUpload]);
 
-  const handleFileSelect = (dataType: string, year: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (dataType: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      handleFileUpload(dataType, file, year);
+      handleFileUpload(dataType, file);
     }
   };
 
@@ -208,50 +190,72 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
   const handleCreatePlan = async () => {
     setIsProcessing(true);
     try {
-      // Combine all uploaded data with years
-      const analysisData: Partial<DistrictAnalysisData> = {};
-      
-      // Get the primary year from the first uploaded file
-      const primaryYear = uploadedFiles.enrolment?.year || 
-                          uploadedFiles.tradewise?.year || 
-                          uploadedFiles.density?.year || 
-                          uploadedFiles.distance?.year || 
-                          '2023-24';
-      
-      if (uploadedFiles.enrolment?.data) {
-        analysisData.enrolment = uploadedFiles.enrolment.data.map((d: any) => ({
-          district: d.District,
-          total: d.Total,
-          ssmo: d.SSMO,
-          fma: d.FMA,
-          hhaGda: d.HHA_GDA
-        }));
-      }
+      const currentUser = 'current-user-id'; // Would come from auth context
+      const uploadedDate = new Date().toISOString();
 
-      if (uploadedFiles.density?.data) {
-        analysisData.density = uploadedFiles.density.data.map((d: any) => ({
+      // Build unified payload with all 4 CSVs data
+      const payload = {
+        workOrderId,
+        financialYear: selectedYear,
+        createdBy: currentUser,
+        uploadedDate,
+        enrolmentData: uploadedFiles.enrolment?.data?.map((d: any) => ({
           district: d.District,
-          population: d.Population,
-          area: d.Area_SqKm,
-          density: d.Density,
-          literacy: d.Literacy_Percent || 0,
-          bplPercentage: d.BPL_Percent || 0
-        }));
-      }
-
-      if (uploadedFiles.distance?.data) {
-        analysisData.distance = uploadedFiles.distance.data.map((d: any) => ({
+          total: Number(d.Total) || 0,
+          ssmo: Number(d.SSMO) || 0,
+          smo: Number(d.SMO) || 0,
+          st: Number(d.ST) || 0,
+          gda: Number(d.GDA) || 0,
+          hha: Number(d.HHA) || 0,
+          it: Number(d.IT) || 0,
+          fma: Number(d.FMA) || 0,
+          workOrderId,
+          createdBy: currentUser,
+          uploadedDate,
+          financialYear: selectedYear
+        })) || [],
+        tradewiseData: uploadedFiles.tradewise?.data?.map((d: any) => ({
           district: d.District,
-          tc1Name: d.TC1_Name,
-          tc1Distance: d.TC1_Distance_Km,
-          tc2Name: d.TC2_Name,
-          tc2Distance: d.TC2_Distance_Km
-        }));
-      }
+          ssmo: Number(d.SSMO) || 0,
+          smo: Number(d.SMO) || 0,
+          st: Number(d.ST) || 0,
+          gda: Number(d.GDA) || 0,
+          hha: Number(d.HHA) || 0,
+          it: Number(d.IT) || 0,
+          fma: Number(d.FMA) || 0,
+          workOrderId,
+          createdBy: currentUser,
+          uploadedDate,
+          financialYear: selectedYear
+        })) || [],
+        densityData: uploadedFiles.density?.data?.map((d: any) => ({
+          district: d.District,
+          population: Number(d.Population) || 0,
+          area: Number(d.Area_SqKm) || 0,
+          density: Number(d.Density) || 0,
+          literacy: Number(d.Literacy_Percent) || 0,
+          bplPercentage: Number(d.BPL_Percent) || 0,
+          workOrderId,
+          createdBy: currentUser,
+          uploadedDate,
+          financialYear: selectedYear
+        })) || [],
+        distanceData: uploadedFiles.distance?.data?.map((d: any) => ({
+          district: d.District,
+          tc1Name: d.TC1_Name || '',
+          tc1Distance: Number(d.TC1_Distance_Km) || 0,
+          tc2Name: d.TC2_Name || '',
+          tc2Distance: Number(d.TC2_Distance_Km) || 0,
+          workOrderId,
+          createdBy: currentUser,
+          uploadedDate,
+          financialYear: selectedYear
+        })) || []
+      };
 
       // Try to call API, fallback to mock on failure
       try {
-        await createPlan({ workOrderId, plan: analysisData, year: primaryYear }).unwrap();
+        await createPlan(payload).unwrap();
       } catch {
         // API failed, use mock data flow
       }
@@ -259,15 +263,52 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
       // If not all data provided, fill with defaults
       const mockData = getJharkhandMockData();
       const fullData: DistrictAnalysisData = {
-        enrolment: analysisData.enrolment || mockData.enrolment,
-        tradeWise: mockData.tradeWise,
-        density: analysisData.density || mockData.density,
-        distance: analysisData.distance || mockData.distance,
+        enrolment: payload.enrolmentData.length > 0 
+          ? payload.enrolmentData.map(d => ({
+              district: d.district,
+              total: d.total,
+              ssmo: d.ssmo,
+              smo: d.smo,
+              st: d.st,
+              gda: d.gda,
+              hha: d.hha,
+              it: d.it,
+              fma: d.fma
+            }))
+          : mockData.enrolment,
+        tradeWise: payload.tradewiseData.length > 0
+          ? payload.tradewiseData.flatMap(d => 
+              tradeCategories.map(trade => ({
+                district: d.district,
+                trade,
+                count: d[trade.toLowerCase() as keyof typeof d] as number || 0
+              }))
+            )
+          : mockData.tradeWise,
+        density: payload.densityData.length > 0
+          ? payload.densityData.map(d => ({
+              district: d.district,
+              population: d.population,
+              area: d.area,
+              density: d.density,
+              literacy: d.literacy,
+              bplPercentage: d.bplPercentage
+            }))
+          : mockData.density,
+        distance: payload.distanceData.length > 0
+          ? payload.distanceData.map(d => ({
+              district: d.district,
+              tc1Name: d.tc1Name,
+              tc1Distance: d.tc1Distance,
+              tc2Name: d.tc2Name,
+              tc2Distance: d.tc2Distance
+            }))
+          : mockData.distance,
         blocks: mockData.blocks
       };
 
-      onPlanCreated(fullData, primaryYear);
-      toast.success(`District adoption plan created for ${primaryYear} successfully!`);
+      onPlanCreated(fullData, selectedYear);
+      toast.success(`District adoption plan created for ${selectedYear} successfully!`);
       onOpenChange(false);
     } catch (error) {
       toast.error('Failed to create plan');
@@ -311,10 +352,36 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
               </AlertDescription>
             </Alert>
 
+            {/* Single Year Selection for All Data */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4" />
+                  Financial Year (for all data)
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Select the financial year for all uploaded data
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {financialYears.map((fy) => (
+                      <SelectItem key={fy.value} value={fy.value}>
+                        {fy.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {dataTypes.map((type) => {
                 const uploadState = uploadedFiles[type.id];
-                const selectedYear = selectedYears[type.id];
                 const Icon = type.icon;
 
                 return (
@@ -329,33 +396,13 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
                         {uploadState?.status === 'error' && <XCircle className="h-4 w-4 text-destructive" />}
                       </CardTitle>
                       <CardDescription className="text-xs">
-                        Required: {type.requiredCols.join(', ')}
+                        Required: {type.requiredCols.slice(0, 4).join(', ')}{type.requiredCols.length > 4 ? '...' : ''}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      {/* Year Selection */}
-                      <div className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                        <Select
-                          value={selectedYear}
-                          onValueChange={(value) => handleYearChange(type.id, value)}
-                        >
-                          <SelectTrigger className="h-8 text-xs">
-                            <SelectValue placeholder="Select Year" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {financialYears.map((fy) => (
-                              <SelectItem key={fy.value} value={fy.value}>
-                                {fy.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
                       <div
                         className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
-                        onDrop={handleDrop(type.id, selectedYear)}
+                        onDrop={handleDrop(type.id)}
                         onDragOver={(e) => e.preventDefault()}
                       >
                         {uploadState?.status === 'pending' ? (
@@ -364,10 +411,7 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
                           <div className="space-y-1">
                             <CheckCircle2 className="h-6 w-6 mx-auto text-green-500" />
                             <p className="text-xs text-muted-foreground">{uploadState.file.name}</p>
-                            <div className="flex items-center justify-center gap-2">
-                              <Badge variant="secondary">{uploadState.data?.length} rows</Badge>
-                              <Badge variant="outline">{uploadState.year}</Badge>
-                            </div>
+                            <Badge variant="secondary">{uploadState.data?.length} rows</Badge>
                           </div>
                         ) : (
                           <>
@@ -380,7 +424,7 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
                           accept=".csv,.xlsx"
                           className="hidden"
                           id={`file-${type.id}`}
-                          onChange={handleFileSelect(type.id, selectedYear)}
+                          onChange={handleFileSelect(type.id)}
                         />
                       </div>
 
@@ -423,6 +467,7 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
                 <Badge variant={uploadedCount > 0 ? 'default' : 'secondary'}>
                   {uploadedCount}/4 files uploaded
                 </Badge>
+                <Badge variant="outline">{selectedYear}</Badge>
                 <Button 
                   variant="link" 
                   size="sm"
@@ -459,41 +504,38 @@ export const CreateDistrictAdoptionPlanDialog: React.FC<CreateDistrictAdoptionPl
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 rounded-lg bg-muted">
-                    <h4 className="font-medium text-sm">What's included:</h4>
-                    <ul className="text-xs text-muted-foreground mt-2 space-y-1">
-                      <li>• 24 Districts of Jharkhand</li>
-                      <li>• Historical enrolment data (FY 22-23)</li>
-                      <li>• Population & density statistics</li>
-                      <li>• Distance from 2 Training Centers</li>
-                      <li>• Block-level demographic data</li>
-                    </ul>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="p-3 rounded-lg bg-muted text-center">
+                    <p className="text-2xl font-bold">24</p>
+                    <p className="text-xs text-muted-foreground">Districts</p>
                   </div>
-                  <div className="p-3 rounded-lg bg-muted">
-                    <h4 className="font-medium text-sm">Features you can explore:</h4>
-                    <ul className="text-xs text-muted-foreground mt-2 space-y-1">
-                      <li>• Data Analysis with 4 views</li>
-                      <li>• District Selection & Priority</li>
-                      <li>• Training Center mapping</li>
-                      <li>• Block-level insights</li>
-                      <li>• Overview & KPIs</li>
-                    </ul>
+                  <div className="p-3 rounded-lg bg-muted text-center">
+                    <p className="text-2xl font-bold">260+</p>
+                    <p className="text-xs text-muted-foreground">Blocks</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted text-center">
+                    <p className="text-2xl font-bold">3</p>
+                    <p className="text-xs text-muted-foreground">Training Centers</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted text-center">
+                    <p className="text-2xl font-bold">FY 22-23</p>
+                    <p className="text-xs text-muted-foreground">Data Year</p>
                   </div>
                 </div>
 
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
-                    After loading tutorial data, you can download the data templates to see the exact format required for your own data uploads.
+                    <strong>What's included:</strong> Census population data, district density metrics, 
+                    distance from training centers, historical enrolment figures, and block-level statistics.
                   </AlertDescription>
                 </Alert>
 
-                <Button
-                  className="w-full"
-                  size="lg"
+                <Button 
                   onClick={handleLoadTutorialData}
                   disabled={isLoadingTutorial}
+                  className="w-full"
+                  size="lg"
                 >
                   {isLoadingTutorial ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />

@@ -48,7 +48,7 @@ export const DistrictSelectionSection: React.FC<DistrictSelectionSectionProps> =
             total: enrolment?.total || 100,
             ssmo: enrolment?.ssmo || 50,
             fma: enrolment?.fma || 25,
-            hhaGda: enrolment?.hhaGda || 25
+            hhaGda: (enrolment?.gda || 0) + (enrolment?.hha || 0)
           },
           blocks: blocks.map(b => ({
             name: b.block,

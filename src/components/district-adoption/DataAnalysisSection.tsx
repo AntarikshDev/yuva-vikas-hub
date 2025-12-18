@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { BarChart3, TrendingUp, MapPin, Route } from 'lucide-react';
 import { jharkhandDistricts, trainingCenters } from '@/data/jharkhandCensusData';
-import { DistrictAnalysisData } from '@/utils/districtTemplateGenerator';
+import { DistrictAnalysisData, tradeCategories } from '@/utils/districtTemplateGenerator';
 
 interface DataAnalysisSectionProps {
   analysisData?: DistrictAnalysisData;
@@ -23,8 +23,12 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
           name: d.district,
           total: d.total,
           ssmo: d.ssmo,
-          fma: d.fma,
-          hhaGda: d.hhaGda
+          smo: d.smo || 0,
+          st: d.st || 0,
+          gda: d.gda || 0,
+          hha: d.hha || 0,
+          it: d.it || 0,
+          fma: d.fma
         }))
         .sort((a, b) => b.total - a.total)
     : jharkhandDistricts
@@ -32,16 +36,20 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
           name: d.name,
           total: d.historicalEnrolment.total,
           ssmo: d.historicalEnrolment.ssmo,
-          fma: d.historicalEnrolment.fma,
-          hhaGda: d.historicalEnrolment.hhaGda
+          smo: Math.floor(d.historicalEnrolment.ssmo * 0.8),
+          st: 0,
+          gda: 0,
+          hha: 0,
+          it: 0,
+          fma: d.historicalEnrolment.fma
         }))
         .sort((a, b) => b.total - a.total);
 
   // Trade-wise top 5 - derive from enrolment data
   const tradeWiseData = {
     ssmo: [...enrolmentData].sort((a, b) => b.ssmo - a.ssmo).slice(0, 5),
-    fma: [...enrolmentData].sort((a, b) => b.fma - a.fma).slice(0, 5),
-    hhaGda: [...enrolmentData].sort((a, b) => b.hhaGda - a.hhaGda).slice(0, 5)
+    smo: [...enrolmentData].sort((a, b) => b.smo - a.smo).slice(0, 5),
+    fma: [...enrolmentData].sort((a, b) => b.fma - a.fma).slice(0, 5)
   };
 
   // Density data
@@ -117,8 +125,8 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
                     <Tooltip />
                     <Legend />
                     <Bar dataKey="ssmo" stackId="a" fill="#3b82f6" name="SSMO" />
+                    <Bar dataKey="smo" stackId="a" fill="#10b981" name="SMO" />
                     <Bar dataKey="fma" stackId="a" fill="#8b5cf6" name="FMA" />
-                    <Bar dataKey="hhaGda" stackId="a" fill="#ec4899" name="HHA/GDA" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -135,8 +143,8 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
                       <TableHead>District</TableHead>
                       <TableHead className="text-right">Total</TableHead>
                       <TableHead className="text-right">SSMO</TableHead>
+                      <TableHead className="text-right">SMO</TableHead>
                       <TableHead className="text-right">FMA</TableHead>
-                      <TableHead className="text-right">HHA/GDA</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -147,8 +155,8 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
                         </TableCell>
                         <TableCell className="text-right font-semibold">{d.total}</TableCell>
                         <TableCell className="text-right">{d.ssmo}</TableCell>
+                        <TableCell className="text-right">{d.smo}</TableCell>
                         <TableCell className="text-right">{d.fma}</TableCell>
-                        <TableCell className="text-right">{d.hhaGda}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -160,11 +168,11 @@ export const DataAnalysisSection: React.FC<DataAnalysisSectionProps> = ({ analys
 
         <TabsContent value="tradewise" className="mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {(['ssmo', 'fma', 'hhaGda'] as const).map((trade) => (
+            {(['ssmo', 'smo', 'fma'] as const).map((trade) => (
               <Card key={trade}>
                 <CardHeader>
                   <CardTitle className="text-lg">
-                    Top 5 Districts - {trade === 'hhaGda' ? 'HHA/GDA' : trade.toUpperCase()}
+                    Top 5 Districts - {trade.toUpperCase()}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +25,8 @@ import {
   useGetAdoptedDistrictsQuery, 
   useAdoptDistrictMutation,
   useGetDistrictOverviewQuery,
-  useGetDistrictAdoptionPlanQuery
+  useGetDistrictAdoptionPlanQuery,
+  useGetDistrictAnalysisDataByYearQuery
 } from '@/store/api/apiSlice';
 import { DistrictAnalysisData, getJharkhandMockData } from '@/utils/districtTemplateGenerator';
 
@@ -65,6 +66,60 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
   const { data: overviewData } = useGetDistrictOverviewQuery({ workOrderId });
   const { data: planData } = useGetDistrictAdoptionPlanQuery(workOrderId);
   const [adoptDistrict] = useAdoptDistrictMutation();
+
+  // RTK Query for fetching analysis data by year
+  const { data: yearAnalysisData, isFetching: isFetchingYearData } = useGetDistrictAnalysisDataByYearQuery(
+    { workOrderId, year: selectedYear },
+    { skip: !selectedYear }
+  );
+
+  // Update local state when API returns data for selected year
+  useEffect(() => {
+    if (yearAnalysisData && yearAnalysisData.enrolmentData?.length > 0) {
+      const transformedData: DistrictAnalysisData = {
+        enrolment: yearAnalysisData.enrolmentData.map((d: any) => ({
+          district: d.district,
+          total: d.total,
+          ssmo: d.ssmo,
+          smo: d.smo,
+          st: d.st,
+          gda: d.gda,
+          hha: d.hha,
+          it: d.it,
+          fma: d.fma
+        })),
+        tradeWise: yearAnalysisData.tradewiseData?.flatMap((d: any) => 
+          ['SSMO', 'SMO', 'ST', 'GDA', 'HHA', 'IT', 'FMA'].map(trade => ({
+            district: d.district,
+            trade,
+            count: d[trade.toLowerCase()] || 0
+          }))
+        ) || [],
+        density: yearAnalysisData.densityData?.map((d: any) => ({
+          district: d.district,
+          population: d.population,
+          area: d.area,
+          density: d.density,
+          literacy: d.literacy,
+          bplPercentage: d.bplPercentage
+        })) || [],
+        distance: yearAnalysisData.distanceData?.map((d: any) => ({
+          district: d.district,
+          tc1Name: d.tc1Name,
+          tc1Distance: d.tc1Distance,
+          tc2Name: d.tc2Name,
+          tc2Distance: d.tc2Distance
+        })) || [],
+        blocks: []
+      };
+      
+      setAnalysisDataByYear(prev => ({
+        ...prev,
+        [selectedYear]: transformedData
+      }));
+      setIsUsingDemoData(false);
+    }
+  }, [yearAnalysisData, selectedYear]);
 
   // Mock fallback pattern
   let adoptedDistricts: string[];
@@ -133,6 +188,9 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
               Demo Data (Jharkhand)
             </Badge>
           )}
+          {isFetchingYearData && (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          )}
         </div>
         <div className="flex items-center gap-3">
           {/* Year Filter Dropdown */}
@@ -147,12 +205,13 @@ export const DistrictAdoptionTab: React.FC<DistrictAdoptionTabProps> = ({
                   <SelectItem 
                     key={fy.value} 
                     value={fy.value}
-                    disabled={!availableYears.includes(fy.value)}
                   >
-                    {fy.label}
-                    {availableYears.includes(fy.value) && (
-                      <Badge variant="secondary" className="ml-2 text-xs">Data</Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {fy.label}
+                      {availableYears.includes(fy.value) && (
+                        <Badge variant="secondary" className="text-xs">Data</Badge>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>

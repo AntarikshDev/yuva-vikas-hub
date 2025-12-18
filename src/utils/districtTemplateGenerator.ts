@@ -1,6 +1,9 @@
 // District Template Generator - Generates CSV templates from Jharkhand data
 import { jharkhandDistricts, trainingCenters, DistrictData } from '@/data/jharkhandCensusData';
 
+// Trade categories - SSMO, SMO, ST, GDA, HHA, IT, FMA
+export const tradeCategories = ['SSMO', 'SMO', 'ST', 'GDA', 'HHA', 'IT', 'FMA'];
+
 export interface DistrictAnalysisData {
   enrolment: EnrolmentData[];
   tradeWise: TradeWiseData[];
@@ -13,8 +16,12 @@ export interface EnrolmentData {
   district: string;
   total: number;
   ssmo: number;
+  smo: number;
+  st: number;
+  gda: number;
+  hha: number;
+  it: number;
   fma: number;
-  hhaGda: number;
 }
 
 export interface TradeWiseData {
@@ -56,15 +63,19 @@ const generateCSV = (headers: string[], rows: string[][]): string => {
   return [headerLine, ...dataLines].join('\n');
 };
 
-// Generate Enrolment Template
+// Generate Enrolment Template with new trade categories
 export const generateEnrolmentTemplate = (): string => {
-  const headers = ['District', 'Total', 'SSMO', 'FMA', 'HHA_GDA'];
+  const headers = ['District', 'Total', ...tradeCategories];
   const rows = jharkhandDistricts.map(d => [
     d.name,
     d.historicalEnrolment.total.toString(),
-    d.historicalEnrolment.ssmo.toString(),
-    d.historicalEnrolment.fma.toString(),
-    d.historicalEnrolment.hhaGda.toString()
+    d.historicalEnrolment.ssmo.toString(), // SSMO
+    Math.floor(d.historicalEnrolment.ssmo * 0.8).toString(), // SMO - sample data
+    '0', // ST - unused
+    '0', // GDA - unused
+    '0', // HHA - unused
+    '0', // IT - unused
+    d.historicalEnrolment.fma.toString() // FMA
   ]);
   return generateCSV(headers, rows);
 };
@@ -117,14 +128,18 @@ export const generateBlockTemplate = (): string => {
   return generateCSV(headers, rows);
 };
 
-// Generate Trade-wise Template
+// Generate Trade-wise Template with new categories
 export const generateTradeWiseTemplate = (): string => {
-  const headers = ['District', 'SSMO', 'FMA', 'HHA_GDA'];
+  const headers = ['District', ...tradeCategories];
   const rows = jharkhandDistricts.map(d => [
     d.name,
-    d.historicalEnrolment.ssmo.toString(),
-    d.historicalEnrolment.fma.toString(),
-    d.historicalEnrolment.hhaGda.toString()
+    d.historicalEnrolment.ssmo.toString(), // SSMO
+    Math.floor(d.historicalEnrolment.ssmo * 0.8).toString(), // SMO - sample data
+    '0', // ST - unused
+    '0', // GDA - unused
+    '0', // HHA - unused
+    '0', // IT - unused
+    d.historicalEnrolment.fma.toString() // FMA
   ]);
   return generateCSV(headers, rows);
 };
@@ -163,24 +178,33 @@ export const downloadTemplate = (type: 'enrolment' | 'density' | 'distance' | 'b
       setTimeout(() => download(generateDensityTemplate(), 'district_density_template.csv'), 100);
       setTimeout(() => download(generateDistanceTemplate(), 'district_distance_template.csv'), 200);
       setTimeout(() => download(generateBlockTemplate(), 'district_blocks_template.csv'), 300);
+      setTimeout(() => download(generateTradeWiseTemplate(), 'district_tradewise_template.csv'), 400);
       break;
   }
 };
 
-// Get Jharkhand mock data as DistrictAnalysisData
+// Get Jharkhand mock data as DistrictAnalysisData with new trade categories
 export const getJharkhandMockData = (): DistrictAnalysisData => {
   return {
     enrolment: jharkhandDistricts.map(d => ({
       district: d.name,
       total: d.historicalEnrolment.total,
       ssmo: d.historicalEnrolment.ssmo,
-      fma: d.historicalEnrolment.fma,
-      hhaGda: d.historicalEnrolment.hhaGda
+      smo: Math.floor(d.historicalEnrolment.ssmo * 0.8),
+      st: 0,
+      gda: 0,
+      hha: 0,
+      it: 0,
+      fma: d.historicalEnrolment.fma
     })),
     tradeWise: jharkhandDistricts.flatMap(d => [
       { district: d.name, trade: 'SSMO', count: d.historicalEnrolment.ssmo },
-      { district: d.name, trade: 'FMA', count: d.historicalEnrolment.fma },
-      { district: d.name, trade: 'HHA/GDA', count: d.historicalEnrolment.hhaGda }
+      { district: d.name, trade: 'SMO', count: Math.floor(d.historicalEnrolment.ssmo * 0.8) },
+      { district: d.name, trade: 'ST', count: 0 },
+      { district: d.name, trade: 'GDA', count: 0 },
+      { district: d.name, trade: 'HHA', count: 0 },
+      { district: d.name, trade: 'IT', count: 0 },
+      { district: d.name, trade: 'FMA', count: d.historicalEnrolment.fma }
     ]),
     density: jharkhandDistricts.map(d => ({
       district: d.name,
