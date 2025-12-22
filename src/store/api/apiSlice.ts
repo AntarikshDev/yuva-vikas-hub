@@ -1807,6 +1807,29 @@ export const apiSlice = createApi({
       providesTags: ['User', 'WorkOrders'],
     }),
 
+    getCRPById: builder.query<any, { workOrderId: string; crpId: string }>({
+      query: ({ workOrderId, crpId }) => `/work-orders/${workOrderId}/crp-network/${crpId}`,
+      providesTags: ['User', 'WorkOrders'],
+    }),
+
+    createCRP: builder.mutation<any, { workOrderId: string; crp: any }>({
+      query: ({ workOrderId, crp }) => ({
+        url: `/work-orders/${workOrderId}/crp-network`,
+        method: 'POST',
+        body: crp,
+      }),
+      invalidatesTags: ['User', 'WorkOrders'],
+    }),
+
+    updateCRP: builder.mutation<any, { workOrderId: string; crpId: string; data: any }>({
+      query: ({ workOrderId, crpId, data }) => ({
+        url: `/work-orders/${workOrderId}/crp-network/${crpId}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['User', 'WorkOrders'],
+    }),
+
     addCRP: builder.mutation<any, { workOrderId: string; crp: any }>({
       query: ({ workOrderId, crp }) => ({
         url: `/work-orders/${workOrderId}/crp-network`,
@@ -1814,6 +1837,11 @@ export const apiSlice = createApi({
         body: crp,
       }),
       invalidatesTags: ['User', 'WorkOrders'],
+    }),
+
+    getCRPPayments: builder.query<any, { workOrderId: string; crpId: string }>({
+      query: ({ workOrderId, crpId }) => `/work-orders/${workOrderId}/crp-network/${crpId}/payments`,
+      providesTags: ['User', 'WorkOrders'],
     }),
 
     // ==================== ACTIVITY CALENDAR ====================
@@ -2070,7 +2098,11 @@ export const {
   useUpdateSOSCaseMutation,
   // CRP Network
   useGetCRPNetworkQuery,
+  useGetCRPByIdQuery,
+  useCreateCRPMutation,
+  useUpdateCRPMutation,
   useAddCRPMutation,
+  useGetCRPPaymentsQuery,
   // Activity Calendar
   useGetActivityCalendarQuery,
   useCreateActivityMutation,
