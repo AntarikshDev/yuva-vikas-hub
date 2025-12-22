@@ -7,12 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Users, UserPlus, FileSignature, Smartphone, Calendar, DollarSign, CheckCircle, XCircle, Loader2, Eye, Pencil, Check, X } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, UserPlus, FileSignature, Smartphone, Calendar, DollarSign, CheckCircle, XCircle, Loader2, Eye, Pencil, Check, X, IndianRupee, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
 import { crpCategories, jharkhandDistricts } from '@/data/jharkhandCensusData';
 import { useGetCRPNetworkQuery } from '@/store/api/apiSlice';
 import { CRPForm } from '@/components/forms/CRPForm';
 import { CRPPaymentsDialog } from '@/components/dialogs/CRPPaymentsDialog';
+import { CRPAccountsSection } from '@/components/district-adoption/CRPAccountsSection';
+import { CRPAnalyticsDashboard } from '@/components/district-adoption/CRPAnalyticsDashboard';
 import type { CRP } from '@/types/crp';
 
 interface Meeting {
@@ -271,53 +274,68 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total CRPs</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">LOI Signed</p>
-                <p className="text-2xl font-bold">{stats.loiSigned}</p>
-              </div>
-              <FileSignature className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">App Registered</p>
-                <p className="text-2xl font-bold">{stats.appRegistered}</p>
-              </div>
-              <Smartphone className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active CRPs</p>
-                <p className="text-2xl font-bold">{stats.active}</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-emerald-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="network" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="network">
+            <Users className="h-4 w-4 mr-2" /> CRP Network
+          </TabsTrigger>
+          <TabsTrigger value="accounts">
+            <IndianRupee className="h-4 w-4 mr-2" /> Accounts
+          </TabsTrigger>
+          <TabsTrigger value="analytics">
+            <BarChart3 className="h-4 w-4 mr-2" /> Analytics
+          </TabsTrigger>
+        </TabsList>
+
+        {/* CRP Network Tab */}
+        <TabsContent value="network" className="mt-4 space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total CRPs</p>
+                    <p className="text-2xl font-bold">{stats.total}</p>
+                  </div>
+                  <Users className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">LOI Signed</p>
+                    <p className="text-2xl font-bold">{stats.loiSigned}</p>
+                  </div>
+                  <FileSignature className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">App Registered</p>
+                    <p className="text-2xl font-bold">{stats.appRegistered}</p>
+                  </div>
+                  <Smartphone className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Active CRPs</p>
+                    <p className="text-2xl font-bold">{stats.active}</p>
+                  </div>
+                  <CheckCircle className="h-8 w-8 text-emerald-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
       {/* CRP Management */}
       <Card>
@@ -499,23 +517,18 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
         </CardContent>
       </Card>
 
-      {/* Payment Tracking */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5" />
-            Fortnightly Payment Tracking
-          </CardTitle>
-          <CardDescription>Track CRP incentive payments</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Payment tracking feature coming soon</p>
-            <p className="text-sm mt-1">Fortnightly payment processing and tracking</p>
-          </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        {/* Accounts Tab */}
+        <TabsContent value="accounts" className="mt-4">
+          <CRPAccountsSection canEdit={canEdit} workOrderId={workOrderId} />
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="mt-4">
+          <CRPAnalyticsDashboard workOrderId={workOrderId} />
+        </TabsContent>
+      </Tabs>
 
       {/* CRP Form Dialog */}
       <CRPForm
