@@ -1915,6 +1915,75 @@ export const apiSlice = createApi({
         `/work-orders/${workOrderId}/district-analysis?year=${year}`,
       providesTags: ['WorkOrders', 'Districts'],
     }),
+
+    // ==================== CRP ACCOUNTS ====================
+    getCommissionRates: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/crp/commission-rates`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    createCommissionRate: builder.mutation<any, { workOrderId: string; data: any }>({
+      query: ({ workOrderId, data }) => ({
+        url: `/work-orders/${workOrderId}/crp/commission-rates`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    getCRPTransactions: builder.query<any, { workOrderId: string; districtId?: string; status?: string }>({
+      query: ({ workOrderId, districtId, status }) => ({
+        url: `/work-orders/${workOrderId}/crp/transactions`,
+        params: { districtId, status },
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    recordCRPTransaction: builder.mutation<any, { workOrderId: string; data: any }>({
+      query: ({ workOrderId, data }) => ({
+        url: `/work-orders/${workOrderId}/crp/transactions`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['WorkOrders'],
+    }),
+
+    getCRPAccountSummaries: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/crp/account-summaries`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    getCRPTransactionsBycrpId: builder.query<any, { workOrderId: string; crpId: string }>({
+      query: ({ workOrderId, crpId }) => `/work-orders/${workOrderId}/crp/${crpId}/transactions`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    // ==================== CRP ANALYTICS ====================
+    getCRPNetworkAnalytics: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/crp/analytics`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    getCRPStateWiseStats: builder.query<any, string>({
+      query: (workOrderId) => `/work-orders/${workOrderId}/crp/analytics/state-wise`,
+      providesTags: ['WorkOrders'],
+    }),
+
+    getCRPTopPerformers: builder.query<any, { workOrderId: string; limit?: number }>({
+      query: ({ workOrderId, limit = 10 }) => ({
+        url: `/work-orders/${workOrderId}/crp/analytics/top-performers`,
+        params: { limit },
+      }),
+      providesTags: ['WorkOrders'],
+    }),
+
+    getCRPMonthlyTrend: builder.query<any, { workOrderId: string; period?: string }>({
+      query: ({ workOrderId, period = '6months' }) => ({
+        url: `/work-orders/${workOrderId}/crp/analytics/monthly-trend`,
+        params: { period },
+      }),
+      providesTags: ['WorkOrders'],
+    }),
   }),
 });
 
@@ -2156,6 +2225,18 @@ export const {
   useUploadDistrictAnalysisDataMutation,
   useGetDistrictAnalysisDataQuery,
   useGetDistrictAnalysisDataByYearQuery,
+  // CRP Accounts
+  useGetCommissionRatesQuery,
+  useCreateCommissionRateMutation,
+  useGetCRPTransactionsQuery,
+  useRecordCRPTransactionMutation,
+  useGetCRPAccountSummariesQuery,
+  useGetCRPTransactionsBycrpIdQuery,
+  // CRP Analytics
+  useGetCRPNetworkAnalyticsQuery,
+  useGetCRPStateWiseStatsQuery,
+  useGetCRPTopPerformersQuery,
+  useGetCRPMonthlyTrendQuery,
 } = apiSlice;
 
 export default apiSlice;

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell 
@@ -12,12 +13,16 @@ import {
   MapPin, Activity, BarChart3 
 } from 'lucide-react';
 import type { CRPNetworkAnalytics, StateWiseCRPStats } from '@/types/crpAccounts';
+import {
+  useGetCRPNetworkAnalyticsQuery,
+  useGetCRPMonthlyTrendQuery,
+} from '@/store/api/apiSlice';
 
 interface CRPAnalyticsDashboardProps {
   workOrderId?: string;
 }
 
-// Mock analytics data
+// Mock analytics data for fallback
 const mockAnalytics: CRPNetworkAnalytics = {
   summary: {
     totalCRPs: 156,
@@ -85,7 +90,25 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export const CRPAnalyticsDashboard: React.FC<CRPAnalyticsDashboardProps> = ({ workOrderId }) => {
   const [selectedPeriod, setSelectedPeriod] = useState('6months');
-  const [analytics] = useState<CRPNetworkAnalytics>(mockAnalytics);
+
+  // RTK Query hooks
+  const { 
+    data: apiAnalytics, 
+    isLoading: analyticsLoading,
+    error: analyticsError 
+  } = useGetCRPNetworkAnalyticsQuery(workOrderId || '', { skip: !workOrderId });
+
+  const { 
+    data: apiMonthlyTrend, 
+    isLoading: trendLoading 
+  } = useGetCRPMonthlyTrendQuery(
+    { workOrderId: workOrderId || '', period: selectedPeriod },
+    { skip: !workOrderId }
+  );
+
+  // Use API data or fallback to mock data
+  const analytics: CRPNetworkAnalytics = apiAnalytics || mockAnalytics;
+  const monthlyTrendData = apiMonthlyTrend || analytics.monthlyTrend;
 
   const getROIColor = (roi: number) => {
     if (roi >= 3.5) return 'text-green-600';
@@ -101,60 +124,73 @@ export const CRPAnalyticsDashboard: React.FC<CRPAnalyticsDashboardProps> = ({ wo
     return <Badge className="bg-red-100 text-red-800">Poor</Badge>;
   };
 
+  const isLoading = analyticsLoading;
+
   return (
     <div className="space-y-6">
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total CRPs</p>
-                <p className="text-2xl font-bold">{analytics.summary.totalCRPs}</p>
-                <p className="text-xs text-green-600">{analytics.summary.totalActiveCRPs} active</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total OFRs</p>
-                <p className="text-2xl font-bold">{analytics.summary.totalOFRs.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Avg: {analytics.summary.avgOFRPerCRP}/CRP</p>
-              </div>
-              <Target className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Investment</p>
-                <p className="text-2xl font-bold">₹{(analytics.summary.totalInvestment / 1000).toFixed(0)}K</p>
-                <p className="text-xs text-muted-foreground">{analytics.summary.totalEnrollments} enrollments</p>
-              </div>
-              <IndianRupee className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Overall ROI</p>
-                <p className={`text-2xl font-bold ${getROIColor(analytics.summary.overallROI)}`}>
-                  {analytics.summary.overallROI}x
-                </p>
-                {getROIBadge(analytics.summary.overallROI)}
-              </div>
-              <TrendingUp className="h-8 w-8 text-emerald-500" />
-            </div>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <>
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+          </>
+        ) : (
+          <>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total CRPs</p>
+                    <p className="text-2xl font-bold">{analytics.summary.totalCRPs}</p>
+                    <p className="text-xs text-green-600">{analytics.summary.totalActiveCRPs} active</p>
+                  </div>
+                  <Users className="h-8 w-8 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total OFRs</p>
+                    <p className="text-2xl font-bold">{analytics.summary.totalOFRs.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">Avg: {analytics.summary.avgOFRPerCRP}/CRP</p>
+                  </div>
+                  <Target className="h-8 w-8 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Investment</p>
+                    <p className="text-2xl font-bold">₹{(analytics.summary.totalInvestment / 1000).toFixed(0)}K</p>
+                    <p className="text-xs text-muted-foreground">{analytics.summary.totalEnrollments} enrollments</p>
+                  </div>
+                  <IndianRupee className="h-8 w-8 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Overall ROI</p>
+                    <p className={`text-2xl font-bold ${getROIColor(analytics.summary.overallROI)}`}>
+                      {analytics.summary.overallROI}x
+                    </p>
+                    {getROIBadge(analytics.summary.overallROI)}
+                  </div>
+                  <TrendingUp className="h-8 w-8 text-emerald-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -168,19 +204,23 @@ export const CRPAnalyticsDashboard: React.FC<CRPAnalyticsDashboardProps> = ({ wo
             <CardDescription>Performance comparison across states</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analytics.stateWiseStats}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="stateName" />
-                <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" />
-                <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
-                <Tooltip />
-                <Legend />
-                <Bar yAxisId="left" dataKey="totalCRPs" fill="#3b82f6" name="Total CRPs" />
-                <Bar yAxisId="left" dataKey="activeCRPs" fill="#93c5fd" name="Active CRPs" />
-                <Bar yAxisId="right" dataKey="conversionRate" fill="#10b981" name="Conversion %" />
-              </BarChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={analytics.stateWiseStats}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="stateName" />
+                  <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" />
+                  <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar yAxisId="left" dataKey="totalCRPs" fill="#3b82f6" name="Total CRPs" />
+                  <Bar yAxisId="left" dataKey="activeCRPs" fill="#93c5fd" name="Active CRPs" />
+                  <Bar yAxisId="right" dataKey="conversionRate" fill="#10b981" name="Conversion %" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -194,25 +234,29 @@ export const CRPAnalyticsDashboard: React.FC<CRPAnalyticsDashboardProps> = ({ wo
             <CardDescription>Where CRP investment is flowing</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={analytics.stateWiseStats}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ stateName, percent }) => `${stateName} (${(percent * 100).toFixed(0)}%)`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="totalInvestment"
-                >
-                  {analytics.stateWiseStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} />
-              </PieChart>
-            </ResponsiveContainer>
+            {isLoading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={analytics.stateWiseStats}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ stateName, percent }) => `${stateName} (${(percent * 100).toFixed(0)}%)`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="totalInvestment"
+                  >
+                    {analytics.stateWiseStats.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value: number) => `₹${value.toLocaleString()}`} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -239,19 +283,23 @@ export const CRPAnalyticsDashboard: React.FC<CRPAnalyticsDashboardProps> = ({ wo
           </Select>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={350}>
-            <LineChart data={analytics.monthlyTrend}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" />
-              <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
-              <Tooltip />
-              <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="ofrs" stroke="#3b82f6" strokeWidth={2} name="OFRs" />
-              <Line yAxisId="left" type="monotone" dataKey="enrollments" stroke="#10b981" strokeWidth={2} name="Enrollments" />
-              <Line yAxisId="right" type="monotone" dataKey="investment" stroke="#8b5cf6" strokeWidth={2} name="Investment (₹)" />
-            </LineChart>
-          </ResponsiveContainer>
+          {trendLoading || isLoading ? (
+            <Skeleton className="h-[350px] w-full" />
+          ) : (
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart data={monthlyTrendData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" />
+                <YAxis yAxisId="right" orientation="right" stroke="#10b981" />
+                <Tooltip />
+                <Legend />
+                <Line yAxisId="left" type="monotone" dataKey="ofrs" stroke="#3b82f6" strokeWidth={2} name="OFRs" />
+                <Line yAxisId="left" type="monotone" dataKey="enrollments" stroke="#10b981" strokeWidth={2} name="Enrollments" />
+                <Line yAxisId="right" type="monotone" dataKey="investment" stroke="#8b5cf6" strokeWidth={2} name="Investment (₹)" />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </CardContent>
       </Card>
 
@@ -266,34 +314,42 @@ export const CRPAnalyticsDashboard: React.FC<CRPAnalyticsDashboardProps> = ({ wo
             <CardDescription>Investment performance by state</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>State</TableHead>
-                  <TableHead className="text-center">CRPs</TableHead>
-                  <TableHead className="text-right">Investment</TableHead>
-                  <TableHead className="text-center">ROI</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {analytics.stateWiseStats.map((state: StateWiseCRPStats) => (
-                  <TableRow key={state.stateId}>
-                    <TableCell className="font-medium">{state.stateName}</TableCell>
-                    <TableCell className="text-center">
-                      {state.activeCRPs}/{state.totalCRPs}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ₹{(state.totalInvestment / 1000).toFixed(0)}K
-                    </TableCell>
-                    <TableCell className={`text-center font-bold ${getROIColor(state.avgROI)}`}>
-                      {state.avgROI}x
-                    </TableCell>
-                    <TableCell>{getROIBadge(state.avgROI)}</TableCell>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>State</TableHead>
+                    <TableHead className="text-center">CRPs</TableHead>
+                    <TableHead className="text-right">Investment</TableHead>
+                    <TableHead className="text-center">ROI</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {analytics.stateWiseStats.map((state: StateWiseCRPStats) => (
+                    <TableRow key={state.stateId}>
+                      <TableCell className="font-medium">{state.stateName}</TableCell>
+                      <TableCell className="text-center">
+                        {state.activeCRPs}/{state.totalCRPs}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ₹{(state.totalInvestment / 1000).toFixed(0)}K
+                      </TableCell>
+                      <TableCell className={`text-center font-bold ${getROIColor(state.avgROI)}`}>
+                        {state.avgROI}x
+                      </TableCell>
+                      <TableCell>{getROIBadge(state.avgROI)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
 
@@ -307,36 +363,44 @@ export const CRPAnalyticsDashboard: React.FC<CRPAnalyticsDashboardProps> = ({ wo
             <CardDescription>Highest contributing CRPs</CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>CRP Name</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead className="text-center">OFRs</TableHead>
-                  <TableHead className="text-right">Earnings</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {analytics.topPerformingCRPs.map((crp, index) => (
-                  <TableRow key={crp.crpId}>
-                    <TableCell>
-                      <Badge variant={index < 3 ? 'default' : 'outline'}>
-                        {index + 1}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-medium">{crp.crpName}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {crp.districtName}, {crp.stateName}
-                    </TableCell>
-                    <TableCell className="text-center">{crp.ofrCount}</TableCell>
-                    <TableCell className="text-right font-medium text-green-600">
-                      ₹{crp.earnings.toLocaleString()}
-                    </TableCell>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>CRP Name</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead className="text-center">OFRs</TableHead>
+                    <TableHead className="text-right">Earnings</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {analytics.topPerformingCRPs.map((crp, index) => (
+                    <TableRow key={crp.crpId}>
+                      <TableCell>
+                        <Badge variant={index < 3 ? 'default' : 'outline'}>
+                          {index + 1}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">{crp.crpName}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {crp.districtName}, {crp.stateName}
+                      </TableCell>
+                      <TableCell className="text-center">{crp.ofrCount}</TableCell>
+                      <TableCell className="text-right font-medium text-green-600">
+                        ₹{crp.earnings.toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </div>

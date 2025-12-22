@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -8,20 +8,28 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   DollarSign, Settings, History, TrendingUp, CheckCircle, Clock, 
-  AlertCircle, Plus, Eye, Download, IndianRupee 
+  AlertCircle, Plus, Eye, Download, IndianRupee, Loader2 
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { jharkhandDistricts } from '@/data/jharkhandCensusData';
 import type { CommissionRate, CRPTransaction, CRPAccountSummary } from '@/types/crpAccounts';
+import {
+  useGetCommissionRatesQuery,
+  useCreateCommissionRateMutation,
+  useGetCRPTransactionsQuery,
+  useGetCRPAccountSummariesQuery,
+  useGetCRPTransactionsBycrpIdQuery,
+} from '@/store/api/apiSlice';
 
 interface CRPAccountsSectionProps {
   canEdit: boolean;
   workOrderId?: string;
 }
 
-// Mock data
+// Mock data for fallback
 const mockCommissionRates: CommissionRate[] = [
   {
     id: '1',
@@ -190,12 +198,37 @@ const mockAccountSummaries: CRPAccountSummary[] = [
 ];
 
 export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit, workOrderId = '' }) => {
-  const [commissionRates, setCommissionRates] = useState<CommissionRate[]>(mockCommissionRates);
-  const [transactions] = useState<CRPTransaction[]>(mockTransactions);
-  const [accountSummaries] = useState<CRPAccountSummary[]>(mockAccountSummaries);
+  // RTK Query hooks
+  const { 
+    data: apiCommissionRates, 
+    isLoading: ratesLoading,
+    error: ratesError 
+  } = useGetCommissionRatesQuery(workOrderId, { skip: !workOrderId });
   
+  const { 
+    data: apiTransactions, 
+    isLoading: transactionsLoading,
+    error: transactionsError 
+  } = useGetCRPTransactionsQuery(
+    { workOrderId, districtId: undefined, status: undefined }, 
+    { skip: !workOrderId }
+  );
+  
+  const { 
+    data: apiAccountSummaries, 
+    isLoading: accountsLoading,
+    error: accountsError 
+  } = useGetCRPAccountSummariesQuery(workOrderId, { skip: !workOrderId });
+
+  const [createCommissionRate, { isLoading: isCreatingRate }] = useCreateCommissionRateMutation();
+
+  // Use API data or fallback to mock data
+  const commissionRates = apiCommissionRates || mockCommissionRates;
+  const transactions = apiTransactions || mockTransactions;
+  const accountSummaries = apiAccountSummaries || mockAccountSummaries;
+
   const [isRateDialogOpen, setIsRateDialogOpen] = useState(false);
-  const [selectedCRPTransactions, setSelectedCRPTransactions] = useState<CRPTransaction[] | null>(null);
+  const [selectedCRPId, setSelectedCRPId] = useState<string | null>(null);
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [filterDistrict, setFilterDistrict] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -206,9 +239,18 @@ export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit,
     effectiveFrom: '',
   });
 
-  const activeRate = commissionRates.find(r => r.isActive);
+  // Query for selected CRP transactions
+  const { 
+    data: selectedCRPTransactions, 
+    isLoading: crpTransactionsLoading 
+  } = useGetCRPTransactionsBycrpIdQuery(
+    { workOrderId, crpId: selectedCRPId || '' },
+    { skip: !workOrderId || !selectedCRPId }
+  );
+
+  const activeRate = commissionRates.find((r: CommissionRate) => r.isActive);
   
-  const filteredTransactions = transactions.filter(t => {
+  const filteredTransactions = transactions.filter((t: CRPTransaction) => {
     const districtMatch = filterDistrict === 'all' || t.districtId === filterDistrict;
     const statusMatch = filterStatus === 'all' || t.paymentStatus === filterStatus;
     return districtMatch && statusMatch;
@@ -216,45 +258,38 @@ export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit,
 
   const stats = {
     totalTransactions: transactions.length,
-    totalAmount: transactions.reduce((sum, t) => sum + t.amount, 0),
-    pendingAmount: transactions.filter(t => t.paymentStatus === 'pending').reduce((sum, t) => sum + t.amount, 0),
-    paidAmount: transactions.filter(t => t.paymentStatus === 'paid').reduce((sum, t) => sum + t.amount, 0),
+    totalAmount: transactions.reduce((sum: number, t: CRPTransaction) => sum + t.amount, 0),
+    pendingAmount: transactions.filter((t: CRPTransaction) => t.paymentStatus === 'pending').reduce((sum: number, t: CRPTransaction) => sum + t.amount, 0),
+    paidAmount: transactions.filter((t: CRPTransaction) => t.paymentStatus === 'paid').reduce((sum: number, t: CRPTransaction) => sum + t.amount, 0),
   };
 
-  const handleSetNewRate = () => {
+  const handleSetNewRate = async () => {
     if (!newRate.ratePerOFR || !newRate.ratePerEnrollment || !newRate.effectiveFrom) {
       toast.error('Please fill all required fields');
       return;
     }
 
-    // Deactivate old rate
-    const updatedRates = commissionRates.map(r => ({
-      ...r,
-      isActive: false,
-      effectiveTo: r.isActive ? newRate.effectiveFrom : r.effectiveTo,
-    }));
-
-    // Add new rate
-    const newRateObj: CommissionRate = {
-      id: Date.now().toString(),
-      workOrderId,
-      ratePerOFR: parseFloat(newRate.ratePerOFR),
-      ratePerEnrollment: parseFloat(newRate.ratePerEnrollment),
-      effectiveFrom: newRate.effectiveFrom,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      createdBy: 'admin',
-    };
-
-    setCommissionRates([newRateObj, ...updatedRates]);
-    setIsRateDialogOpen(false);
-    setNewRate({ ratePerOFR: '', ratePerEnrollment: '', effectiveFrom: '' });
-    toast.success('Commission rate updated successfully!');
+    try {
+      await createCommissionRate({
+        workOrderId,
+        data: {
+          ratePerOFR: parseFloat(newRate.ratePerOFR),
+          ratePerEnrollment: parseFloat(newRate.ratePerEnrollment),
+          effectiveFrom: newRate.effectiveFrom,
+          createdBy: 'admin',
+        },
+      }).unwrap();
+      
+      setIsRateDialogOpen(false);
+      setNewRate({ ratePerOFR: '', ratePerEnrollment: '', effectiveFrom: '' });
+      toast.success('Commission rate updated successfully!');
+    } catch (error) {
+      toast.error('Failed to create commission rate');
+    }
   };
 
   const handleViewCRPTransactions = (crpId: string) => {
-    const crpTxns = transactions.filter(t => t.crpId === crpId);
-    setSelectedCRPTransactions(crpTxns);
+    setSelectedCRPId(crpId);
     setIsTransactionDialogOpen(true);
   };
 
@@ -272,6 +307,10 @@ export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit,
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+
+  // Get transactions for dialog - use API data or filter from main transactions
+  const dialogTransactions = selectedCRPTransactions || 
+    transactions.filter((t: CRPTransaction) => t.crpId === selectedCRPId);
 
   return (
     <div className="space-y-6">
@@ -346,8 +385,13 @@ export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit,
               </div>
               <Dialog open={isRateDialogOpen} onOpenChange={setIsRateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button disabled={!canEdit}>
-                    <Plus className="h-4 w-4 mr-2" /> Set New Rate
+                  <Button disabled={!canEdit || isCreatingRate}>
+                    {isCreatingRate ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Plus className="h-4 w-4 mr-2" />
+                    )}
+                    Set New Rate
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -382,7 +426,8 @@ export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit,
                         onChange={e => setNewRate({ ...newRate, effectiveFrom: e.target.value })}
                       />
                     </div>
-                    <Button className="w-full" onClick={handleSetNewRate}>
+                    <Button className="w-full" onClick={handleSetNewRate} disabled={isCreatingRate}>
+                      {isCreatingRate ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
                       Save Rate
                     </Button>
                   </div>
@@ -390,38 +435,45 @@ export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit,
               </Dialog>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Rate per OFR</TableHead>
-                    <TableHead>Rate per Enrollment</TableHead>
-                    <TableHead>Effective From</TableHead>
-                    <TableHead>Effective To</TableHead>
-                    <TableHead>Created At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {commissionRates.map(rate => (
-                    <TableRow key={rate.id} className={rate.isActive ? 'bg-green-50 dark:bg-green-900/20' : ''}>
-                      <TableCell>
-                        {rate.isActive ? (
-                          <Badge className="bg-green-100 text-green-800">Active</Badge>
-                        ) : (
-                          <Badge variant="outline">Inactive</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium">₹{rate.ratePerOFR}</TableCell>
-                      <TableCell className="font-medium">₹{rate.ratePerEnrollment}</TableCell>
-                      <TableCell>{new Date(rate.effectiveFrom).toLocaleDateString()}</TableCell>
-                      <TableCell>{rate.effectiveTo ? new Date(rate.effectiveTo).toLocaleDateString() : '-'}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {new Date(rate.createdAt).toLocaleDateString()}
-                      </TableCell>
+              {ratesLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Rate per OFR</TableHead>
+                      <TableHead>Rate per Enrollment</TableHead>
+                      <TableHead>Effective From</TableHead>
+                      <TableHead>Effective To</TableHead>
+                      <TableHead>Created At</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {commissionRates.map((rate: CommissionRate) => (
+                      <TableRow key={rate.id} className={rate.isActive ? 'bg-green-50 dark:bg-green-900/20' : ''}>
+                        <TableCell>
+                          {rate.isActive ? (
+                            <Badge className="bg-green-100 text-green-800">Active</Badge>
+                          ) : (
+                            <Badge variant="outline">Inactive</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">₹{rate.ratePerOFR}</TableCell>
+                        <TableCell className="font-medium">₹{rate.ratePerEnrollment}</TableCell>
+                        <TableCell>{new Date(rate.effectiveFrom).toLocaleDateString()}</TableCell>
+                        <TableCell>{rate.effectiveTo ? new Date(rate.effectiveTo).toLocaleDateString() : '-'}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(rate.createdAt).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -464,44 +516,52 @@ export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit,
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>CRP Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-center">OFRs</TableHead>
-                    <TableHead className="text-center">Enrollments</TableHead>
-                    <TableHead className="text-right">Rate</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Reference</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredTransactions.map(txn => (
-                    <TableRow key={txn.id}>
-                      <TableCell className="text-sm">
-                        {new Date(txn.transactionDate).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="font-medium">{txn.crpName}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {txn.transactionType === 'ofr_commission' ? 'OFR' : 'Enrollment'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">{txn.ofrCount || '-'}</TableCell>
-                      <TableCell className="text-center">{txn.enrollmentCount || '-'}</TableCell>
-                      <TableCell className="text-right">₹{txn.rateApplied}</TableCell>
-                      <TableCell className="text-right font-medium">₹{txn.amount.toLocaleString()}</TableCell>
-                      <TableCell>{getStatusBadge(txn.paymentStatus)}</TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {txn.referenceNumber || '-'}
-                      </TableCell>
+              {transactionsLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>CRP Name</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead className="text-center">OFRs</TableHead>
+                      <TableHead className="text-center">Enrollments</TableHead>
+                      <TableHead className="text-right">Rate</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Reference</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredTransactions.map((txn: CRPTransaction) => (
+                      <TableRow key={txn.id}>
+                        <TableCell className="text-sm">
+                          {new Date(txn.transactionDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="font-medium">{txn.crpName}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {txn.transactionType === 'ofr_commission' ? 'OFR' : 'Enrollment'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">{txn.ofrCount || '-'}</TableCell>
+                        <TableCell className="text-center">{txn.enrollmentCount || '-'}</TableCell>
+                        <TableCell className="text-right">₹{txn.rateApplied}</TableCell>
+                        <TableCell className="text-right font-medium">₹{txn.amount.toLocaleString()}</TableCell>
+                        <TableCell>{getStatusBadge(txn.paymentStatus)}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {txn.referenceNumber || '-'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -514,101 +574,115 @@ export const CRPAccountsSection: React.FC<CRPAccountsSectionProps> = ({ canEdit,
               <CardDescription>Individual CRP earnings and payment status</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>CRP Name</TableHead>
-                    <TableHead>District</TableHead>
-                    <TableHead className="text-center">Total OFRs</TableHead>
-                    <TableHead className="text-center">Enrollments</TableHead>
-                    <TableHead className="text-right">Total Earnings</TableHead>
-                    <TableHead className="text-right">Paid</TableHead>
-                    <TableHead className="text-right">Pending</TableHead>
-                    <TableHead>Last Payment</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {accountSummaries.map(summary => {
-                    const district = jharkhandDistricts.find(d => d.id === summary.districtId);
-                    return (
-                      <TableRow key={summary.crpId}>
-                        <TableCell className="font-medium">{summary.crpName}</TableCell>
-                        <TableCell>{district?.name}</TableCell>
-                        <TableCell className="text-center">{summary.totalOFRs}</TableCell>
-                        <TableCell className="text-center">{summary.totalEnrollments}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          ₹{summary.totalEarnings.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right text-green-600">
-                          ₹{summary.totalPaid.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-right text-yellow-600">
-                          ₹{summary.pendingAmount.toLocaleString()}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {summary.lastPaymentDate 
-                            ? new Date(summary.lastPaymentDate).toLocaleDateString() 
-                            : '-'}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewCRPTransactions(summary.crpId)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              {accountsLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>CRP Name</TableHead>
+                      <TableHead>District</TableHead>
+                      <TableHead className="text-center">Total OFRs</TableHead>
+                      <TableHead className="text-center">Enrollments</TableHead>
+                      <TableHead className="text-right">Total Earnings</TableHead>
+                      <TableHead className="text-right">Paid</TableHead>
+                      <TableHead className="text-right">Pending</TableHead>
+                      <TableHead>Last Payment</TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {accountSummaries.map((summary: CRPAccountSummary) => {
+                      const district = jharkhandDistricts.find(d => d.id === summary.districtId);
+                      return (
+                        <TableRow key={summary.crpId}>
+                          <TableCell className="font-medium">{summary.crpName}</TableCell>
+                          <TableCell>{district?.name}</TableCell>
+                          <TableCell className="text-center">{summary.totalOFRs}</TableCell>
+                          <TableCell className="text-center">{summary.totalEnrollments}</TableCell>
+                          <TableCell className="text-right font-medium">
+                            ₹{summary.totalEarnings.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-right text-green-600">
+                            ₹{summary.totalPaid.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-right text-yellow-600">
+                            ₹{summary.pendingAmount.toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {summary.lastPaymentDate 
+                              ? new Date(summary.lastPaymentDate).toLocaleDateString() 
+                              : '-'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewCRPTransactions(summary.crpId)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* CRP Transactions Dialog */}
       <Dialog open={isTransactionDialogOpen} onOpenChange={setIsTransactionDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>CRP Transaction History</DialogTitle>
             <DialogDescription>
-              {selectedCRPTransactions?.[0]?.crpName}'s transaction details
+              {dialogTransactions?.[0]?.crpName}'s transaction details
             </DialogDescription>
           </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-center">Count</TableHead>
-                <TableHead className="text-right">Rate</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {selectedCRPTransactions?.map(txn => (
-                <TableRow key={txn.id}>
-                  <TableCell>{new Date(txn.transactionDate).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {txn.transactionType === 'ofr_commission' ? 'OFR' : 'Enrollment'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {txn.ofrCount || txn.enrollmentCount}
-                  </TableCell>
-                  <TableCell className="text-right">₹{txn.rateApplied}</TableCell>
-                  <TableCell className="text-right font-medium">₹{txn.amount}</TableCell>
-                  <TableCell>{getStatusBadge(txn.paymentStatus)}</TableCell>
+          {crpTransactionsLoading ? (
+            <div className="space-y-2 py-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-center">Count</TableHead>
+                  <TableHead className="text-right">Rate</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {dialogTransactions?.map((txn: CRPTransaction) => (
+                  <TableRow key={txn.id}>
+                    <TableCell>{new Date(txn.transactionDate).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {txn.transactionType === 'ofr_commission' ? 'OFR' : 'Enrollment'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {txn.ofrCount || txn.enrollmentCount}
+                    </TableCell>
+                    <TableCell className="text-right">₹{txn.rateApplied}</TableCell>
+                    <TableCell className="text-right font-medium">₹{txn.amount}</TableCell>
+                    <TableCell>{getStatusBadge(txn.paymentStatus)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </DialogContent>
       </Dialog>
     </div>
