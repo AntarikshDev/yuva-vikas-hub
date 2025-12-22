@@ -7,28 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, UserPlus, FileSignature, Smartphone, Calendar, DollarSign, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Users, UserPlus, FileSignature, Smartphone, Calendar, DollarSign, CheckCircle, XCircle, Loader2, Eye, Pencil, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { crpCategories, jharkhandDistricts } from '@/data/jharkhandCensusData';
-import { useGetCRPNetworkQuery, useAddCRPMutation } from '@/store/api/apiSlice';
-
-interface CRP {
-  id: string;
-  name: string;
-  category: string;
-  homeLocation: string;
-  workLocation: string;
-  phone: string;
-  districtId: string;
-  loiSigned: boolean;
-  loiDate?: string;
-  appRegistered: boolean;
-  appRegistrationDate?: string;
-  lastPaymentDate?: string;
-  totalPayments: number;
-  isActive: boolean;
-}
+import { useGetCRPNetworkQuery } from '@/store/api/apiSlice';
+import { CRPForm } from '@/components/forms/CRPForm';
+import { CRPPaymentsDialog } from '@/components/dialogs/CRPPaymentsDialog';
+import type { CRP } from '@/types/crp';
 
 interface Meeting {
   id: string;
@@ -45,13 +30,148 @@ interface CRPNetworkSectionProps {
   workOrderId?: string;
 }
 
-// Mock CRP data
+// Mock CRP data with new fields
 const mockCRPs: CRP[] = [
-  { id: '1', name: 'Ram Kumar Sharma', category: 'School Principal', homeLocation: 'Kanke', workLocation: 'Kanke Block', phone: '9876543210', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-15', appRegistered: true, appRegistrationDate: '2024-01-16', lastPaymentDate: '2024-02-01', totalPayments: 2, isActive: true },
-  { id: '2', name: 'Sunita Devi', category: 'SHG Member', homeLocation: 'Ratu', workLocation: 'Ratu Block', phone: '9876543211', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-18', appRegistered: true, appRegistrationDate: '2024-01-19', lastPaymentDate: '2024-02-01', totalPayments: 2, isActive: true },
-  { id: '3', name: 'Vikash Oraon', category: 'Teacher', homeLocation: 'Burmu', workLocation: 'Burmu Block', phone: '9876543212', districtId: 'ranchi', loiSigned: true, loiDate: '2024-01-20', appRegistered: false, totalPayments: 0, isActive: true },
-  { id: '4', name: 'Meena Kumari', category: 'Alumni', homeLocation: 'Hazaribag', workLocation: 'Hazaribag Block', phone: '9876543213', districtId: 'hazaribagh', loiSigned: false, appRegistered: false, totalPayments: 0, isActive: true },
-  { id: '5', name: 'Rajesh Munda', category: 'Local Influencer', homeLocation: 'Dhanbad', workLocation: 'Dhanbad Block', phone: '9876543214', districtId: 'dhanbad', loiSigned: true, loiDate: '2024-01-25', appRegistered: true, appRegistrationDate: '2024-01-26', lastPaymentDate: '2024-02-15', totalPayments: 1, isActive: true },
+  { 
+    id: '1', 
+    name: 'Ram Kumar Sharma', 
+    category: 'School Principal', 
+    homeLocation: 'Kanke', 
+    workLocation: 'Kanke Block', 
+    phone: '9876543210', 
+    districtId: 'ranchi', 
+    aadhaarNumber: '123456789012',
+    panNumber: 'ABCDE1234F',
+    bankDetails: {
+      accountHolderName: 'Ram Kumar Sharma',
+      accountNumber: '1234567890123',
+      ifscCode: 'SBIN0001234',
+      bankName: 'State Bank of India',
+      branchName: 'Ranchi Main Branch',
+    },
+    documents: [],
+    loi: true, 
+    loiDate: '2024-01-15', 
+    appRegistered: true, 
+    appRegistrationDate: '2024-01-16', 
+    lastPaymentDate: '2024-02-01', 
+    totalPayments: 2, 
+    isActive: true,
+    createdAt: '2024-01-10',
+    createdBy: 'admin',
+    workOrderId: '1',
+  },
+  { 
+    id: '2', 
+    name: 'Sunita Devi', 
+    category: 'SHG Member', 
+    homeLocation: 'Ratu', 
+    workLocation: 'Ratu Block', 
+    phone: '9876543211', 
+    districtId: 'ranchi', 
+    aadhaarNumber: '234567890123',
+    panNumber: 'BCDEF2345G',
+    bankDetails: {
+      accountHolderName: 'Sunita Devi',
+      accountNumber: '2345678901234',
+      ifscCode: 'HDFC0002345',
+      bankName: 'HDFC Bank',
+      branchName: 'Ranchi Branch',
+    },
+    documents: [],
+    loi: true, 
+    loiDate: '2024-01-18', 
+    appRegistered: true, 
+    appRegistrationDate: '2024-01-19', 
+    lastPaymentDate: '2024-02-01', 
+    totalPayments: 2, 
+    isActive: true,
+    createdAt: '2024-01-12',
+    createdBy: 'admin',
+    workOrderId: '1',
+  },
+  { 
+    id: '3', 
+    name: 'Vikash Oraon', 
+    category: 'Teacher', 
+    homeLocation: 'Burmu', 
+    workLocation: 'Burmu Block', 
+    phone: '9876543212', 
+    districtId: 'ranchi', 
+    aadhaarNumber: '345678901234',
+    panNumber: 'CDEFG3456H',
+    bankDetails: {
+      accountHolderName: 'Vikash Oraon',
+      accountNumber: '3456789012345',
+      ifscCode: 'ICIC0003456',
+      bankName: 'ICICI Bank',
+      branchName: 'Burmu Branch',
+    },
+    documents: [],
+    loi: true, 
+    loiDate: '2024-01-20', 
+    appRegistered: false, 
+    totalPayments: 0, 
+    isActive: true,
+    createdAt: '2024-01-15',
+    createdBy: 'admin',
+    workOrderId: '1',
+  },
+  { 
+    id: '4', 
+    name: 'Meena Kumari', 
+    category: 'Alumni', 
+    homeLocation: 'Hazaribag', 
+    workLocation: 'Hazaribag Block', 
+    phone: '9876543213', 
+    districtId: 'hazaribagh', 
+    aadhaarNumber: '456789012345',
+    panNumber: 'DEFGH4567I',
+    bankDetails: {
+      accountHolderName: 'Meena Kumari',
+      accountNumber: '4567890123456',
+      ifscCode: 'PUNB0004567',
+      bankName: 'Punjab National Bank',
+      branchName: 'Hazaribagh Branch',
+    },
+    documents: [],
+    loi: false, 
+    appRegistered: false, 
+    totalPayments: 0, 
+    isActive: true,
+    createdAt: '2024-01-18',
+    createdBy: 'admin',
+    workOrderId: '1',
+  },
+  { 
+    id: '5', 
+    name: 'Rajesh Munda', 
+    category: 'Local Influencer', 
+    homeLocation: 'Dhanbad', 
+    workLocation: 'Dhanbad Block', 
+    phone: '9876543214', 
+    districtId: 'dhanbad', 
+    aadhaarNumber: '567890123456',
+    panNumber: 'EFGHI5678J',
+    bankDetails: {
+      accountHolderName: 'Rajesh Munda',
+      accountNumber: '5678901234567',
+      ifscCode: 'BARB0005678',
+      bankName: 'Bank of Baroda',
+      branchName: 'Dhanbad Branch',
+    },
+    documents: [],
+    loi: true, 
+    loiDate: '2024-01-25', 
+    appRegistered: true, 
+    appRegistrationDate: '2024-01-26', 
+    lastPaymentDate: '2024-02-15', 
+    totalPayments: 1, 
+    isActive: true,
+    createdAt: '2024-01-20',
+    createdBy: 'admin',
+    workOrderId: '1',
+  },
 ];
 
 // Mock meetings data
@@ -66,8 +186,7 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
   workOrderId = ''
 }) => {
   // RTK Query hooks
-  const { data: crpData, isLoading } = useGetCRPNetworkQuery(workOrderId, { skip: !workOrderId });
-  const [addCRPMutation] = useAddCRPMutation();
+  const { data: crpData, isLoading, refetch } = useGetCRPNetworkQuery(workOrderId, { skip: !workOrderId });
 
   // Mock fallback pattern
   const [crps, setCrps] = useState<CRP[]>(mockCRPs);
@@ -79,9 +198,13 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
     }
   }, [crpData]);
 
-  const [isAddCRPOpen, setIsAddCRPOpen] = useState(false);
+  // Dialog states
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingCrpId, setEditingCrpId] = useState<string | undefined>();
   const [isScheduleMeetingOpen, setIsScheduleMeetingOpen] = useState(false);
-  const [newCRP, setNewCRP] = useState<Partial<CRP>>({});
+  const [isPaymentsDialogOpen, setIsPaymentsDialogOpen] = useState(false);
+  const [selectedCrpForPayments, setSelectedCrpForPayments] = useState<CRP | null>(null);
+  
   const [newMeeting, setNewMeeting] = useState<Partial<Meeting>>({});
   const [filterDistrict, setFilterDistrict] = useState<string>('all');
 
@@ -91,35 +214,28 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
 
   const stats = {
     total: crps.length,
-    loiSigned: crps.filter(c => c.loiSigned).length,
+    loiSigned: crps.filter(c => c.loi).length,
     appRegistered: crps.filter(c => c.appRegistered).length,
     active: crps.filter(c => c.isActive).length
   };
 
   const handleAddCRP = () => {
-    if (!newCRP.name || !newCRP.category || !newCRP.districtId) {
-      toast.error('Please fill required fields');
-      return;
-    }
+    setEditingCrpId(undefined);
+    setIsFormOpen(true);
+  };
 
-    const crp: CRP = {
-      id: Date.now().toString(),
-      name: newCRP.name!,
-      category: newCRP.category!,
-      homeLocation: newCRP.homeLocation || '',
-      workLocation: newCRP.workLocation || '',
-      phone: newCRP.phone || '',
-      districtId: newCRP.districtId!,
-      loiSigned: false,
-      appRegistered: false,
-      totalPayments: 0,
-      isActive: true
-    };
+  const handleEditCRP = (crpId: string) => {
+    setEditingCrpId(crpId);
+    setIsFormOpen(true);
+  };
 
-    setCrps([...crps, crp]);
-    setIsAddCRPOpen(false);
-    setNewCRP({});
-    toast.success('CRP added successfully!');
+  const handleViewPayments = (crp: CRP) => {
+    setSelectedCrpForPayments(crp);
+    setIsPaymentsDialogOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    refetch();
   };
 
   const handleScheduleMeeting = () => {
@@ -141,16 +257,6 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
     setIsScheduleMeetingOpen(false);
     setNewMeeting({});
     toast.success('Meeting scheduled successfully!');
-  };
-
-  const toggleLOI = (crpId: string) => {
-    setCrps(crps.map(c => {
-      if (c.id === crpId) {
-        const newStatus = !c.loiSigned;
-        return { ...c, loiSigned: newStatus, loiDate: newStatus ? new Date().toISOString().split('T')[0] : undefined };
-      }
-      return c;
-    }));
   };
 
   const toggleAppRegistration = (crpId: string) => {
@@ -233,68 +339,10 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
                 })}
               </SelectContent>
             </Select>
-            <Dialog open={isAddCRPOpen} onOpenChange={setIsAddCRPOpen}>
-              <DialogTrigger asChild>
-                <Button disabled={!canEdit}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Add CRP
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New CRP</DialogTitle>
-                  <DialogDescription>Register a new Community Resource Person</DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Name *</Label>
-                    <Input value={newCRP.name || ''} onChange={e => setNewCRP({ ...newCRP, name: e.target.value })} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Category *</Label>
-                    <Select value={newCRP.category} onValueChange={v => setNewCRP({ ...newCRP, category: v })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {crpCategories.map(cat => (
-                          <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>District *</Label>
-                    <Select value={newCRP.districtId} onValueChange={v => setNewCRP({ ...newCRP, districtId: v })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select district" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {adoptedDistricts.map(id => {
-                          const district = jharkhandDistricts.find(d => d.id === id);
-                          return <SelectItem key={id} value={id}>{district?.name}</SelectItem>;
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Home Location</Label>
-                      <Input value={newCRP.homeLocation || ''} onChange={e => setNewCRP({ ...newCRP, homeLocation: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Work Location</Label>
-                      <Input value={newCRP.workLocation || ''} onChange={e => setNewCRP({ ...newCRP, workLocation: e.target.value })} />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Phone</Label>
-                    <Input value={newCRP.phone || ''} onChange={e => setNewCRP({ ...newCRP, phone: e.target.value })} />
-                  </div>
-                  <Button className="w-full" onClick={handleAddCRP}>Add CRP</Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button disabled={!canEdit} onClick={handleAddCRP}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add CRP
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -307,7 +355,8 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
                 <TableHead>Location</TableHead>
                 <TableHead className="text-center">LOI</TableHead>
                 <TableHead className="text-center">App</TableHead>
-                <TableHead className="text-center">Payments</TableHead>
+                <TableHead className="text-center">Payments & OFRs</TableHead>
+                {canEdit && <TableHead className="text-center">Actions</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -332,25 +381,22 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleLOI(crp.id)}
-                        disabled={!canEdit}
-                      >
-                        {crp.loiSigned ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-500" />
-                        )}
-                      </Button>
+                      {crp.loi ? (
+                        <div className="flex items-center justify-center">
+                          <Check className="h-5 w-5 text-green-500" />
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          <X className="h-5 w-5 text-red-500" />
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleAppRegistration(crp.id)}
-                        disabled={!canEdit || !crp.loiSigned}
+                        disabled={!canEdit || !crp.loi}
                       >
                         {crp.appRegistered ? (
                           <CheckCircle className="h-5 w-5 text-green-500" />
@@ -360,10 +406,27 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
                       </Button>
                     </TableCell>
                     <TableCell className="text-center">
-                      <Badge variant={crp.totalPayments > 0 ? 'default' : 'outline'}>
-                        {crp.totalPayments}
-                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewPayments(crp)}
+                        title="View Payments & OFRs"
+                      >
+                        <Eye className="h-5 w-5 text-blue-500" />
+                      </Button>
                     </TableCell>
+                    {canEdit && (
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditCRP(crp.id)}
+                          title="Edit CRP"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
@@ -453,6 +516,27 @@ export const CRPNetworkSection: React.FC<CRPNetworkSectionProps> = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* CRP Form Dialog */}
+      <CRPForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        crpId={editingCrpId}
+        workOrderId={workOrderId}
+        adoptedDistricts={adoptedDistricts}
+        onSuccess={handleFormSuccess}
+      />
+
+      {/* Payments Dialog */}
+      {selectedCrpForPayments && (
+        <CRPPaymentsDialog
+          open={isPaymentsDialogOpen}
+          onOpenChange={setIsPaymentsDialogOpen}
+          crpId={selectedCrpForPayments.id}
+          crpName={selectedCrpForPayments.name}
+          workOrderId={workOrderId}
+        />
+      )}
     </div>
   );
 };
